@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* Custom CSS - Place after Tailwind to avoid conflicts */
+
+/* Content Container */
+.container {
+  font-family: "Alegreya", serif;
+  max-width: 1400px;
+  /* Limit content width */
+  margin: 0 auto;
+  /* Center the content */
+  padding: 0 15px;
+  /* Add padding on the sides for small screens */
+}
+/* carousel Container */
+.carousel-container {
+  /* font-family: 'Alegreya', serif; */
+  max-width: 1600px;
+  /* Limit content width */
+  margin: 0 auto;
+  /* Center the content */
+  padding: 0 15px;
+  /* Add padding on the sides for small screens */
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .flex-row {
+    flex-direction: column;
+  }
+}
+
+/* Default blur effect for all slides */
+.splide__slide {
+  transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out; /* Smooth transition */
+  transform: scale(0.98); /* Slightly shrink side slides */
+}
+
+/* Remove blur effect from the active (centered) slide */
+.splide__slide.is-active {
+  transform: scale(1); /* Restore full size */
+}
+
+/* Card Container for testing page*/
+.card-container {
+  max-width: 1400px;
+  display: flex;
+  gap: 80px;
+  justify-content: center; /* Align cards in the center */
+  flex-wrap: wrap; /* Allow cards to wrap if the screen is too small */
+  /* padding: 20px; */
+  max-width: 1400px;
+  /* Limit content width */
+  margin: 0 auto;
+  /* Center the content */
+  padding: 0 15px;
+  /* Add padding on the sides for small screens */
+}
+.testpage-container {
+  width: 100%;
+  max-width: 1350px;
+  margin: 0 auto;
+  padding: 20px;
+  /* padding: 0 15px; */
+}
+
+
+@media screen and (max-width: 576px){}
+@media (min-width: 577px) and (max-width: 768px){}
+@media (min-width: 769px) and (max-width: 992px){}
+@media (min-width: 1400px) {}

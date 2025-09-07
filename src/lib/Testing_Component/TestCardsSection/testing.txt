@@ -1,0 +1,7 @@
+    Implement proper password hashing for the anonymous user
+
+    Add cart quantity validation
+
+    Create a cart viewing page
+
+    Add user authentication later (with cart migration)

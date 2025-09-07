@@ -1,0 +1,1810 @@
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { user, isAuthenticated } from "$lib/store";
+  import { get } from "svelte/store";
+  import { toast } from "svelte-sonner";
+  import { writable } from "svelte/store";
+  import { goto } from "$app/navigation";
+  // Use $user for reactivity instead of a static currentUser
+
+  let selectedStep = "Address";
+  const steps = ["Address", "Sample Details", "Payment"];
+
+  let location = "";
+  let buildingOrRoom = "";
+  let department = "";
+  let streetAddress = "";
+  let city = "";
+  let stateProvince = "";
+  let region = "";
+  let postalCode = "";
+  let preferredTimeSlot = "";
+  let timeSlots: { value: string; label: string }[] = [];
+
+  // Country list for maintainability
+  const countries = [
+    { value: "India", label: "India" },
+    { value: "USA", label: "USA" },
+    // Add more countries here as needed
+  ];
+
+  type OrderSummaryItem = {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+    image: string;
+  };
+  export const OrderSummaryItems = writable<OrderSummaryItem[]>([]);
+
+  // Fetch or clear OrderSummary items based on authentication status
+  $: {
+    if ($isAuthenticated) {
+      fetchOrderSummary();
+    } else {
+      OrderSummaryItems.set([]);
+    }
+  }
+  // Replace the above with a more targeted reactive statement:
+  $: if ($isAuthenticated) {
+    fetchOrderSummary();
+  }
+  // Or, if you want to fetch only when $isAuthenticated transitions to true:
+  /*
+    $: if ($isAuthenticated) {
+        fetchOrderSummary();
+    }
+    */
+  // Best practice: Use a reactive statement that only triggers when $isAuthenticated changes:
+  /*
+    $: fetchOrderSummaryOnAuth = (() => {
+        if ($isAuthenticated) fetchOrderSummary();
+    })();
+    */
+
+  async function fetchOrderSummary() {
+    if (!$isAuthenticated || !$user?.access_token) {
+      OrderSummaryItems.set([]);
+      return;
+    }
+    try {
+      const response = await fetch("http://127.0.0.1:8000/get-ordersummary", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${$user.access_token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch Order Summary");
+
+      const data = await response.json();
+
+      const formattedOrderSummary = data.OrderSummary.map(
+        (item: {
+          id: number;
+          test_name: string;
+          test_price: string;
+          quantity: number;
+          image_url: string;
+        }) => ({
+          id: item.id,
+          name: item.test_name,
+          price: parseFloat(item.test_price),
+          quantity: item.quantity,
+          image: item.image_url,
+        })
+      );
+
+      OrderSummaryItems.set(formattedOrderSummary);
+    } catch (error) {
+      console.error("Error fetching Order Summary:", error);
+      OrderSummaryItems.set([]);
+    }
+  }
+
+  async function updateQuantity(id: number, newQuantity: number) {
+    if (newQuantity < 1) return;
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/update-ordersummary-item/`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${$user?.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ item_id: id, quantity: newQuantity }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to update quantity");
+
+      OrderSummaryItems.update((items) =>
+        items.map((item) =>
+          item.id === id ? { ...item, quantity: newQuantity } : item
+        )
+      );
+    } catch (error) {
+      toast.error("Failed to update quantity");
+      console.error(error);
+    }
+  }
+
+  async function removeItem(id: number) {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/delete-ordersummary-item/${id}/`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${$user?.access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      // Reactively fetch or clear OrderSummary when auth changes (handled above)
+      OrderSummaryItems.update((items) =>
+        items.filter((item) => item.id !== id)
+      );
+      toast.success("Item removed from OrderSummary");
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      toast.error("Error deleting item");
+    }
+  }
+
+  // Reactively fetch OrderSummary when opened or when auth changes
+  // $: if ($isAuthenticated) {
+  //     fetchOrderSummary();
+  // }
+  // Clear OrderSummary when logged out
+  $: if (!$isAuthenticated) {
+    OrderSummaryItems.set([]);
+  }
+
+  $: totalItems = $OrderSummaryItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+  $: subtotal = $OrderSummaryItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  // ✅ Fetch existing address on mount
+  onMount(async () => {
+    try {
+      const res = await fetch("http://localhost:8000/auth/get-address/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${$user?.access_token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.address && Object.keys(data.address).length > 0) {
+          location = data.address.location || "";
+          buildingOrRoom = data.address.building_or_room || "";
+          department = data.address.department || "";
+          streetAddress = data.address.street_address || "";
+          city = data.address.city || "";
+          stateProvince = data.address.state_province || "";
+          region = data.address.region || "";
+          postalCode = data.address.postal_code || "";
+          preferredTimeSlot = data.address.preferred_time_slot || "";
+        }
+        if (data.time_slots) {
+          timeSlots = data.time_slots;
+        }
+      } else {
+        console.warn("No address found or unauthorized.");
+      }
+    } catch (err) {
+      console.error("Failed to fetch address:", err);
+    }
+  });
+
+  async function submitAddress() {
+    try {
+      const res = await fetch("http://localhost:8000/auth/save-address/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${$user?.access_token}`,
+        },
+        body: JSON.stringify({
+          location,
+          building_or_room: buildingOrRoom,
+          department,
+          street_address: streetAddress,
+          city,
+          state_province: stateProvince,
+          region,
+          postal_code: postalCode,
+          preferred_time_slot: preferredTimeSlot,
+        }),
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Address saved successfully!");
+        selectedStep = "Sample Details"; // ✅ Move to next step only after save
+      } else {
+        alert(data.error || "Failed to save address.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong.");
+    }
+  }
+
+  function goToPreviousStep() {
+    const currentIndex = steps.indexOf(selectedStep);
+    if (currentIndex > 0) {
+      selectedStep = steps[currentIndex - 1];
+    }
+  }
+</script>
+
+<div class="checkout-container">
+  <div class="checkout-left">
+    <!-- Segmented Control for Steps -->
+    <div class="segmented-control">
+      {#each steps as step, i}
+        <button
+          class="tab
+          {selectedStep === step ? 'active' : ''}
+          {steps.indexOf(selectedStep) > i ? 'completed' : ''}"
+          on:click|preventDefault={() => {}}
+          disabled
+        >
+          <span class="step-icon">
+            {#if steps.indexOf(selectedStep) > i}
+              <!-- Tick icon for completed steps -->
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle cx="9" cy="9" r="9" fill="#90EE90" />
+                <path
+                  d="M5 9.5l3 3 5-5"
+                  stroke="#4caf50"
+                  stroke-width="2"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            {:else if selectedStep === step}
+              <!-- Active step icon -->
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle
+                  cx="9"
+                  cy="9"
+                  r="8"
+                  stroke="#1565c0"
+                  stroke-width="2"
+                  fill="#fff"
+                />
+                <circle cx="9" cy="9" r="4" fill="#1565c0" />
+              </svg>
+            {:else}
+              <!-- Inactive step icon -->
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle
+                  cx="9"
+                  cy="9"
+                  r="8"
+                  stroke="#e0e0e0"
+                  stroke-width="2"
+                  fill="#fff"
+                />
+              </svg>
+            {/if}
+          </span>
+          {step}
+        </button>
+      {/each}
+    </div>
+
+    <div style="margin-top: 2rem;">
+      {#if selectedStep === "Address"}
+        <form on:submit|preventDefault={submitAddress} class="address-form">
+          <div class="form-grid">
+            <div>
+              <div class="field-label">Country</div>
+              <select bind:value={location} required class="input-field">
+                <option value="">Select Country</option>
+                {#each countries as country}
+                  <option value={country.value}>{country.label}</option>
+                {/each}
+              </select>
+            </div>
+            <div>
+              <div class="field-label">Building/Room</div>
+              <input
+                type="text"
+                placeholder="Building/Room"
+                bind:value={buildingOrRoom}
+                required
+                class="input-field"
+              />
+            </div>
+            <div>
+              <div class="field-label">Department</div>
+              <input
+                type="text"
+                placeholder="Department"
+                bind:value={department}
+                required
+                class="input-field"
+              />
+            </div>
+            <div>
+              <div class="field-label">Street Address</div>
+              <input
+                type="text"
+                placeholder="Street Address"
+                bind:value={streetAddress}
+                required
+                class="input-field"
+              />
+            </div>
+            <div>
+              <div class="field-label">City</div>
+              <input
+                type="text"
+                placeholder="City"
+                bind:value={city}
+                required
+                class="input-field"
+              />
+            </div>
+            <div>
+              <div class="field-label">State</div>
+              <select bind:value={stateProvince} required class="input-field">
+                <option value="">Select State</option>
+                {#if location === "India"}
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Karnataka">Karnataka</option>
+                {/if}
+                {#if location === "USA"}
+                  <option value="California">California</option>
+                  <option value="Texas">Texas</option>
+                {/if}
+              </select>
+            </div>
+            <div>
+              <div class="field-label">Region</div>
+              <input
+                type="text"
+                placeholder="Region"
+                bind:value={region}
+                required
+                class="input-field"
+              />
+            </div>
+            <div>
+              <div class="field-label">Postal Code</div>
+              <input
+                type="text"
+                placeholder="Postal Code"
+                bind:value={postalCode}
+                inputmode="numeric"
+                pattern="[0-9]*"
+                required
+                class="input-field"
+              />
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <div class="field-label">Preferred Time Slot</div>
+              <select
+                bind:value={preferredTimeSlot}
+                required
+                class="input-field"
+              >
+                <option value="">Select Preferred Time Slot</option>
+                {#each timeSlots as slot}
+                  <option value={slot.value}>
+                    {slot.value} ({slot.label})
+                  </option>
+                {/each}
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="primary-btn">Save Address</button>
+          </div>
+        </form>
+      {/if}
+    </div>
+    <!-- Back button outside form so it doesn't trigger form submit -->
+    {#if steps.indexOf(selectedStep) > 0}
+      <button
+        class="primary-btn"
+        on:click={goToPreviousStep}
+        style="margin-top: 1rem;"
+      >
+        Back
+      </button>
+    {/if}
+  </div>
+  <div class="checkout-right">
+    <h2>Order Summary</h2>
+    <div class="ordersummary-content">
+      {#if $OrderSummaryItems.length === 0}
+        <p class="empty-message">Your ordersummary is currently empty</p>
+      {:else}
+        <div class="ordersummary-items">
+          {#each $OrderSummaryItems as item (item.id)}
+            <div class="ordersummary-item">
+              <img src={item.image} alt={item.name} class="item-image" />
+              <div class="item-details">
+                <h3>{item.name}</h3>
+                <p>
+                  ${item.price.toFixed(2)} × {item.quantity}
+                </p>
+              </div>
+              <div class="item-actions">
+                <button
+                  class="quantity-btn"
+                  on:click={() => updateQuantity(item.id, item.quantity - 1)}
+                  disabled={item.quantity <= 1}>−</button
+                >
+                <span>{item.quantity}</span>
+                <button
+                  class="quantity-btn"
+                  on:click={() => updateQuantity(item.id, item.quantity + 1)}
+                  >+</button
+                >
+                <button class="remove-btn" on:click={() => removeItem(item.id)}
+                  >×</button
+                >
+              </div>
+            </div>
+          {/each}
+          <div class="add-more-btn-row">
+            <button class="add-more-btn" on:click={() => goto("/testing")}>
+              + Add More Test
+            </button>
+          </div>
+        </div>
+        {#if $OrderSummaryItems.length > 0}
+          <hr class="ordersummary-divider" />
+        {/if}
+      {/if}
+    </div>
+
+    {#if $OrderSummaryItems.length > 0}
+      <div class="ordersummary-summary">
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span>${subtotal.toFixed(2)}</span>
+        </div>
+      </div>
+    {/if}
+  </div>
+</div>
+
+<style>
+  .field-label {
+    font-size: 0.97rem;
+    color: #234567;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .checkout-container {
+    display: flex;
+    min-height: 80vh;
+    width: 100%;
+    max-width: 1650px;
+    margin: 40px auto;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(39, 9, 207, 0.07);
+    overflow: visible;
+    position: relative;
+  }
+
+  .checkout-left,
+  .checkout-right {
+    flex: 1 1 0;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .checkout-left {
+    border-right: 1px solid #eee;
+    background: #ffffff;
+    z-index: 1;
+  }
+
+  .checkout-right {
+    background: #f3f3f3;
+    border-top-left-radius: 32px;
+    border-bottom-left-radius: 32px;
+    margin-left: -24px;
+    box-shadow: -8px 0 24px -12px rgba(39, 9, 207, 0.1);
+    z-index: 2;
+  }
+
+  .segmented-control {
+    display: flex;
+    gap: 8px;
+    background: #f8fafc;
+    padding: 6px;
+    border-radius: 50px;
+    border: 2px solid #e0e7ef;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0 auto 32px auto;
+  }
+
+  .tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 50px;
+    background: #ececec;
+    color: #234567;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      color 0.2s;
+    box-shadow: none;
+    position: relative;
+  }
+
+  .tab:hover {
+    background: #e0e0e0;
+    color: #1565c0;
+  }
+
+  .tab.active {
+    background: #d2d6db;
+    color: #174a5b;
+    font-weight: bold;
+  }
+
+  .tab.completed {
+    background: #f0f0f0;
+    color: #a0a0a0;
+    font-weight: 500;
+  }
+
+  .step-icon {
+    display: flex;
+    align-items: center;
+    margin-right: 6px;
+  }
+
+  .address-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem 2rem;
+  }
+
+  .form-grid > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (max-width: 700px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .input-field {
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #f9fafb;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+    outline: none;
+  }
+
+  .input-field:focus {
+    border-color: #1565c0;
+    background: #fff;
+    box-shadow: 0 0 0 2px #e3f0fc;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .primary-btn {
+    background: #1565c0;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .primary-btn:hover {
+    background: #174ea6;
+  }
+
+  .ordersummary-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .empty-message {
+    text-align: center;
+    color: #666;
+    margin-top: 40px;
+    font-size: 1.1rem;
+  }
+
+  .ordersummary-items {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .ordersummary-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+  }
+
+  .item-image {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+
+  .item-details {
+    flex: 1;
+  }
+
+  .item-details h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .item-details p {
+    margin: 5px 0 0;
+    color: #444;
+    font-size: 0.95rem;
+  }
+
+  .item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .quantity-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .quantity-btn:hover {
+    background: #e2e8f0;
+  }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #ff3d00;
+    cursor: pointer;
+    font-size: 24px;
+    margin-left: 10px;
+  }
+
+  .ordersummary-summary {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .ordersummary-divider {
+    border: none;
+    height: 1px;
+    background: #e0e0e0;
+    margin: 1rem 0;
+  }
+
+  .add-more-btn-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  .add-more-btn {
+    background: #fff;
+    color: #1565c0;
+    border: 1.5px solid #1565c0;
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.18s,
+      color 0.18s,
+      border-color 0.18s;
+    margin-bottom: 0;
+    /* Remove display:flex and justify-content from here */
+  }
+
+  .add-more-btn:hover {
+    background: #1565c0;
+    color: #fff;
+    border-color: #174ea6;
+  }
+</style>
+
+
+==================
+
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { Toaster, toast } from "svelte-sonner";
+  import { ShieldCheck, ClipboardList, Award, Check, Download, Share2 } from "lucide-svelte";
+  import { user } from "$lib/store";
+
+  // Sample Analysis Request Form state
+  let sampleForm = {
+    // Section 1: Customer Information
+    customerName: "",
+    customerType: "Manufacturing Company", // Manufacturing Company / Individual
+    email: "",
+    phone: "",
+    submissionDate: new Date().toISOString().slice(0, 10),
+
+    // Section 2: Sample Information
+    sampleNameOrBatch: "",
+    numberOfSamples: 1,
+    physicalState: "Solid", // Solid / Liquid / Gas
+    appearance: "",
+    solubility: "",
+    specialHandling: "",
+    usage: "",
+    storageConditions: [] as string[], // Room Temp / 2–8°C / –20°C / –70°C / Other
+    storageOther: "", // shown when "Other" selected
+    hazardInfo: [] as string[], // Toxic / Flammable / Corrosive / Biohazard / Radioactive / None
+    msds: "No", // Yes / No
+    msdsFile: null as File | null, // optional upload when MSDS = Yes
+
+    // Section 3: Analytical Requirements
+    requestedTechnique: "",
+    analysisPurpose: [] as string[], // Qualitative / Quantitative / Purity / Identification / Other
+    amountProvided: "",
+    amountUnit: "mg", // mg / g / mL
+    requestedTAT: "Standard (5–7 days)",
+    clientSampleCode: "",
+
+    // Section 4: Additional Instructions
+    notes: "",
+    sampleDisposal: "Discard", // Discard / Return / Return unused portion only
+    returnShippingAddress: "",
+
+    // Section 5: Authorization and Acknowledgement
+    declarationAccepted: false,
+    signature: "",
+    authorizationDate: new Date().toISOString().slice(0, 10),
+
+    // Pickup details
+    pickup: {
+      location: "",           // site/campus/facility name
+      buildingRoom: "",       // building and room/lab
+      streetAddress: "",
+      city: "",
+      stateProvince: "",
+      region: "",             // district/region
+      postalCode: "",
+      preferredDate: new Date().toISOString().slice(0, 10),
+      preferredTimeSlot: "",
+      contactPerson: "",
+      contactPhone: "",
+      alternatePhone: "",
+      isBusinessAddress: false,
+      pickupInstructions: "", // packaging, labeling, handover, etc.
+      accessNotes: ""         // gate code, security desk, elevator info
+    },
+
+    // For Internal Use Only
+    // internal: {
+    //   sampleReceivedDate: "",
+    //   conditionUponArrival: "",
+    //   analystName: "",
+    //   dateOfAnalysis: "",
+    //   amountConsumed: "",
+    //   techniquesUsed: "",
+    //   resultsDeliveredTo: "",
+    //   remarks: ""
+    // }
+  };
+
+  const storageOptions = ["Room Temp", "2–8°C", "–20°C", "–70°C", "Other"];
+  const hazardOptions = [
+    "Toxic",
+    "Flammable",
+    "Corrosive",
+    "Biohazard",
+    "Radioactive",
+    "None"
+  ];
+  const purposeOptions = [
+    "Qualitative",
+    "Quantitative",
+    "Purity",
+    "Identification",
+    "Other"
+  ];
+  const amountUnits = ["mg", "g", "mL"];
+  const tatOptions = ["Priority (48–72h)", "Standard (5–7 days)", "Extended (8–14 days)"];
+  // Replace the static const with a default + mutable list populated from API when available
+  const defaultPickupTimeSlots = ["09:00–12:00", "12:00–15:00", "15:00–18:00", "18:00–21:00", "Anytime (Business hours)"];
+  let pickupTimeSlots: string[] = [...defaultPickupTimeSlots];
+
+  // Save/submit state
+  let saving = { sec1: false, sec2: false, sec3: false, sec4: false, pickup: false };
+  let saved  = { sec1: false, sec2: false, sec3: false, sec4: false, pickup: false };
+  let submitting = false;
+
+  // Section validations
+  function validateSection1() {
+    if (![sampleForm.customerName, sampleForm.email, sampleForm.phone].every(v => String(v).trim())) {
+      return "Please complete Name, Email, and Phone.";
+    }
+    return null;
+  }
+  function validateSection2() {
+    if (!String(sampleForm.sampleNameOrBatch).trim()) return "Please enter Sample Name/Batch No.";
+    if (sampleForm.storageConditions.includes("Other") && !sampleForm.storageOther.trim())
+      return 'Please specify "Other" storage condition.';
+    return null;
+  }
+  function validateSection3() {
+    if (!String(sampleForm.requestedTechnique).trim()) return "Please enter Requested Technique.";
+    return null;
+  }
+  function validateSection4() {
+    if (
+      (sampleForm.sampleDisposal === "Return" || sampleForm.sampleDisposal === "Return unused portion only") &&
+      !sampleForm.returnShippingAddress.trim()
+    ) return "Please enter a return shipping address.";
+    return null;
+  }
+  function validatePickup() {
+    const p = sampleForm.pickup;
+    const required = [p.streetAddress, p.city, p.stateProvince, p.postalCode, p.preferredDate, p.preferredTimeSlot, p.contactPerson, p.contactPhone];
+    if (!required.every(v => String(v).trim())) return "Please complete the pickup address and preferred date/time slot.";
+    return null;
+  }
+
+  // Save handlers
+  async function saveSection1() {
+    const err = validateSection1(); if (err) return toast.error(err);
+    saving.sec1 = true;
+    try {
+      console.log("Saving Section 1", { customerName: sampleForm.customerName, customerType: sampleForm.customerType, email: sampleForm.email, phone: sampleForm.phone, submissionDate: sampleForm.submissionDate });
+      toast.success("Section 1 saved.");
+      saved.sec1 = true;
+    } finally { saving.sec1 = false; }
+  }
+  async function saveSection2() {
+    const err = validateSection2(); if (err) return toast.error(err);
+    saving.sec2 = true;
+    try {
+      console.log("Saving Section 2", { sampleNameOrBatch: sampleForm.sampleNameOrBatch, numberOfSamples: sampleForm.numberOfSamples, physicalState: sampleForm.physicalState, appearance: sampleForm.appearance, solubility: sampleForm.solubility, specialHandling: sampleForm.specialHandling, usage: sampleForm.usage, storageConditions: sampleForm.storageConditions, storageOther: sampleForm.storageOther, hazardInfo: sampleForm.hazardInfo, msds: sampleForm.msds });
+      toast.success("Section 2 saved.");
+      saved.sec2 = true;
+    } finally { saving.sec2 = false; }
+  }
+  async function saveSection3() {
+    const err = validateSection3(); if (err) return toast.error(err);
+    saving.sec3 = true;
+    try {
+      console.log("Saving Section 3", { requestedTechnique: sampleForm.requestedTechnique, analysisPurpose: sampleForm.analysisPurpose, amountProvided: sampleForm.amountProvided, amountUnit: sampleForm.amountUnit, requestedTAT: sampleForm.requestedTAT, clientSampleCode: sampleForm.clientSampleCode });
+      toast.success("Section 3 saved.");
+      saved.sec3 = true;
+    } finally { saving.sec3 = false; }
+  }
+  async function saveSection4() {
+    const err = validateSection4(); if (err) return toast.error(err);
+    saving.sec4 = true;
+    try {
+      console.log("Saving Section 4", { notes: sampleForm.notes, sampleDisposal: sampleForm.sampleDisposal, returnShippingAddress: sampleForm.returnShippingAddress });
+      toast.success("Section 4 saved.");
+      saved.sec4 = true;
+    } finally { saving.sec4 = false; }
+  }
+  async function confirmPickup() {
+    const err = validatePickup(); if (err) return toast.error(err);
+    saving.pickup = true;
+    try {
+      const res = await fetch("http://localhost:8000/auth/save-address/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${$user?.access_token}`,
+        },
+        body: JSON.stringify({
+          // map camelCase -> snake_case as expected by backend
+          location: sampleForm.pickup.location,
+          building_or_room: sampleForm.pickup.buildingRoom,
+          department: "", // optional – not present in form
+          street_address: sampleForm.pickup.streetAddress,
+          city: sampleForm.pickup.city,
+          state_province: sampleForm.pickup.stateProvince,
+          region: sampleForm.pickup.region,
+          postal_code: sampleForm.pickup.postalCode,
+          preferred_time_slot: sampleForm.pickup.preferredTimeSlot,
+          preferred_date: sampleForm.pickup.preferredDate,
+          contact_person: sampleForm.pickup.contactPerson,
+          contact_phone: sampleForm.pickup.contactPhone,
+          alternate_phone: sampleForm.pickup.alternatePhone,
+          is_business_address: sampleForm.pickup.isBusinessAddress,
+          pickup_instructions: sampleForm.pickup.pickupInstructions,
+          access_notes: sampleForm.pickup.accessNotes,
+        }),
+        credentials: "include",
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to save pickup address.");
+      }
+
+      toast.success("Pickup address saved.");
+      saved.pickup = true;
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to save pickup address.");
+    } finally {
+      saving.pickup = false;
+    }
+  }
+
+  // Normalize API date (YYYY-MM-DD) for date input
+  const toYMD = (d: string | null | undefined) => {
+    if (!d) return "";
+    try { return new Date(d).toISOString().slice(0, 10); } catch { return String(d).slice(0, 10); }
+  };
+
+  let pickupLoaded = false;
+  async function loadPickupAddress() {
+    if (pickupLoaded) return;
+    if (!$user?.access_token) return;
+
+    try {
+      const res = await fetch("http://localhost:8000/auth/get-address/", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${$user.access_token}` },
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        // 404/no data: keep empty form silently
+        pickupLoaded = true;
+        return;
+      }
+
+      const data = await res.json();
+
+      // Load time slots from API if present
+      if (Array.isArray(data?.time_slots) && data.time_slots.length > 0) {
+        pickupTimeSlots = data.time_slots.map((s: { value: string; label?: string }) => s.value);
+      }
+
+      const addr = data?.address || {};
+      if (addr && Object.keys(addr).length > 0) {
+        // snake_case -> camelCase mapping
+        sampleForm.pickup.location           = addr.location ?? "";
+        sampleForm.pickup.buildingRoom       = addr.building_or_room ?? "";
+        sampleForm.pickup.streetAddress      = addr.street_address ?? "";
+        sampleForm.pickup.city               = addr.city ?? "";
+        sampleForm.pickup.stateProvince      = addr.state_province ?? "";
+        sampleForm.pickup.region             = addr.region ?? "";
+        sampleForm.pickup.postalCode         = addr.postal_code ?? "";
+        sampleForm.pickup.preferredTimeSlot  = addr.preferred_time_slot ?? "";
+        sampleForm.pickup.preferredDate      = toYMD(addr.preferred_date) || sampleForm.pickup.preferredDate;
+        sampleForm.pickup.contactPerson      = addr.contact_person ?? "";
+        sampleForm.pickup.contactPhone       = addr.contact_phone ?? "";
+        sampleForm.pickup.alternatePhone     = addr.alternate_phone ?? "";
+        sampleForm.pickup.isBusinessAddress  = Boolean(addr.is_business_address);
+        sampleForm.pickup.pickupInstructions = addr.pickup_instructions ?? "";
+        sampleForm.pickup.accessNotes        = addr.access_notes ?? "";
+
+        // Mark as confirmed if an address exists
+        saved.pickup = true;
+      }
+    } catch (e) {
+      console.error("Failed to load pickup address:", e);
+    } finally {
+      pickupLoaded = true;
+    }
+  }
+
+  onMount(() => {
+    loadPickupAddress();
+  });
+
+  // If token becomes available after mount (e.g., hydration), try once
+  $: if ($user?.access_token && !pickupLoaded) {
+    loadPickupAddress();
+  }
+
+  function validateSampleForm() {
+    // Full-form validation before final submit
+    const e1 = validateSection1(); if (e1) return e1;
+    const e2 = validateSection2(); if (e2) return e2;
+    const e3 = validateSection3(); if (e3) return e3;
+    const e4 = validateSection4(); if (e4) return e4;
+    const ep = validatePickup();  if (ep) return ep;
+    if (!sampleForm.declarationAccepted) return "Please accept the declaration.";
+    return null;
+  }
+
+  async function submitRequisition() {
+    const err = validateSampleForm();
+    if (err) { toast.error(err); return; }
+    submitting = true;
+    try {
+      console.log("Submitting Sample Requisition", sampleForm);
+      toast.success("Requisition submitted.");
+    } catch (e) {
+      toast.error("Failed to submit requisition.");
+    } finally {
+      submitting = false;
+    }
+  }
+
+  // Progress indicators for header
+  $: savedCount = (saved.sec1 ? 1 : 0) + (saved.sec2 ? 1 : 0) + (saved.sec3 ? 1 : 0) + (saved.sec4 ? 1 : 0);
+  $: progressPercent = Math.round((savedCount / 4) * 100);
+  $: pickupConfirmed = saved.pickup;
+
+  // Helper to make a safe filename
+  const sanitizeFileName = (s: string) =>
+    (s || "customer")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-_.]+/gi, "");
+
+  function buildExportFilename() {
+    const d = new Date().toISOString().slice(0, 10);
+    return `sample-request-${d}-${sanitizeFileName(sampleForm.customerName)}.json`;
+  }
+
+  function handleDownload() {
+    const exportData = {
+      generatedAt: new Date().toISOString(),
+      savedSections: savedCount,
+      pickupConfirmed,
+      form: sampleForm
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json"
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = buildExportFilename();
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Download started.");
+  }
+
+  async function handleShare() {
+    const url = window.location.href;
+    const title = "Sample Analysis Request";
+    const text = "Please review my sample analysis request.";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, text, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied to clipboard.");
+      }
+    } catch (err: any) {
+      if (err?.name !== "AbortError") toast.error("Share canceled or failed.");
+    }
+  }
+</script>
+
+<Toaster richColors />
+
+<main class="w-full px-5 md:px-8 lg:px-10 py-6">
+  <div class="mx-auto w-[min(1320px,100vw-72px)]">
+
+    <!-- Page header -->
+    <header class="mb-6 rounded-2xl bg-white/90 supports-backdrop-blur:bg-white/60 backdrop-blur ring-1 ring-gray-200 shadow-sm">
+      <div class="flex items-start justify-between gap-6 p-6">
+        <div class="flex items-start gap-4">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+            <ClipboardList class="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl">Sample Analysis Request</h1>
+            <p class="mt-1 text-sm text-gray-600">
+              Provide sample details, choose analyses, and schedule pickup.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-end gap-3 sm:flex-row sm:items-center">
+          <div class="order-2 flex flex-wrap items-center gap-2 text-xs sm:order-1">
+            <span class="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-1 font-medium text-indigo-700">
+              Sections: {savedCount}/4
+            </span>
+            <span
+              class="inline-flex items-center gap-1 rounded-md px-2 py-1 font-medium"
+              class:bg-emerald-50={pickupConfirmed}
+              class:text-emerald-700={pickupConfirmed}
+              class:bg-rose-50={!pickupConfirmed}
+              class:text-rose-700={!pickupConfirmed}
+            >
+              Pickup: {pickupConfirmed ? "Confirmed" : "Not set"}
+            </span>
+          </div>
+
+          <div class="order-1 flex items-center gap-2 sm:order-2">
+            <button
+              class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50"
+              aria-label="Download"
+              on:click={handleDownload}
+            >
+              <Download class="h-4 w-4 text-gray-400" aria-hidden="true" />
+              Download
+            </button>
+            <button
+              class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50"
+              aria-label="Share"
+              on:click={handleShare}
+            >
+              <Share2 class="h-4 w-4 text-gray-400" aria-hidden="true" />
+              Share
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 pb-6">
+        <div class="mb-1 flex items-center justify-between text-xs text-gray-600">
+          <span>Progress</span>
+          <span>{progressPercent}%</span>
+        </div>
+        <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+          <div class="h-full bg-indigo-600 transition-all" style="width: {progressPercent}%"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sections start -->
+    <!-- Section 1 -->
+    <section class="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+      <header class="flex items-start justify-between">
+        <div class="flex items-center gap-2">
+          <ShieldCheck class="h-5 w-5 text-emerald-500" aria-hidden="true" />
+          <h3 class="text-base font-semibold text-gray-900">Section 1: Customer Information</h3>
+        </div>
+        {#if saved.sec1}
+          <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+            <Check class="h-3 w-3" /> Saved
+          </span>
+        {/if}
+      </header>
+
+      <div class="mt-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">
+              Name <span class="text-rose-500">*</span>
+            </label>
+            <input
+              id="customerName"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="text" bind:value={sampleForm.customerName} placeholder="Your full name" required
+            />
+          </div>
+
+          <div>
+            <fieldset>
+              <legend class="block text-sm font-medium text-gray-700 mb-1">Customer Type</legend>
+              <div class="flex flex-wrap items-center gap-4 py-2">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="custType" bind:group={sampleForm.customerType} value="Manufacturing Company" />
+                  Manufacturing Company
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="custType" bind:group={sampleForm.customerType} value="Individual" />
+                  Individual
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div>
+            <label for="customerEmail" class="block text-sm font-medium text-gray-700 mb-1">
+              Email Address <span class="text-rose-500">*</span>
+            </label>
+            <input
+              id="customerEmail"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="email" bind:value={sampleForm.email} placeholder="name@company.com" required
+            />
+            <p class="mt-1 text-xs text-gray-500">We’ll send confirmations and results to this address.</p>
+          </div>
+
+          <div>
+            <label for="customerPhone" class="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number <span class="text-rose-500">*</span>
+            </label>
+            <input
+              id="customerPhone"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="tel" bind:value={sampleForm.phone} placeholder="+91 98765 43210" required
+            />
+          </div>
+
+          <div>
+            <label for="submissionDate" class="block text-sm font-medium text-gray-700 mb-1">Date of Submission</label>
+            <input
+              id="submissionDate"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="date" bind:value={sampleForm.submissionDate}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-end">
+        <button
+          type="button"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
+          on:click={saveSection1}
+          disabled={saving.sec1}
+        >
+          {saving.sec1 ? "Saving..." : "Save"}
+        </button>
+      </div>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+      <header class="flex items-start justify-between">
+        <div class="flex items-center gap-2">
+          <ClipboardList class="h-5 w-5 text-indigo-500" aria-hidden="true" />
+          <h3 class="text-base font-semibold text-gray-900">Section 2: Sample Information</h3>
+        </div>
+        {#if saved.sec2}
+          <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+            <Check class="h-3 w-3" /> Saved
+          </span>
+        {/if}
+      </header>
+
+      <div class="mt-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label for="sampleNameOrBatch" class="block text-sm font-medium text-gray-700 mb-1">
+              Sample Name / Batch No. <span class="text-rose-500">*</span>
+            </label>
+            <input
+              id="sampleNameOrBatch"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="text" bind:value={sampleForm.sampleNameOrBatch} placeholder="e.g., API-0425 / BATCH-77A" required
+            />
+          </div>
+
+          <div>
+            <label for="numberOfSamples" class="block text-sm font-medium text-gray-700 mb-1">Number of Samples</label>
+            <input
+              id="numberOfSamples"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="number" min="1" bind:value={sampleForm.numberOfSamples}
+            />
+          </div>
+
+          <div class="md:col-span-2">
+            <fieldset>
+              <legend class="block text-sm font-medium text-gray-700 mb-1">Physical State</legend>
+              <div class="flex flex-wrap items-center gap-4 py-2">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="physState" bind:group={sampleForm.physicalState} value="Solid" /> Solid
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="physState" bind:group={sampleForm.physicalState} value="Liquid" /> Liquid
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="physState" bind:group={sampleForm.physicalState} value="Gas" /> Gas
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div>
+            <label for="appearance" class="block text-sm font-medium text-gray-700 mb-1">Appearance (Colour, Texture)</label>
+            <input
+              id="appearance"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="text" bind:value={sampleForm.appearance} placeholder="e.g., white crystalline powder"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Solubility</label>
+            <input
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="text" bind:value={sampleForm.solubility} placeholder="e.g., soluble in methanol"
+            />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Special Handling Instructions</label>
+            <input
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="text" bind:value={sampleForm.specialHandling} placeholder="e.g., protect from light"
+            />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Product / Sample is used for</label>
+            <input
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="text" bind:value={sampleForm.usage} placeholder="e.g., stability testing"
+            />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Storage Conditions</label>
+            <div class="flex flex-wrap items-center gap-4 py-2">
+              {#each storageOptions as opt}
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="checkbox" value={opt} bind:group={sampleForm.storageConditions} /> {opt}
+                </label>
+              {/each}
+            </div>
+            {#if sampleForm.storageConditions.includes("Other")}
+              <div class="mt-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Specify other storage condition</label>
+                <input
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  type="text" bind:value={sampleForm.storageOther} placeholder="Describe required storage"
+                />
+              </div>
+            {/if}
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hazard Information</label>
+            <div class="flex flex-wrap items-center gap-4 py-2">
+              {#each hazardOptions as hazard}
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="checkbox" value={hazard} bind:group={sampleForm.hazardInfo} /> {hazard}
+                </label>
+              {/each}
+            </div>
+
+            {#if sampleForm.hazardInfo.length && !sampleForm.hazardInfo.includes("None")}
+              <div class="mt-2 rounded-md bg-amber-50 text-amber-800 text-sm px-3 py-2 ring-1 ring-amber-200">
+                Please ensure proper labelling and packaging. MSDS is required for hazardous samples.
+              </div>
+            {/if}
+
+            <div class="mt-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">MSDS (Material Safety Data Sheet)</label>
+              <p class="text-sm text-gray-600 mb-3">
+              Note: Required for hazardous samples.
+            </p>
+              <div class="flex items-center gap-4 py-1">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="msds" bind:group={sampleForm.msds} value="Yes" /> Yes
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="msds" bind:group={sampleForm.msds} value="No" /> No 
+                </label>
+              </div>
+
+              {#if sampleForm.msds === "Yes"}
+                <div class="mt-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Upload MSDS (PDF/Image)</label>
+                  <input
+                    class="block w-full text-sm text-gray-900 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-indigo-700 hover:file:bg-indigo-100"
+                    type="file" accept=".pdf,image/*"
+                    on:change={(e: Event) =>
+                      (sampleForm.msdsFile = (e.target as HTMLInputElement).files?.[0] ?? null)}
+                  />
+                </div>
+              {/if}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-end">
+        <button
+          type="button"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
+          on:click={saveSection2}
+          disabled={saving.sec2}
+        >
+          {saving.sec2 ? "Saving..." : "Save"}
+        </button>
+      </div>
+    </section>
+
+    <!-- Section 3 -->
+    <section class="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+      <header class="flex items-start justify-between">
+        <div class="flex items-center gap-2">
+          <Award class="h-5 w-5 text-amber-500" aria-hidden="true" />
+          <h3 class="text-base font-semibold text-gray-900">Section 3: Analytical Requirements</h3>
+        </div>
+        {#if saved.sec3}
+          <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+            <Check class="h-3 w-3" /> Saved
+          </span>
+        {/if}
+      </header>
+
+      <div class="mt-4">
+        <p class="text-sm text-gray-600 mb-3">
+          Note: Send 1–2 mg/g sample extra in addition to the mentioned amount required for analysis.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Requested Technique <span class="text-rose-500">*</span>
+            </label>
+            <input
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="text" placeholder="e.g., HPLC, GC-MS, NMR" bind:value={sampleForm.requestedTechnique} required
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Amount Provided</label>
+            <div class="flex gap-2">
+              <input
+                class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                type="number" min="0" step="0.01" placeholder="e.g., 50" bind:value={sampleForm.amountProvided}
+              />
+              <select
+                class="w-28 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                bind:value={sampleForm.amountUnit}
+              >
+                {#each amountUnits as u}<option value={u}>{u}</option>{/each}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Requested Turnaround</label>
+            <select
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              bind:value={sampleForm.requestedTAT}
+            >
+              {#each tatOptions as t}<option value={t}>{t}</option>{/each}
+            </select>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Analysis Purpose</label>
+            <div class="flex flex-wrap items-center gap-4 py-2">
+              {#each purposeOptions as p}
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="checkbox" value={p} bind:group={sampleForm.analysisPurpose} /> {p}
+                </label>
+              {/each}
+            </div>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Client Sample Code (optional)</label>
+            <input
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              type="text" bind:value={sampleForm.clientSampleCode} placeholder="Your internal reference code"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-end">
+        <button
+          type="button"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
+          on:click={saveSection3}
+          disabled={saving.sec3}
+        >
+          {saving.sec3 ? "Saving..." : "Save"}
+        </button>
+      </div>
+    </section>
+
+    <!-- Section 4 -->
+    <section class="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+      <header class="flex items-start justify-between">
+        <h3 class="text-base font-semibold text-gray-900">Section 4: Additional Instructions</h3>
+        {#if saved.sec4}
+          <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+            <Check class="h-3 w-3" /> Saved
+          </span>
+        {/if}
+      </header>
+
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="md:col-span-2">
+          <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <textarea
+            id="notes"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            rows="3" bind:value={sampleForm.notes} placeholder="Any additional instructions or context"
+          ></textarea>
+        </div>
+
+        <div class="md:col-span-2">
+          <fieldset>
+            <legend class="block text-sm font-medium text-gray-700 mb-1">Sample Disposal</legend>
+            <p class="text-sm text-gray-600 mb-3">
+                Note: Extra charge may apply for returning samples.
+            </p>
+            <div class="flex flex-wrap items-center gap-4 py-2">
+              {#each ["Discard", "Return", "Return unused portion only"] as disp}
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="radio" name="sampleDisposal" bind:group={sampleForm.sampleDisposal} value={disp} /> {disp}
+                </label>
+              {/each}
+            </div>
+          </fieldset>
+        </div>
+
+        {#if sampleForm.sampleDisposal === "Return" || sampleForm.sampleDisposal === "Return unused portion only"}
+          <div class="md:col-span-2">
+            <label for="returnShippingAddress" class="block text-sm font-medium text-gray-700 mb-1">
+              Return Shipping Address <span class="text-rose-500">*</span>
+            </label>
+            <textarea
+              id="returnShippingAddress"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              rows="3" bind:value={sampleForm.returnShippingAddress}
+              placeholder="Recipient name, address, phone, and any courier instructions"
+            ></textarea>
+          </div>
+        {/if}
+      </div>
+
+      <div class="mt-4 flex items-center justify-end">
+        <button
+          type="button"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
+          on:click={saveSection4}
+          disabled={saving.sec4}
+        >
+          {saving.sec4 ? "Saving..." : "Save"}
+        </button>
+      </div>
+    </section>
+
+    <!-- Section 5 -->
+    <section class="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+      <h3 class="text-base font-semibold text-gray-900">Section 5: Authorization and Acknowledgement</h3>
+
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="md:col-span-2">
+          <label class="inline-flex items-start gap-2 text-sm text-gray-700">
+            <input type="checkbox" bind:checked={sampleForm.declarationAccepted} />
+            <span>
+              Declaration: I certify that the information provided is accurate and the sample is properly
+              labelled and packaged.
+            </span>
+          </label>
+        </div>
+
+        <div>
+          <label for="signature" class="block text-sm font-medium text-gray-700 mb-1">Signature</label>
+          <input
+            id="signature"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            type="text" bind:value={sampleForm.signature} placeholder="Type your full name"
+          />
+        </div>
+
+        <div>
+          <label for="authorizationDate" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+          <input
+            id="authorizationDate"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            type="date" bind:value={sampleForm.authorizationDate}
+          />
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-end">
+        <button
+          type="button"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
+          on:click={submitRequisition}
+          disabled={submitting}
+        >
+          {submitting ? "Submitting..." : "Submit Requisition"}
+        </button>
+      </div>
+    </section>
+
+    <!-- Pickup address and date slot -->
+    <section class="mt-6 rounded-xl border border-gray-200 bg-white p-6">
+      <header class="flex items-start justify-between">
+        <h3 class="text-base font-semibold text-gray-900">Pickup address and date slot</h3>
+        {#if saved.pickup}
+          <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+            <Check class="h-3 w-3" /> Confirmed
+          </span>
+        {/if}
+      </header>
+
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Location (Site/Campus)</label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="text" bind:value={sampleForm.pickup.location} placeholder="e.g., Corporate R&D Center" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Building & Room/Lab</label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="text" bind:value={sampleForm.pickup.buildingRoom} placeholder="e.g., B-Block, Lab 203" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Street Address <span class="text-rose-500">*</span></label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="text" bind:value={sampleForm.pickup.streetAddress} placeholder="Street, number, unit" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-rose-500">*</span></label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="text" bind:value={sampleForm.pickup.city} />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">State/Province <span class="text-rose-500">*</span></label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="text" bind:value={sampleForm.pickup.stateProvince} />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Region/District</label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="text" bind:value={sampleForm.pickup.region} />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code <span class="text-rose-500">*</span></label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="text" bind:value={sampleForm.pickup.postalCode} />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Date <span class="text-rose-500">*</span></label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="date" bind:value={sampleForm.pickup.preferredDate} />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Time Slot <span class="text-rose-500">*</span></label>
+          <select class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  bind:value={sampleForm.pickup.preferredTimeSlot}>
+            <option value="" disabled>Select a slot</option>
+            {#each pickupTimeSlots as t}<option value={t}>{t}</option>{/each}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person <span class="text-rose-500">*</span></label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="text" bind:value={sampleForm.pickup.contactPerson} placeholder="Name at pickup location" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone <span class="text-rose-500">*</span></label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="tel" bind:value={sampleForm.pickup.contactPhone} placeholder="+91 98765 43210" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Alternate Phone (optional)</label>
+          <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                 type="tel" bind:value={sampleForm.pickup.alternatePhone} />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="inline-flex items-start gap-2 text-sm text-gray-700">
+            <input type="checkbox" bind:checked={sampleForm.pickup.isBusinessAddress} />
+            <span>This is a business address with receiving/security desk</span>
+          </label>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Pickup Instructions</label>
+          <textarea class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    rows="3" bind:value={sampleForm.pickup.pickupInstructions}
+                    placeholder="Packaging provided? Labeling? Handover name, ID, or any special handling."></textarea>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Access Notes</label>
+          <textarea class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    rows="2" bind:value={sampleForm.pickup.accessNotes}
+                    placeholder="Gate code, parking, security checkpoints, elevator access, etc."></textarea>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-end">
+        <button
+          type="button"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
+          on:click={confirmPickup}
+          disabled={saving.pickup}
+        >
+          {saving.pickup ? "Confirming..." : "Confirm location/address"}
+        </button>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<style>
+  /* Subtle UX polish */
+  :global(input[type="number"]::-webkit-outer-spin-button),
+  :global(input[type="number"]::-webkit-inner-spin-button) {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  :global(input[type="number"]) { -moz-appearance: textfield; }
+</style>

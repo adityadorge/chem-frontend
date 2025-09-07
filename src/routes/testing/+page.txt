@@ -1,0 +1,323 @@
+Great! To ensure that the **most recently interacted card** (either from categories or subcategories) stays on top, you need to track the most recently interacted category or subcategory. You can do this by adding a mechanism to update the order based on interactions.
+
+Here’s how you can modify your `page.svelte` to achieve this:
+
+### ✅ 1. Track Recently Interacted Category or Subcategory
+
+You can create a variable to store the **last interacted category** or **subcategory**.
+
+#### Add this in your script section of `page.svelte`:
+
+```ts
+let lastInteractedCategory: Category | null = null;
+let lastInteractedSubcategory: Subcategory | null = null;
+```
+
+#### Update the function `showSubcategories` to set the most recently interacted category:
+
+```ts
+function showSubcategories(category: Category) {
+  lastInteractedCategory = category;
+  selectedCategory = category;
+  fetchSubcategories(category.id);
+}
+```
+
+### ✅ 2. Sort Cards Based on Recent Interaction
+
+You will modify the `#each` loop for both **categories** and **subcategories** to show the **recently interacted one on top**.
+
+#### Modify `#each` loop for categories:
+
+```svelte
+{#each categories
+  .filter(category => category.category_name.toLowerCase().includes(searchTerm.toLowerCase()))
+  .sort((a, b) => {
+    if (lastInteractedCategory === a) return -1;  // Keep last interacted on top
+    if (lastInteractedCategory === b) return 1;
+    return b.category_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? 1 :
+           a.category_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? -1 : 0;
+  }) as category}
+  <CardsSection
+    icon={category.image_url}
+    title={category.category_name}
+    description={category.description}
+    info={category.info}
+    category={category}
+    showSubcategories={showSubcategories}
+  />
+{/each}
+```
+
+#### Modify `#each` loop for subcategories:
+
+```svelte
+{#if subcategories.length > 0 && selectedCategory}
+  {#each subcategories
+    .filter(subcategory => subcategory.category_name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      if (lastInteractedSubcategory === a) return -1;  // Keep last interacted on top
+      if (lastInteractedSubcategory === b) return 1;
+      return b.category_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? 1 :
+             a.category_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? -1 : 0;
+    }) as subcategory}
+    <CardsSection
+      icon={subcategory.image_url}
+      title={subcategory.category_name}
+      description={subcategory.description}
+      info={subcategory.information}
+      category={subcategory}
+      showSubcategories={showSubcategories}
+    />
+  {/each}
+{/if}
+```
+
+### 💡 What this does:
+- **Categories** and **Subcategories** are both **filtered by search**.
+- The **most recently interacted category or subcategory** is **always displayed first** (i.e., it gets priority and stays on top).
+- The **sorting order** still takes into account the search term (i.e., it prioritizes items starting with the search term, then falls back to the original order).
+
+---
+
+### ✅ Optional: Reset on Click Outside
+If you'd like to reset the `lastInteractedCategory` or `lastInteractedSubcategory` when clicking elsewhere or clearing the filter, you can add a reset mechanism:
+
+```ts
+function clearInteraction() {
+  lastInteractedCategory = null;
+  lastInteractedSubcategory = null;
+}
+```
+
+---
+
+Let me know if you'd like further customizations such as **automatic reset on filtering** or if you'd like me to guide you through any other part of the implementation!
+
+
+
+
+
+
+
+
+
+
+below is the urls.py :
+
+from django.urls import path
+from . import views
+from .views import CategoryListView
+
+urlpatterns = [
+    path("", views.index, name="index"),
+    path('categories/', CategoryListView.as_view(), name='category-list'),
+    path('categories/<int:category_id>/subcategories/', views.SubcategoryListView.as_view(), name='subcategory-list'),
+]
+below is the models.py code: 
+from django.db import models
+
+# Create your models here.
+from django.db import models
+
+# Categories model
+class Category(models.Model):
+    category_name = models.CharField(max_length=255, unique=True)
+    image_url = models.CharField(max_length=255)
+    description = models.TextField()
+    info = models.TextField()
+    parent_category = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subcategories')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.category_name
+
+    # Method to get the parent category name
+    def get_parent_category(self):
+        if self.parent_category:
+            return self.parent_category.category_name
+        return None
+
+
+# Tests model
+class Test(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    test_name = models.CharField(max_length=255)
+    test_description = models.TextField()
+    image_url = models.CharField(max_length=255)
+    test_price = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.test_name
+
+Below is the serializer.py code:
+from rest_framework import serializers
+from .models import Category
+
+# Create a serializer for the Category model
+class CategorySerializer(serializers.ModelSerializer):
+    # This will include a list of subcategories in the serialized category data
+    subcategories = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model = Category
+        fields = ['id', 'category_name', 'image_url', 'description', 'info', 'subcategories', 'created_at', 'updated_at']
+ 
+Below is the views.py code:
+from django.shortcuts import render
+# Create your views here.
+from django.http import HttpResponse
+
+# app1/views.py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Category
+from .serializers import CategorySerializer
+
+def index(request):
+    return HttpResponse("Hello, world. You're at the polls index.")
+
+
+
+class CategoryListView(APIView):
+    def get(self, request):
+        # Fetch only categories with no parent
+        categories = Category.objects.filter(parent_category__isnull=True)
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class SubcategoryListView(APIView):
+    def get(self, request, category_id):
+        # Fetch subcategories of a particular category
+        category = Category.objects.get(id=category_id)
+        subcategories = category.subcategories.all()  # Assuming there's a relationship in the model
+        serializer = CategorySerializer(subcategories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+Below is the page.svelte code:
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import CardsSection from "$lib/Testing_Component/CardsSection/CardsSection.svelte"; 
+  import Filter from '$lib/Testing_Component/Filter/Filter.svelte';
+  let searchTerm: string = '';
+
+  interface Category {
+    image_url: string;
+    category_name: string;
+    description: string;
+    info: string;
+    id: number;
+  }
+
+  interface Subcategory {
+    category_name: string;
+    description: string;
+    info: string;
+    image_url: string;
+  }
+
+  let categories: Category[] = [];
+  let selectedCategory: Category | null = null;
+  let subcategories: Subcategory[] = [];
+
+  // Fetch the category data from the Django API
+  async function fetchCategories() {
+    const response = await fetch('http://localhost:8000/app1/categories/');
+    const data: Category[] = await response.json();
+    categories = data;
+  }
+
+  // Fetch subcategories for a selected category
+  async function fetchSubcategories(categoryId: number) {
+    const response = await fetch(`http://localhost:8000/app1/categories/${categoryId}/subcategories/`);
+    const data: Subcategory[] = await response.json();
+    subcategories = data;
+  }
+
+  // Fetch categories when the component is mounted
+  onMount(() => {
+    fetchCategories();
+  });
+
+  // Handle the click on the arrow link to fetch subcategories
+  function showSubcategories(category: Category) {
+    selectedCategory = category;
+    console.log("Selected category ID: ", category.id); // Ensure the category ID is logged
+    fetchSubcategories(category.id); // Fetch subcategories based on the clicked category
+  }
+</script>
+
+<div class="testpage-container">
+  <Filter bind:searchTerm onSearch={(term) => (searchTerm = term)} />
+</div>
+
+<main class="card-container">
+  {#if categories.length > 0 && !selectedCategory}
+  <!-- search the parent card according to character -->
+  {#each categories
+    .filter(category => category.category_name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) =>
+      b.category_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? 1 :
+      a.category_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? -1 : 0
+    ) as category}
+    <CardsSection
+      icon={category.image_url}
+      title={category.category_name}
+      description={category.description}
+      info={category.info}
+      category={category}
+      showSubcategories={showSubcategories}
+    />
+  {/each}
+  {/if}
+
+  {#if subcategories.length > 0 && selectedCategory}
+  <!-- search the subcategory card according to character -->
+  {#each subcategories
+    .filter(subcategory => subcategory.category_name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) =>
+      b.category_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? 1 :
+      a.category_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? -1 : 0
+    ) as subcategory}
+      <CardsSection
+        icon={subcategory.image_url}
+        title={subcategory.category_name}
+        description={subcategory.description}
+        info={subcategory.info}
+        category={subcategory}
+        showSubcategories={showSubcategories}
+      />
+    {/each}
+  {/if}
+</main>
+
+below is the admin.py code:
+from django.db import models
+
+# Create your models here.
+from django.db import models
+
+# Categories model
+class Category(models.Model):
+    category_name = models.CharField(max_length=255, unique=True)
+    image_url = models.CharField(max_length=255)
+    description = models.TextField()
+    info = models.TextField()
+    parent_category = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subcategories')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.category_name
+
+    # Method to get the parent category name
+    def get_parent_category(self):
+        if self.parent_category:
+            return self.parent_category.category_name
+        return None
+
+i want to create test 
