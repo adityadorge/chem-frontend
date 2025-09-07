@@ -7,6 +7,7 @@
   import TestCardsSection from "$lib/Testing_Component/TestCardsSection/TestCardsSection.svelte";
   import Navbar from "$lib/Navbar/Navbar.svelte";
   import { goto } from "$app/navigation";
+  import { API_URL } from "$lib/store/api";
 
   let searchTerm: string = "";
 
@@ -51,7 +52,7 @@
 
   // Fetch the category data from the Django API
   async function fetchCategories() {
-    const response = await fetch("http://localhost:8000/app1/categories/");
+    const response = await fetch(`${API_URL}/app1/categories/`);
     const data: Category[] = await response.json();
     categories = data;
   }
@@ -59,14 +60,14 @@
   // Fetch subcategories for a selected category
   async function fetchData(categoryId: number) {
     const subcategories_response = await fetch(
-      `http://localhost:8000/app1/categories/${categoryId}/subcategories/`
+      `${API_URL}/app1/categories/${categoryId}/subcategories/`
     );
     const subcategories_data: Subcategory[] =
       await subcategories_response.json();
     subcategories = subcategories_data;
 
     const test_response = await fetch(
-      `http://localhost:8000/app1/categories/${categoryId}/tests/`
+      `${API_URL}/app1/categories/${categoryId}/tests/`
     );
     const test_data: Test[] = await test_response.json();
     tests = test_data;

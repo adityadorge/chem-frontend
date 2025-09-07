@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_URL } from "$lib/store/api";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
   import { Toaster, toast } from "svelte-sonner";
@@ -40,7 +41,7 @@
     loading = true;
     error = null;
     try {
-      const res = await fetch(`http://localhost:8000/app1/tests/${id}/`);
+      const res = await fetch(`${API_URL}/app1/tests/${id}/`);
       if (!res.ok) throw new Error("Failed to fetch test");
       test = await res.json();
     } catch (e: unknown) {
@@ -72,7 +73,7 @@
     isAdding = true;
     try {
       const { access_token } = get(user) ?? {};
-      const res = await fetch("http://localhost:8000/add-to-cart/", {
+      const res = await fetch(`${API_URL}/add-to-cart/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${access_token}`,
@@ -100,7 +101,7 @@
     isAccepting = true;
     try {
       const { access_token } = get(user) ?? {};
-      const res = await fetch("http://localhost:8000/add-to-ordersummary/", {
+      const res = await fetch(`${API_URL}/add-to-ordersummary/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${access_token}`,

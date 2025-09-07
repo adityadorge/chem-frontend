@@ -4,6 +4,7 @@
   import { ShieldCheck, ClipboardList, Award, Check, Download, Share2 } from "lucide-svelte";
   import { user } from "$lib/store";
   import { page } from "$app/stores";
+  import { API_URL } from "$lib/store/api";
 
   // Sample Analysis Request Form state
   let sampleForm = {
@@ -179,7 +180,7 @@
     const err = validatePickup(); if (err) return toast.error(err);
     saving.pickup = true;
     try {
-      const res = await fetch("http://localhost:8000/auth/save-address/", {
+      const res = await fetch(`${API_URL}/auth/save-address/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${$user?.access_token}`,
@@ -231,7 +232,7 @@
     if (!$user?.access_token) return;
 
     try {
-      const res = await fetch("http://localhost:8000/auth/get-address/", {
+      const res = await fetch(`${API_URL}/auth/get-address/`, {
         method: "GET",
         headers: { Authorization: `Bearer ${$user.access_token}` },
         credentials: "include",
@@ -360,7 +361,7 @@
         fd.append("pickup_address", String(pickupAddressId));
       }
 
-      const res = await fetch("http://localhost:8000/sample-requisitions/", {
+      const res = await fetch(`${API_URL}/sample-requisitions/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${$user?.access_token}`,

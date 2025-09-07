@@ -5,13 +5,14 @@
   import { get } from "svelte/store";
   import { goto } from "$app/navigation";
   import { clearUser } from "$lib/store/auth";
+  import { API_URL } from "$lib/store/api";
   const currentUser = get(user);
   let userData: { id: number; name: string; email: string } | null = null;
 
   // ✅ Fetch profile info from Django backend
   async function fetchProfile() {
     try {
-      const res = await fetch("http://localhost:8000/auth/profile/", {
+      const res = await fetch(`${API_URL}/auth/profile/`, {
         method: "GET",
         credentials: "include", // Send cookie with JWT
         headers: {
@@ -41,7 +42,7 @@
   // 🚪 Logout
   async function handleLogout() {
     try {
-      await fetch("http://localhost:8000/auth/logout/", {
+      await fetch(`${API_URL}/auth/logout/`, {
         method: "POST",
         credentials: "include",
       });

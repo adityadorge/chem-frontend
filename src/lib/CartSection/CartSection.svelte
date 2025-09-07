@@ -6,6 +6,8 @@
     import { writable } from "svelte/store";
     import { goto } from "$app/navigation";
     // Define the type for cart items
+    import { API_URL } from "$lib/store/api";
+    
     type CartItem = {
         id: number;
         name: string;
@@ -28,7 +30,7 @@
             return;
         }
         try {
-            const response = await fetch("http://127.0.0.1:8000/cart", {
+            const response = await fetch(`${API_URL}/cart`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${$user.access_token}`,
@@ -71,7 +73,7 @@
         if (newQuantity < 1) return;
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/cart/update/`, {
+            const response = await fetch(`${API_URL}/cart/update/`, {
                 method: "PATCH",
                 headers: {
                     Authorization: `Bearer ${$user?.access_token}`,
@@ -96,7 +98,7 @@
     async function removeItem(id: number) {
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/cart/delete/${id}/`,
+                `${API_URL}/cart/delete/${id}/`,
                 {
                     method: "DELETE",
                     headers: {
@@ -124,7 +126,7 @@
 
     async function proceedToCheckout() {
     try {
-        const response = await fetch('http://127.0.0.1:8000/add-cart-to-ordersummary/', {
+        const response = await fetch(`${API_URL}/add-cart-to-ordersummary/`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${$user?.access_token}`,

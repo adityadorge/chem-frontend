@@ -4,6 +4,7 @@
   import { user } from "$lib/store";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
+  import { API_URL } from "$lib/store/api";
 
   let full_name = "";
   let email = "";
@@ -52,7 +53,7 @@
 
     try {
       const backendResponse = await fetch(
-        "http://localhost:8000/auth/exchange-token/",
+        `${API_URL}/auth/exchange-token/`,
         {
           method: "POST",
           headers: {

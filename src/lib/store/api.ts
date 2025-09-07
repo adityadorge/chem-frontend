@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000";
+export const API_URL = import.meta.env.VITE_API_URL;
 
 interface UserData {
   full_name: string;
@@ -63,7 +63,7 @@ export async function refreshToken() {
 }
 
 export async function sendOTP(email: string) {
-  const res = await fetch("http://localhost:8000/auth/send-otp/", {
+  const res = await fetch(`${API_URL}/auth/send-otp/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
@@ -74,7 +74,7 @@ export async function sendOTP(email: string) {
 
 // verifyOtp.ts
 export async function verifyOTP(userData: UserData, otp: string) {
-  const res = await fetch("http://localhost:8000/auth/verify-otp/", {
+  const res = await fetch(`${API_URL}/auth/verify-otp/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userData, otp }),
@@ -87,14 +87,11 @@ export async function verifyOTP(userData: UserData, otp: string) {
 // password reset link
 
 export async function sendPasswordResetEmail(email: string) {
-  const res = await fetch(
-    "http://localhost:8000/auth/send-password-reset-link/",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    }
-  );
+  const res = await fetch(`${API_URL}/auth/send-password-reset-link/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
   return res.json();
 }
 
@@ -107,7 +104,7 @@ export async function sendInvoiceEmail(emailData: {
   invoiceId: string;
   invoiceData: any;
 }) {
-  const res = await fetch("http://localhost:8000/api/send-invoice-email/", {
+  const res = await fetch(`${API_URL}/api/send-invoice-email/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(emailData),

@@ -6,6 +6,7 @@
   import { onDestroy } from "svelte";
   import { setUser, loadUser } from "$lib/store/auth";
   import { goto } from "$app/navigation";
+  import { API_URL } from "$lib/store/api";
 
   let error = "";
   let email = "";
@@ -67,7 +68,7 @@
 
     try {
       const backendResponse = await fetch(
-        "http://localhost:8000/auth/exchange-token/",
+        `${API_URL}/auth/exchange-token/`,
         {
           method: "POST",
           headers: {

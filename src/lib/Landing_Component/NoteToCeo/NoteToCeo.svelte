@@ -5,6 +5,7 @@
   import { Toaster, toast } from "svelte-sonner";
   import { user } from "$lib/store";
   import { get } from "svelte/store";
+  import { API_URL } from "$lib/store/api";
 
   let selectedOptions: string[] = [];
   let customSuggestion = "";
@@ -31,7 +32,7 @@
     }
 
     try {
-      const res = await fetch("http://localhost:8000/suggestions/", {
+      const res = await fetch(`${API_URL}/suggestions/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

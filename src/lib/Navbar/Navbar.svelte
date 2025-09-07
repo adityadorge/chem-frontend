@@ -8,6 +8,7 @@
   import CartSection from "$lib/CartSection/CartSection.svelte";
   import { goto } from "$app/navigation";
   import { loadUser } from "$lib/store/auth";
+  import { API_URL } from "$lib/store/api";
 
 
   let scrolled = false;
@@ -42,7 +43,7 @@
 
   async function fetchCategories() {
     try {
-      const res = await fetch("http://localhost:8000/app1/categories/");
+      const res = await fetch(`${API_URL}/app1/categories/`);
       const data = await res.json();
       categories.set(data);
     } catch (e) {
@@ -73,7 +74,7 @@
 
     try {
       const res = await fetch(
-        `http://localhost:8000/app1/categories/${parentId}/subcategories/`,
+        `${API_URL}/app1/categories/${parentId}/subcategories/`,
       );
       const data = await res.json();
 

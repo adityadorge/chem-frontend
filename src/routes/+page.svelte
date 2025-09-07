@@ -8,6 +8,7 @@
   import NoteToCeo from "$lib/Landing_Component/NoteToCeo/NoteToCeo.svelte";
   import WorkingProcess from "$lib/Landing_Component/WorkingProcess/WorkingProcess.svelte";
   import Comparison from "$lib/Landing_Component/Comparison/Comparison.svelte";
+  import { API_URL } from "$lib/store/api";
 
   interface Category {
     image_url: string;
@@ -20,7 +21,7 @@
   let categories: Category[] = [];
 
   async function fetchCategories() {
-    const response = await fetch("http://localhost:8000/app1/categories/");
+    const response = await fetch(`${API_URL}/app1/categories/`);
     const data: Category[] = await response.json();
     categories = data;
   }
