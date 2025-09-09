@@ -17,11 +17,12 @@ if (typeof window !== "undefined") {
       if (isApiHost && !u.pathname.endsWith("/") && noExt) {
         u.pathname += "/";
       }
-      // Add ngrok bypass (header + query) for all ngrok hosts
+      // Add ngrok bypass (use only query param to avoid CORS preflight)
       if (u.host.includes("ngrok-free.app")) {
-        const headers = new Headers(init?.headers || {});
-        headers.set("ngrok-skip-browser-warning", "true");
-        init = { ...init, headers };
+        // REMOVE header injection to prevent preflight failure
+        // const headers = new Headers(init?.headers || {});
+        // headers.set("ngrok-skip-browser-warning", "true");
+        // init = { ...init, headers };
         if (!u.searchParams.has("ngrok-skip-browser-warning")) {
           u.searchParams.set("ngrok-skip-browser-warning", "true");
         }
