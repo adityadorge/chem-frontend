@@ -21,23 +21,10 @@
   let categories: Category[] = [];
 
   async function fetchCategories() {
-    try {
-    const response = await fetch(`${API_URL}/app1/categories/`);
-    const text = await response.text();   // Get raw response
-    console.log("Raw response text:", text);
-
-    // Try to parse JSON only if it's valid
-    try {
-      const data: Category[] = JSON.parse(text);
-      console.log("Parsed JSON:", data);
-      categories = data;
-    } catch (e) {
-      console.error("Response was not JSON:", e);
-    }
-  } catch (err) {
-    console.error("Fetch error:", err);
+    const response = await fetch(`${API_URL}/categories`);
+    const data: Category[] = await response.json();
+    categories = data;
   }
-}
 
 
   onMount(() => {
