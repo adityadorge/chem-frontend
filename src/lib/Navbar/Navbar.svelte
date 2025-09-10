@@ -12,7 +12,6 @@
 
 
   let scrolled = false;
-  let menuOpen = false;
   let dropdownOpen = false;
   let cartOpen = false;
   const authValid = writable(false);
@@ -109,6 +108,30 @@
       hoveredSubCategoryId = null; // Reset hovered subcategory
     }, 200);
   }
+
+  let menuOpen = false;
+
+  // Mobile-only items (different from desktop)
+  const mobileNav = [
+    { label: "Testing", href: "/testing" },
+    { label: "Services", href: "/services" },
+    { label: "Learn", href: "/learn" },
+    { label: "About Us", href: "/about" },
+    { label: "Enroll your lab", href: "/enroll-lab" }, // moved into the list
+  ];
+
+  function openMobile() {
+    menuOpen = true;
+    document.body.classList.add("menu-open");
+  }
+  function closeMobile() {
+    menuOpen = false;
+    document.body.classList.remove("menu-open");
+  }
+  async function go(href: string) {
+    await goto(href);
+    closeMobile();
+  }
 </script>
 
 <svelte:window on:scroll={handleScroll} />
@@ -119,215 +142,197 @@
       <a href="/"><span>APP NAME</span></a>
     </div>
     <div class="nav-links">
+      <!-- desktop (unchanged) -->
       <a
         href="/testing"
         class="mega-box-btn"
         on:click|preventDefault={() => goto("/testing")}
         on:mouseenter={handleMouseEnter}
         on:mouseleave={handleMouseLeave}
-      >
-        Testing
-      </a>
+      >Testing</a>
       <a href="/services">Services</a>
       <a href="/learn">Learn</a>
       <a href="/about">About Us</a>
       <a href="/enroll-lab" class="quote-btn">Enroll your lab</a>
       {#if $isAuthenticated}
-        <!-- svelte-ignore a11y_consider_explicit_label -->
         <a href="/profile">
-          <img
-            src="/assets/profile-icon/profile.svg"
-            alt="Profile"
-            width="30"
-            height="30"
-            style="vertical-align: middle;"
-          />
+          <img src="/assets/profile-icon/profile.svg" alt="Profile" width="30" height="30" style="vertical-align: middle;" />
         </a>
       {:else}
         <a href="/login">Login</a>
         <a href="/register">Register</a>
       {/if}
-      <!-- svelte-ignore a11y_consider_explicit_label -->
-      <a
-        href="#"
-        class="cart-link"
-        on:click|preventDefault={toggleCart}
-        style="display: inline-flex; align-items: center;"
-      >
-        <img
-          src="/assets/cart/cart1.svg"
-          alt="Profile"
-          width="30"
-          height="30"
-          style="vertical-align: middle;"
-        />
+      <a href="#" class="cart-link" on:click|preventDefault={toggleCart} style="display: inline-flex; align-items: center;">
+        <img src="/assets/cart/cart1.svg" alt="Cart" width="30" height="30" style="vertical-align: middle;" />
       </a>
-
-      <!-- Add CartSection component -->
       <CartSection bind:isOpen={cartOpen} />
     </div>
 
-    <button class="hamburger" on:click={() => (menuOpen = !menuOpen)}>
+    <button class="hamburger" on:click={openMobile} aria-label="Open menu">
       <img src="/assets/navbar/menu-line.svg" alt="menu" />
     </button>
   </div>
 </nav>
 
 {#if menuOpen}
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="mobile-menu" on:click={() => (menuOpen = false)}>
-    <div class="mobile-menu-content" on:click|stopPropagation>
-      <a href="/testing" on:click={() => (menuOpen = false)}>Testing</a>
-      <a href="/services" on:click={() => (menuOpen = false)}>Services</a>
-      <a href="/learn" on:click={() => (menuOpen = false)}>Learn</a>
-      <a href="/about" on:click={() => (menuOpen = false)}>About Us</a>
-      <a href="/profile" on:click={() => (menuOpen = false)}>Profile</a>
-      <a
-        href="/request-quote"
-        class="quote-btn-mobile"
-        on:click={() => (menuOpen = false)}>Request A Quote</a
-      >
+  <!-- Full-screen overlay -->
+  <div class="mobile-overlay" on:click={closeMobile}>
+    <div class="mobile-panel" on:click|stopPropagation>
+      <div class="mobile-topbar">
+        <div class="brand">
+          <img src="/favicon.png" alt="Logo" width="24" height="24" />
+          <span>APP NAME</span>
+        </div>
+        <button class="close-btn" on:click={closeMobile} aria-label="Close menu">×</button>
+      </div>
+
+      <ul class="mobile-list">
+        {#each mobileNav as item}
+          <li>
+            <button class="list-row" on:click={() => go(item.href)} aria-label={item.label}>
+              <span class="row-text">{item.label}</span>
+              <svg class="chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707A1 1 0 118.707 5.293l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </li>
+
+          {#if item.href === "/enroll-lab" && !$isAuthenticated}
+            <li class="auth-li">
+              <div class="mobile-auth">
+                <button class="btn-outline auth-btn" on:click={() => go("/login")}>Login</button>
+                <button class="btn-primary auth-btn" on:click={() => go("/register")}>Register</button>
+              </div>
+            </li>
+          {/if}
+        {/each}
+      </ul>
     </div>
   </div>
 {/if}
 
 <style>
-  :root {
-    --main-font: "Roboto", sans-serif;
+  :root { --main-font: "Roboto", sans-serif; --brand: #1746a2; }
+  * { font-family: var(--main-font); }
+
+  .nav-bar { margin: 25px auto; padding: 8px 20px; position: sticky; top: 0; z-index: 1000;
+    width: 85%; border-radius: 40px; background-color: rgba(255,255,255,0.9);
+    backdrop-filter: blur(8px); transition: all .3s ease-in-out; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
+  .nav-contains { display: flex; justify-content: space-between; align-items: center; }
+  .nav-bar.sticky { width: 100%; margin: 0; border-radius: 0; box-shadow: 0 3px 12px rgba(0,0,0,.18); background-color: rgba(255,255,255,.95); }
+  .nav-links { display: flex; align-items: center; gap: 15px; }
+  .nav-links a { text-decoration: none; padding: 6px 12px; font-size: .9rem; color: #414141; border-radius: 50px; font-weight: 500; transition: all .2s; cursor: pointer; }
+  .nav-links a:hover { background-color: #2709cf79; color: #fff; transform: scale(1.05); }
+  .quote-btn { background-color: #2709cf79; color: #fff !important; padding: 6px 12px; font-size: .9rem; border-radius: 50px; font-weight: 600; transition: all .2s; }
+  .quote-btn:hover { transform: scale(1.05); }
+  .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 8px; }
+
+  /* Mobile overlay + panel (responsive) */
+  .mobile-overlay {
+    position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.35);
+    width: 100vw; max-width: 100vw; overflow-x: hidden; /* prevent sideways scroll */
   }
-  * {
-    font-family: var(--main-font);
-  }
-  .nav-bar {
-    margin: 25px auto;
-    padding: 8px 20px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    width: 85%;
-    border-radius: 40px;
-    background-color: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.12);
+  .mobile-panel {
+    position: absolute; inset: 0; background: #fff;
+    display: grid; grid-template-rows: auto auto 1fr; /* topbar, actions, list */
+    height: 100dvh; animation: fadeIn .15s ease-out;
+    width: 100vw; max-width: 100vw; overflow-x: hidden; /* prevent sideways scroll */
   }
 
-  .nav-contains {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: translateY(0) } }
+
+  .mobile-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 14px; border-bottom: 1px solid #eee; }
+  .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; }
+
+  .close-btn { appearance: none; background: none; border: 0; font-size: 28px; line-height: 1; cursor: pointer; color: #333; padding: 4px 8px; }
+
+  /* remove old .mobile-actions; using inline auth block instead */
+  .mobile-auth {
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    background: #fff;
+  }
+  .auth-li { border-bottom: 0; }
+
+  .auth-btn {
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: #fff;
+    border: 1px solid var(--brand);
+  }
+  .btn-outline {
+    background: #fff;
+    color: var(--brand);
+    border: 1px solid var(--brand);
+  }
+  .btn-primary:active, .btn-outline:active { transform: scale(0.98); }
+  .btn-primary:focus-visible, .btn-outline:focus-visible {
+    outline: 2px solid #111; outline-offset: 2px;
   }
 
-  .nav-bar.sticky {
+  .nav-links { display: flex; align-items: center; gap: 15px; }
+  .nav-links a { text-decoration: none; padding: 6px 12px; font-size: .9rem; color: #414141; border-radius: 50px; font-weight: 500; transition: all .2s; cursor: pointer; }
+  .nav-links a:hover { background-color: #2709cf79; color: #fff; transform: scale(1.05); }
+  .quote-btn { background-color: #2709cf79; color: #fff !important; padding: 6px 12px; font-size: .9rem; border-radius: 50px; font-weight: 600; transition: all .2s; }
+  .quote-btn:hover { transform: scale(1.05); }
+  .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 8px; }
+
+  /* Mobile overlay + panel (responsive) */
+  .mobile-overlay {
+    position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.35);
+    width: 100vw; max-width: 100vw; overflow-x: hidden; /* prevent sideways scroll */
+  }
+  .mobile-panel {
+    position: absolute; inset: 0; background: #fff;
+    display: grid; grid-template-rows: auto auto 1fr; /* topbar, actions, list */
+    height: 100dvh; animation: fadeIn .15s ease-out;
+    width: 100vw; max-width: 100vw; overflow-x: hidden; /* prevent sideways scroll */
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: translateY(0) } }
+
+  .mobile-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 14px; border-bottom: 1px solid #eee; }
+  .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; }
+
+  .close-btn { appearance: none; background: none; border: 0; font-size: 28px; line-height: 1; cursor: pointer; color: #333; padding: 4px 8px; }
+
+  /* Actions just under top bar */
+  .mobile-actions {
+    position: sticky; top: 0; z-index: 1;
+    background: #fff; padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+
+  .mobile-list { list-style: none; margin: 0; padding: 8px 0; overflow-y: auto; }
+  .mobile-list li { border-bottom: 1px solid #eee; }
+
+  .list-row {
     width: 100%;
-    margin: 0;
-    border-radius: 0;
-    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.18);
-    background-color: rgba(255, 255, 255, 0.95);
+    padding: 16px 16px;
+    text-align: left; background: none; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: clamp(16px, 4.2vw, 19px); color: #111;
   }
+  .list-row:active { background-color: #f5f5f5; }
 
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
+  /* Truncate long labels to avoid horizontal overflow */
+  .row-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  .nav-links a {
-    text-decoration: none;
-    padding: 6px 12px;
-    font-size: 0.9rem;
-    color: #414141;
-    border-radius: 50px;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-  }
-
-  .nav-links a:hover {
-    background-color: #2709cf79;
-    color: white;
-    transform: scale(1.05);
-  }
-
-  .quote-btn {
-    background-color: #2709cf79;
-    color: white !important;
-    padding: 6px 12px; /* Slimmer */
-    font-size: 0.9rem;
-    border-radius: 50px;
-    font-weight: 600;
-    transition: all 0.2s ease-in-out;
-  }
-
-  .quote-btn:hover {
-    transform: scale(1.05);
-  }
-
-  .hamburger {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    flex-direction: column;
-    gap: 5px;
-    padding: 8px;
-  }
-
-  .mobile-menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.95);
-    z-index: 2000;
-    animation: slideIn 0.2s forwards;
-  }
-
-  @keyframes slideIn {
-    from {
-      transform: translateX(-100%);
-    }
-    to {
-      transform: translateX(0);
-    }
-  }
-
-  .mobile-menu-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 50px;
-  }
-
-  .mobile-menu-content a {
-    padding: 12px;
-    text-decoration: none;
-    color: black;
-    font-size: 18px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-    transition: all 0.2s ease-in-out;
-  }
-
-  .mobile-menu-content a:hover {
-    background-color: #2709cf79;
-    color: white;
-  }
+  .chevron { width: 14px; height: 14px; color: #9ca3af; flex: 0 0 auto; }
 
   @media screen and (max-width: 768px) {
-    .nav-links {
-      display: none;
-    }
-    .hamburger {
-      display: flex;
-    }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
   }
 
-  /* Prevent body scrolling when cart is open */
-  :global(body.cart-open) {
-    overflow: hidden;
-  }
+  :global(body.menu-open) { overflow: hidden; } /* already prevents body scroll */
 </style>
