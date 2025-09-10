@@ -1,4 +1,5 @@
 <script>
+  import { ClipboardCheck, Truck, FlaskConical, ListTodo } from "lucide-svelte";
   const trustedSteps = [
     {
       number: "01",
@@ -29,14 +30,20 @@
   ];
 </script>
 
-<section class="trusted-section">
-  <div class="trusted-container">
-    <div class="trusted-text">
-      <p class="trusted-subtitle">Our Working Process</p>
-      <h2 class="trusted-heading">
+<section class="bg-white dark:bg-gray-900">
+  <div
+    class="items-center max-w-screen-xl px-4 py-8 mx-auto lg:grid lg:grid-cols-4 lg:gap-16 xl:gap-24 lg:py-24 lg:px-6"
+  >
+    <div class="col-span-2 mb-8">
+      <p class="text-lg font-medium text-[#1746a2] dark:text-[#1746a2]">
+        Our Working Process
+      </p>
+      <h2
+        class="mt-3 mb-4 text-3xl font-extrabold tracking-tight text-gray-900 md:text-3xl dark:text-white"
+      >
         Trusted by over 600 million users and 10,000 teams
       </h2>
-      <p class="trusted-description">
+      <p class="font-light text-gray-500 sm:text-xl dark:text-gray-400">
         We've designed a seamless service booking flow to eliminate the hassle
         traditionally involved in lab sample testing. Whether you're a student,
         researcher, or institution, you can now book tests in just a few
@@ -89,26 +96,99 @@
           Global reach
         </li>
       </ul>
-      <div class="trusted-links">
-        <a href="#" class="trusted-link"
-          >Explore Legality Guide <span>→</span></a
-        >
-        <a href="#" class="trusted-link"
-          >Visit the Trust Center <span>→</span></a
-        >
+      <div
+        class="pt-6 mt-6 space-y-4 border-t border-gray-200 dark:border-gray-700"
+      >
+        <div>
+          <a
+            href="#"
+            class="inline-flex items-center text-base font-medium text-[#1746a2] hover:text-[#1746a2] dark:text-[#1746a2] dark:hover:text-[#1746a2]"
+          >
+            Explore Legality Guide
+            <svg
+              class="w-5 h-5 ml-1"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+              ><path
+                fill-rule="evenodd"
+                d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              ></path></svg
+            >
+          </a>
+        </div>
+        <div>
+          <a
+            href="#"
+            class="inline-flex items-center text-base font-medium text-[#1746a2] hover:text-[#1746a2] dark:text-[#1746a2] dark:hover:text-[#1746a2]"
+          >
+            Visit the Trust Center
+            <svg
+              class="w-5 h-5 ml-1"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+              ><path
+                fill-rule="evenodd"
+                d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              ></path></svg
+            >
+          </a>
+        </div>
       </div>
     </div>
-    <div class="trusted-grid">
-      {#each trustedSteps as step}
-        <div class="trusted-item">
-          <div class="icon-circle">
-            <img src={step.icon} alt={step.title} />
-            <div class="step-number">{step.number}</div>
-          </div>
-          <h3>{step.title}</h3>
-          <p>{step.description}</p>
-        </div>
-      {/each}
+    <div
+      class="col-span-2 space-y-8 md:grid md:grid-cols-2 md:gap-12 md:space-y-0"
+    >
+      <div>
+        <!-- Replace the inline SVG below with ClipboardCheck -->
+        <ClipboardCheck
+          class="w-10 h-10 mb-2 text-[#1746a2] md:w-12 md:h-12"
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+        <h3 class="text-2xl text-gray-500 dark:text-gray-400">99.99% uptime</h3>
+        <p class="font-light text-gray-500 dark:text-gray-400">
+          For Landwind, with zero maintenance downtime
+        </p>
+      </div>
+      <div>
+        <Truck
+          class="w-12 h-10 mb-2 text-[#1746a2] md:w-12 md:h-12"
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+        <h3 class="text-2xl text-gray-500 dark:text-gray-400">600M+ Users</h3>
+        <p class="font-light text-gray-500 dark:text-gray-400">
+          Trusted by over 600 milion users around the world
+        </p>
+      </div>
+      <div>
+        <FlaskConical
+          class="w-12 h-10 mb-2 text-[#1746a2] md:w-12 md:h-12"
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+        <h3 class="text-2xl text-gray-500 dark:text-gray-400">
+          100+ countries
+        </h3>
+        <p class="font-light text-gray-500 dark:text-gray-400">
+          Have used Landwind to create functional websites
+        </p>
+      </div>
+      <div>
+        <ListTodo
+          class="w-12 h-10 mb-2 text-[#1746a2] md:w-12 md:h-12"
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+        <h3 class="text-2xl text-gray-500 dark:text-gray-400">5+ Million</h3>
+        <p class="font-light text-gray-500 dark:text-gray-400">
+          Transactions per day
+        </p>
+      </div>
     </div>
   </div>
 </section>
@@ -132,196 +212,5 @@
     display: inline-flex;
     align-items: center;
     margin-right: 0.3em;
-  }
-  .trusted-section {
-    background: #fff;
-    padding: 4rem 1rem;
-    color: #111;
-    margin-top: 3rem;
-    padding-left: 7rem;
-  }
-
-  .trusted-container {
-    max-width: 1200px;
-    margin: auto;
-    display: grid;
-    gap: 6rem; /* Increased gap between content and trustedSteps */
-    grid-template-columns: 1fr;
-  }
-  .trusted-text {
-    margin-left: -3.5rem; /* Shift content a little to the left for laptop view */
-  }
-
-  @media (min-width: 1024px) {
-    .trusted-container {
-      grid-template-columns: 1fr 1fr;
-      gap: 8rem; /* Even more gap for laptop view */
-    }
-  }
-
-  .trusted-subtitle {
-    color: #1e40af;
-    font-weight: 600;
-    font-size: 1.125rem;
-  }
-
-  .trusted-heading {
-    margin: 0.75rem 0;
-    font-size: 2rem;
-    font-weight: 800;
-    line-height: 1.2;
-  }
-
-  .trusted-description {
-    color: #6b7280;
-    font-weight: 300;
-    font-size: 1.125rem;
-  }
-
-  .trusted-links {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .trusted-link {
-    color: #1e40af;
-    text-decoration: none;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    transition: color 0.3s;
-  }
-
-  .trusted-link:hover {
-    color: #1d4ed8;
-  }
-
-  .trusted-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  @media (min-width: 768px) {
-    .trusted-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-@media (max-width: 767px) {
-  .trusted-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2.5rem; /* Increased gap between step items for mobile view */
-    justify-items: start;
-    align-items: start;
-    padding-left: 0.5rem;
-    padding-right: 5rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  .trusted-item {
-    min-width: 0;
-    max-width: 100%;
-    margin: 0;
-    padding: 0.5rem 0.2rem;
-    box-sizing: border-box;
-  }
-  .icon-circle {
-    width: 70px;
-    height: 70px;
-  }
-  .icon-circle img {
-    width: 50px;
-    height: 50px;
-  }
-  .step-number {
-    width: 22px;
-    height: 22px;
-    font-size: 0.8rem;
-    bottom: -7px;
-    right: -7px;
-  }
-  .trusted-item h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.3rem;
-  }
-  .trusted-item p {
-    font-size: 0.95rem;
-  }
-}
-
-  .trusted-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .icon-circle {
-    position: relative;
-    width: 95px;
-    height: 95px;
-    margin: 0 auto 1rem;
-    border: 2px dashed #d4e4f5;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    box-shadow: 0 2px 12px rgba(30, 64, 175, 0.07);
-    transition:
-      transform 0.6s cubic-bezier(0.23, 1, 0.32, 1),
-      box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1),
-      border-color 0.6s cubic-bezier(0.23, 1, 0.32, 1),
-      background 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    will-change: transform, box-shadow, border-color, background;
-  }
-
-  .icon-circle:hover {
-    transform: scale(1.13) rotate(-3deg);
-    box-shadow:
-      0 8px 32px rgba(30, 64, 175, 0.18),
-      0 1.5px 8px rgba(30, 64, 175, 0.1);
-    border-color: #1746a2;
-    background: linear-gradient(135deg, #f0f6ff 60%, #e3eaff 100%);
-    z-index: 2;
-  }
-  .icon-circle img {
-    width: 70px;
-    height: 70px;
-  }
-
-  .step-number {
-    position: absolute;
-    bottom: -10px;
-    right: -10px;
-    background: #0f8bdc;
-    color: white;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
-  .trusted-item h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-
-  .trusted-item p {
-    color: #6b7280;
-    font-weight: 300;
   }
 </style>
