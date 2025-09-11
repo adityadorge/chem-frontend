@@ -34,8 +34,6 @@
     test_price: number;
   }
 
-  // ...existing code...
-
   type BreadcrumbItem = {
     label: string;
     type: "home" | "category" | "subcategory";
@@ -250,7 +248,7 @@
     {/each}
   </div>
 
-  <Filter
+    <Filter
     bind:searchTerm
     onSearch={(term) => (searchTerm = term)}
     {categories}
@@ -264,10 +262,11 @@
       // Optionally filter subcategories/tests here as well
     }}
   />
+
 </div>
 
 <main>
-<div class="cards-wrapper">
+<div class="cards-wrapper" class:list={tests.length > 0 && selectedCategory}>
   {#if categories.length > 0 && !selectedCategory}
     <!-- search the parent card according to character -->
     {#each categories
@@ -314,19 +313,9 @@
 
   {#if tests.length > 0 && selectedCategory}
     {#each tests
-      .filter((test) => test.test_name
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()))
-      .sort((a, b) => (b.test_name
-          .toLowerCase()
-          .startsWith(searchTerm.toLowerCase()) ? 1 : a.test_name
-                .toLowerCase()
-                .startsWith(searchTerm.toLowerCase()) ? -1 : 0)) as test}
+      .filter((test) => test.test_name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .sort((a, b) => (b.test_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? 1 : a.test_name.toLowerCase().startsWith(searchTerm.toLowerCase()) ? -1 : 0)) as test}
       <TestCardsSection
-        icon={test.image_url}
-        title={test.test_name}
-        description={test.test_description}
-        info={`Price: ₹${test.test_price}`}
         {test}
       />
     {/each}
@@ -343,37 +332,48 @@
   align-items: flex-start;
   padding: 32px 0 32px 0; /* equal left and right padding */
 }
-  /* ...existing styles... */
-  .breadcrumb {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    font-family: "Alegreya", serif;
-    font-size: 1.1rem;
-    color: #555;
-    letter-spacing: 0.5px;
-    padding: 4px 24px; /* Reduced vertical padding */
-    margin: 8px 0 8px 0; /* Reduced top and bottom margin */
-    max-width: 900px;
-    gap: 0.5rem;
-  }
 
-  .breadcrumb-item {
-    cursor: pointer;
-    transition: color 0.2s;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
+/* Stacked list layout only when showing tests */
+.cards-wrapper.list {
+  flex-wrap: nowrap;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  max-width: 980px;  /* long readable width, like checkout */
+  margin: 0 auto;
+}
 
-  .breadcrumb-item:hover {
-    color: #2709cf;
-    background: #ececff;
-    text-decoration: underline;
-  }
+/* ...existing styles... */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-family: "Alegreya", serif;
+  font-size: 1.1rem;
+  color: #555;
+  letter-spacing: 0.5px;
+  padding: 4px 24px; /* Reduced vertical padding */
+  margin: 8px 0 8px 0; /* Reduced top and bottom margin */
+  max-width: 900px;
+  gap: 0.5rem;
+}
 
-  .breadcrumb-separator {
-    color: #b0b0b0;
-    font-size: 1.2em;
-    user-select: none;
-  }
+.breadcrumb-item {
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.breadcrumb-item:hover {
+  color: #2709cf;
+  background: #ececff;
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: #b0b0b0;
+  font-size: 1.2em;
+  user-select: none;
+}
 </style>
