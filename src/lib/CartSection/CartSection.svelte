@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { API_URL } from "$lib/store/api";
     import { toast } from "svelte-sonner";
     import { fade, fly } from "svelte/transition";
     import { onMount } from "svelte";
@@ -6,8 +7,6 @@
     import { writable } from "svelte/store";
     import { goto } from "$app/navigation";
     // Define the type for cart items
-    import { API_URL } from "$lib/store/api";
-    
     type CartItem = {
         id: number;
         name: string;
@@ -97,12 +96,10 @@
 
     async function removeItem(id: number) {
         try {
-            const response = await fetch(
-                `${API_URL}/cart/delete/${id}/`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${$user?.access_token}`,
+            const response = await fetch(`${API_URL}/cart/delete/${id}/`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${$user?.access_token}`,
                         "Content-Type": "application/json",
                     },
                 },

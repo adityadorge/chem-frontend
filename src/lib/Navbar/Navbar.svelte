@@ -90,8 +90,18 @@
     cartOpen = !cartOpen;
   }
 
+  // Throttle + hysteresis to avoid flip-flop near the threshold
+  let ticking = false;
   function handleScroll() {
-    scrolled = window.scrollY > 50; // Adjusted for smooth scroll effect
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY || 0;
+      const ON = 70;   // turn sticky on after this
+      const OFF = 30;  // turn sticky off only when above is undone enough
+      scrolled = scrolled ? y > OFF : y > ON;
+      ticking = false;
+    });
   }
 
   function handleMouseEnter() {
@@ -215,11 +225,52 @@
   :root { --main-font: "Roboto", sans-serif; --brand: #1746a2; }
   * { font-family: var(--main-font); }
 
-  .nav-bar { margin: 25px auto; padding: 8px 20px; position: sticky; top: 0; z-index: 1000;
-    width: 85%; border-radius: 40px; background-color: rgba(255,255,255,0.9);
-    backdrop-filter: blur(8px); transition: all .3s ease-in-out; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
+  /* Avoid animating layout properties; keep transforms/opacity only */
+  .nav-bar {
+    margin: 25px auto;
+    padding: 8px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 85%;
+    border-radius: 40px;
+    background-color: rgba(255,255,255,0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    box-shadow: 0 3px 12px rgba(0,0,0,.12);
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  .nav-bar.sticky {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: 0 3px 12px rgba(0,0,0,.18);
+    background-color: rgba(255,255,255,.95);
+  }
+
+  /* Mobile: keep dimensions constant to prevent bounce */
+  @media screen and (max-width: 768px) {
+    .nav-bar {
+      width: 100%;
+      margin: 0;
+      border-radius: 0;
+      padding-left: 12px;
+      padding-right: 12px;
+      /* Optional: uncomment to reduce GPU jank from blur on mobile */
+      /* backdrop-filter: none;
+      -webkit-backdrop-filter: none; */
+    }
+    .nav-bar.sticky {
+      width: 100%;
+      margin: 0;
+      border-radius: 0;
+    }
+  }
+
   .nav-contains { display: flex; justify-content: space-between; align-items: center; }
-  .nav-bar.sticky { width: 100%; margin: 0; border-radius: 0; box-shadow: 0 3px 12px rgba(0,0,0,.18); background-color: rgba(255,255,255,.95); }
   .nav-links { display: flex; align-items: center; gap: 15px; }
   .nav-links a { text-decoration: none; padding: 6px 12px; font-size: .9rem; color: #414141; border-radius: 50px; font-weight: 500; transition: all .2s; cursor: pointer; }
   .nav-links a:hover { background-color: #2709cf79; color: #fff; transform: scale(1.05); }

@@ -69,15 +69,17 @@
     /* Individual Card */
     .card {
         position: relative;
-        width: 450px;
-        min-width: 450px;
-        max-width: 450px;
+        /* Make width fluid with side gutters and cap at 450px */
+        width: clamp(280px, 100% - 32px, 450px);
+        min-width: 0;
+        max-width: 100%;
         min-height: 240px;
         max-height: 240px;
         background: rgba(255, 255, 255, 0.9);
         border-radius: 20px;
         padding: 36px 24px;
-        margin: 16px;
+        /* center card and keep space from screen edges */
+        margin: 16px auto;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -89,38 +91,38 @@
     }
 
     /* Info button (upper right corner) */
-.info-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: linear-gradient(90deg, #1746a2 0%, #3066be 100%);
-    color: #fff;
-    font-size: 1rem;
-    font-family: "Roboto", sans-serif;
-    padding: 6px 18px;
-    border: none;
-    border-radius: 20px;
-    box-shadow: 0 2px 8px rgba(23, 70, 162, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
+    .info-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: linear-gradient(90deg, #1746a2 0%, #3066be 100%);
+        color: #fff;
+        font-size: 1rem;
+        font-family: "Roboto", sans-serif;
+        padding: 6px 18px;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(23, 70, 162, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
 
-.info-button:hover {
-    background: linear-gradient(90deg, #ffb347 0%, #ffd580 100%);
-    color: #fff;
-}
+    .info-button:hover {
+        background: linear-gradient(90deg, #ffb347 0%, #ffd580 100%);
+        color: #fff;
+    }
 
     /* Popup styles */
     .popup {
         position: absolute;
         top: 20px;
         right: 20px;
-        width: 400px;
+        width: min(400px, calc(100% - 40px)); /* responsive popup */
         background-color: white;
         border-radius: 12px;
         padding: 15px;
@@ -139,13 +141,13 @@
     }
 
     /* Popup content */
-.popup-content h4 {
-    font-family: "Alegreya", serif;
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #1746a2; /* Blue color for heading */
-}
+    .popup-content h4 {
+        font-family: "Alegreya", serif;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #1746a2; /* Blue color for heading */
+    }
 
     .popup-content p {
         font-family: "Alegreya", serif;
@@ -167,16 +169,16 @@
 
     /* Icon inside the Card */
     .card-icon {
-        width: 80px; /* Increased from 56px */
-        height: 80px; /* Increased from 56px */
+        width: 80px;
+        height: 80px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
     .card-icon img {
-        width: 60px; /* Increased from 32px */
-        height: 60px; /* Increased from 32px */
+        width: 60px;
+        height: 60px;
         object-fit: contain;
         display: block;
     }
@@ -200,31 +202,39 @@
     }
 
     .card-text p {
-    font-family: "Roboto", serif;
-    font-size: 0.9rem;
-    color: #777;
-    padding-right: 60px; /* Add space for the button */
-    word-break: break-word;
-    white-space: normal;
-    max-height: 3.6em; /* Limit to 2 lines */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
+        font-family: "Roboto", serif;
+        font-size: 0.9rem;
+        color: #777;
+        padding-right: 60px; /* Add space for the button */
+        word-break: break-word;
+        white-space: normal;
+        max-height: 3.6em; /* Limit to 2 lines */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
 
-.btn {
-	background-color: #f1eded;
-	border: 0;
-	border-radius: 50px;
-	/* box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2); */
-	color: #000000;
-	font-size: 16px;
-	padding: 12px 25px;
-	position: absolute;
-	bottom: 20px;
-	right: 12px;
-	letter-spacing: 1px;
-}
+    .btn {
+        background-color: #f1eded;
+        border: 0;
+        border-radius: 50px;
+        color: #000000;
+        font-size: 16px;
+        padding: 12px 25px;
+        position: absolute;
+        bottom: 20px;
+        right: 12px;
+        letter-spacing: 1px;
+    }
+
+    @media (max-width: 640px) {
+        .card {
+            /* tighter padding and gutters on small screens */
+            padding: 28px 16px;
+            margin: 12px auto;
+            width: calc(100% - 24px); /* keep side gaps on very small screens */
+        }
+    }
 </style>

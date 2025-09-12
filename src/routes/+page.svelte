@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_URL } from "$lib/store/api";
   import Carousel from "$lib/Landing_Component/Carousel/Carousel.svelte";
   import ExploreFields from "$lib/Landing_Component/ExploreFields/ExploreFields.svelte";
   import { onMount } from "svelte";
@@ -8,7 +9,6 @@
   import NoteToCeo from "$lib/Landing_Component/NoteToCeo/NoteToCeo.svelte";
   import WorkingProcess from "$lib/Landing_Component/WorkingProcess/WorkingProcess.svelte";
   import Comparison from "$lib/Landing_Component/Comparison/Comparison.svelte";
-  import { API_URL } from "$lib/store/api";
 
   interface Category {
     image_url: string;
@@ -21,11 +21,10 @@
   let categories: Category[] = [];
 
   async function fetchCategories() {
-    const response = await fetch(`${API_URL}/categories`);
+    const response = await fetch(`${API_URL}/app1/categories/`);
     const data: Category[] = await response.json();
     categories = data;
   }
-
 
   onMount(() => {
     fetchCategories();

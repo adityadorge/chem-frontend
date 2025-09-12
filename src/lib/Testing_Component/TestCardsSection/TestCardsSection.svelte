@@ -102,6 +102,7 @@
     box-shadow: 0 2px 6px var(--shadow);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     cursor: pointer;
+    margin: 12px; /* NEW: space from edges and between cards */
   }
 
   .card:hover {
@@ -186,7 +187,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;       /* keep everything on one line */
     gap: 12px;
   }
 
@@ -195,6 +196,9 @@
     gap: 16px;
     font-size: 0.9rem;
     color: var(--muted);
+    flex: 1 1 auto;          /* take remaining space */
+    min-width: 0;            /* allow shrinking */
+    overflow: hidden;        /* enable ellipsis inside */
   }
 
   .rating,
@@ -203,16 +207,17 @@
     align-items: center;
     gap: 6px;
     font-weight: 500;
-  }
-
-  .star {
-    color: #fbbf24; /* golden yellow for star */
+    white-space: nowrap;     /* keep each item intact */
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .actions {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;          /* don't shrink the price/button */
+    white-space: nowrap;     /* keep price + button together */
   }
 
   .price {
@@ -242,6 +247,7 @@
     .card {
       padding: 16px;
       gap: 10px;
+      margin: 10px; /* NEW: tighter margins on small screens */
     }
     .title {
       font-size: 1rem;
@@ -249,16 +255,18 @@
     .company {
       font-size: 0.8rem;
     }
+    /* keep footer in one line on mobile too */
     .card-footer {
-      flex-direction: column;
-      align-items: flex-start;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
     }
     .actions {
-      width: 100%;
-      justify-content: space-between;
+      width: auto;            /* reset */
+      justify-content: flex-end;
     }
     .btn {
-      flex-grow: 1;
+      flex-grow: 0;           /* reset */
       text-align: center;
     }
   }

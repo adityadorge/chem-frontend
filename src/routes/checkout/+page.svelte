@@ -1,10 +1,10 @@
 <script lang="ts">
+  import { API_URL } from "$lib/store/api";
   import { onMount } from "svelte";
   import { Toaster, toast } from "svelte-sonner";
   import { ShieldCheck, ClipboardList, Award, Check, Download, Share2 } from "lucide-svelte";
   import { user } from "$lib/store";
   import { page } from "$app/stores";
-  import { API_URL } from "$lib/store/api";
 
   // Sample Analysis Request Form state
   let sampleForm = {

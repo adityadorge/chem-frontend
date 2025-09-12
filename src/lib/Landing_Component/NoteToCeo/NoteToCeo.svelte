@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { API_URL } from "$lib/store/api";
   // import { InitializeGoogleLogin } from "$lib/utils/googleLogin";
   import { goto } from "$app/navigation";
   import { Toaster, toast } from "svelte-sonner";
   import { user } from "$lib/store";
   import { get } from "svelte/store";
-  import { API_URL } from "$lib/store/api";
 
   let selectedOptions: string[] = [];
   let customSuggestion = "";

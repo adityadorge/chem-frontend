@@ -1,11 +1,11 @@
 <script lang="ts">
+  import { API_URL } from "$lib/store/api";
   import { onMount } from "svelte";
   import { user } from "$lib/store";
   import { toast } from "svelte-sonner";
   import { get } from "svelte/store";
   import { goto } from "$app/navigation";
   import { clearUser } from "$lib/store/auth";
-  import { API_URL } from "$lib/store/api";
   const currentUser = get(user);
   let userData: { id: number; name: string; email: string } | null = null;
 

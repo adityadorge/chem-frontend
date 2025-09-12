@@ -1,10 +1,10 @@
 <script lang="ts">
+  import { API_URL } from "$lib/store/api";
   import { Toaster, toast } from "svelte-sonner";
   import { registerUser, sendOTP, verifyOTP } from "../../lib/store/api"; // You'll define sendOTP and verifyOTP
   import { user } from "$lib/store";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import { API_URL } from "$lib/store/api";
 
   let full_name = "";
   let email = "";
@@ -196,39 +196,45 @@
     justify-content: center;
     align-items: center;
     gap: 20px;
-    margin-top: 50px;
+    margin-top: clamp(16px, 6vh, 50px);
+    padding: 0 12px; /* side gutters on small screens */
   }
+
   .register-container {
-    position: block;
-    width: 550px;
+    position: relative;        /* fix invalid 'position: block' */
+    width: 100%;
+    max-width: 520px;          /* cap width for large screens */
     background-color: #fff;
-    border-radius: 10px;
+    border-radius: 12px;
     box-shadow: 0 0 15px #b9b9b9;
-    padding: 10px;
+    padding: 16px clamp(16px, 5vw, 28px); /* responsive inner padding */
+    margin: 0 auto;            /* center */
   }
 
   .header {
     text-align: center;
-    padding: 0px 0px 20px 0px;
+    padding: 0 0 16px 0;
+    font-size: clamp(20px, 5vw, 28px);
   }
 
   .container form {
-    padding: 0px 40px;
+    padding: 0 clamp(12px, 5vw, 40px); /* responsive side padding */
   }
 
   .text_field {
     position: relative;
     border-bottom: 2px solid #adadad;
-    margin: 30px 0px;
+    margin: clamp(18px, 4vw, 30px) 0;
   }
 
   .text_field input {
     width: 100%;
-    padding: 0px 5px;
-    height: 40px;
+    padding: 0 5px;
+    height: 44px; /* taller touch target on mobile */
     border: none;
     background: none;
     outline: none;
+    font-size: clamp(14px, 3.5vw, 16px);
   }
 
   .text_field label {
@@ -239,18 +245,20 @@
     transform: translateY(-50%);
     transition: 0.5s;
     pointer-events: none;
+    font-size: clamp(12px, 3.3vw, 14px);
   }
 
   .text_field span::before {
     content: " ";
     position: absolute;
-    top: 40px;
-    left: 0px;
+    top: 44px; /* align with input height */
+    left: 0;
     width: 0;
     height: 2px;
     background: #2709cf79;
     transition: 0.5s;
   }
+
   .text_field input:focus ~ label,
   .text_field input:valid ~ label {
     top: -5px;
@@ -264,9 +272,10 @@
   }
 
   .signup_link {
-    margin: 30px 0px;
+    margin: 20px 0;
     text-align: center;
     color: #666666;
+    font-size: clamp(13px, 3.6vw, 15px);
   }
 
   .signup_link a {
@@ -280,10 +289,9 @@
   }
 
   .submit-btn {
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin: 20px 0;
     width: 100%;
-    height: 50px;
+    min-height: 48px;                 /* better for touch */
     border-radius: 50px;
     background-color: #2709cf79;
     outline: none;
@@ -291,8 +299,8 @@
     border: none;
     color: white;
     transition: all 0.1s ease-in-out;
-    font-size: 18px;
-    font-weight: 300;
+    font-size: clamp(15px, 4vw, 18px);
+    font-weight: 400;
   }
 
   .submit-btn:active {
@@ -304,32 +312,16 @@
     box-shadow: 0 20px 30px -6px rgba(39, 9, 207, 0.475);
   }
 
-  .btn-image {
-    width: 36px;
-    padding: 5px;
-  }
-
-  /* .btn_google_Login {
-        padding: 10px;
-        background-color: #fff;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        font-size: 18px;
-        font-weight: 300;
-        width: 100%;
-        height: 50px;
-        cursor: pointer;
-        outline: none;
-        border: 1px solid #adadad;
-        border-radius: 50px;
-    } */
-
   .btn_google_Login {
     margin-top: 10px;
     display: flex;
     flex-direction: row;
     justify-content: center;
+  }
+
+  @media (max-width: 480px) {
+    .register-container {
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    }
   }
 </style>
