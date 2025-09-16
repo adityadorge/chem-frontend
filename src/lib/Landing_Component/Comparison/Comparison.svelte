@@ -23,57 +23,65 @@
   // Default content (override by passing `sections` from parent)
   export let sections: Section[] = [
     {
-      title: "Work with tools you already use",
+      title: "Focus on what matters: your research",
       description:
-        "Deliver great service experiences fast - without the complexity of traditional ITSM solutions. Accelerate critical development work, eliminate toil, and deploy changes with ease.",
-      image: "/assets/enroll-lab/images/feature-1.png",
+        "Enable faster research outcomes without the complexity of traditional lab processes. Streamline testing workflows, eliminate inefficiencies, & deliver accurate results with ease.",
+      image: "/assets/comparison/cdc-CfS6A4U5g8M-unsplash(1).jpg",
       imageAlt: "dashboard feature image",
       imageFirst: false,
       features: [
-        { label: "Continuous integration and deployment", a: true, b: false },
-        { label: "Development workflow", a: true, b: false },
-        { label: "Knowledge management", a: true, b: false }
+        { label: "Access to Certified Research Facilities", a: true, b: false },
+        { label: "Time & Cost Efficiency", a: true, b: false },
+        { label: "Faster Turnaround Time (TAT)", a: true, b: false }
       ],
       footer:
-        "Deliver great service experiences fast - without the complexity of traditional ITSM solutions."
+        "No more wasting hours — book tests, send samples, and get accurate results faster, all from one seamless platform."
     },
     {
-      title: "We invest in the world’s potential",
+      title: "We invest in the individual’s potential",
       description:
-        "Deliver great service experiences fast - without the complexity of traditional ITSM solutions. Accelerate critical development work, eliminate toil, and deploy changes with ease.",
-      image: "/assets/enroll-lab/images/feature-2.png",
+        "True growth stems from the quality of knowledge one gains. Our platform empowers researchers by removing barriers, connecting them to the right labs, and ensuring that their work is not hindered by inefficiencies.",
+      image: "assets/comparison/irham-setyaki-Vg7xbXRPiCk-unsplash.jpg",
       imageAlt: "feature image 2",
       imageFirst: true,
       features: [
-        { label: "Dynamic reports and dashboards", a: true, b: false },
-        { label: "Templates for everyone", a: true, b: false },
-        { label: "Development workflow", a: true, b: false },
-        { label: "Limitless business automation", a: true, b: false },
-        { label: "Knowledge management", a: true, b: false }
+        { label: "Doorstep Sample Pickup", a: true, b: false },
+        { label: "Dynamic Reports and Dashboards", a: true, b: false },
+        { label: "Handle Compliance & Documentation", a: true, b: false },
+        { label: "Post-Result Communication", a: true, b: false },
       ],
       footer:
-        "Deliver great service experiences fast - without the complexity of traditional ITSM solutions."
+        "Potential transforms into collective progress. We exist to make that transformation possible."
     },
     {
-      title: "Work with tools you already use",
+      title: "Science doesn’t wait, and neither do we.",
       description:
-        "Deliver great service experiences fast - without the complexity of traditional ITSM solutions. Accelerate critical development work, eliminate toil, and deploy changes with ease.",
-      image: "/assets/enroll-lab/images/feature-1.png",
+        "Our round-the-clock service ensures uninterrupted access and support for your research needs. Managed with utmost care and strict confidentiality, safeguarding both your data and intellectual property. We ensure every report is accurate, reliable, and research-ready.",
+      image: "/assets/comparison/xiazheng1995--y5X8YFApj4-unsplash.jpg",
       imageAlt: "dashboard feature image",
       imageFirst: false,
       features: [
-        { label: "Continuous integration and deployment", a: true, b: false },
-        { label: "Development workflow", a: true, b: false },
-        { label: "Knowledge management", a: true, b: false }
+        { label: "Quality of Results", a: true, b: false },
+        { label: "Secure Handling & Strict IP Protection", a: true, b: false },
+        { label: "24/7 service availability", a: true, b: false }
       ],
       footer:
-        "Deliver great service experiences fast - without the complexity of traditional ITSM solutions."
+        "Science moves faster, smoother, and smarter—with us by your side."
     }
   ];
 </script>
 
-<section class="bg-gray-50 dark:bg-gray-800">
+<section class="bg-gray-50 dark:bg-gray-800 font-sans">
   <div class="max-w-screen-xl px-4 py-8 mx-auto space-y-12 lg:space-y-20 lg:py-24 lg:px-6">
+
+    <!-- Page headline -->
+    <header class="text-center mb-8 sm:mb-12">
+      <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+        Why Settle for Outdated Methods?
+        <span class="text-[#174698] dark:text-[#174698] pencil-underline">Research Made Modern</span>
+      </h1>
+    </header>
+
     {#each sections as s}
       <div class="items-center gap-8 lg:grid lg:grid-cols-2 xl:gap-16">
         {#if s.imageFirst}
@@ -155,3 +163,23 @@
     {/each}
   </div>
 </section>
+
+<style>
+  .pencil-underline {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.4em; /* was 0.25em */
+  }
+  .pencil-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15em; /* was 0.05em */
+    height: 0.65em;  /* was 0.6em */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 28' preserveAspectRatio='none'><path d='M2 16c50-6 100 2 150-2s100-8 150-2 50 6 96 2' fill='none' stroke='%23174698' stroke-width='6' stroke-linecap='round' stroke-opacity='0.9'/><path d='M2 22c50-6 100 2 150-2s100-8 150-2 50 6 96 2' fill='none' stroke='%23174698' stroke-width='2.5' stroke-linecap='round' stroke-opacity='0.65'/></svg>");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
+  }
+</style>

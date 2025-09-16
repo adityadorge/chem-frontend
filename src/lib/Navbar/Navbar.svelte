@@ -126,8 +126,8 @@
     { label: "Testing", href: "/testing" },
     { label: "Services", href: "/services" },
     { label: "Learn", href: "/learn" },
-    { label: "About Us", href: "/about" },
-    { label: "Enroll your lab", href: "/enroll-lab" }, // moved into the list
+    { label: "About", href: "/about" },
+    { label: "Supplier", href: "/enroll-lab" }, // moved into the list
   ];
 
   function openMobile() {
@@ -162,8 +162,8 @@
       >Testing</a>
       <a href="/services">Services</a>
       <a href="/learn">Learn</a>
-      <a href="/about">About Us</a>
-      <a href="/enroll-lab" class="quote-btn">Enroll your lab</a>
+      <a href="/about">About</a>
+      <a href="/enroll-lab" class="quote-btn">Supplier</a>
       {#if $isAuthenticated}
         <a href="/profile">
           <img src="/assets/profile-icon/profile.svg" alt="Profile" width="30" height="30" style="vertical-align: middle;" />
@@ -220,9 +220,14 @@
     </div>
   </div>
 {/if}
-
 <style>
-  :root { --main-font: "Roboto", sans-serif; --brand: #1746a2; }
+  /* Import Inter font */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root { 
+    --main-font: "Inter", sans-serif; 
+    --brand: #1746a2; 
+  }
   * { font-family: var(--main-font); }
 
   /* Avoid animating layout properties; keep transforms/opacity only */
@@ -259,9 +264,6 @@
       border-radius: 0;
       padding-left: 12px;
       padding-right: 12px;
-      /* Optional: uncomment to reduce GPU jank from blur on mobile */
-      /* backdrop-filter: none;
-      -webkit-backdrop-filter: none; */
     }
     .nav-bar.sticky {
       width: 100%;
@@ -272,22 +274,44 @@
 
   .nav-contains { display: flex; justify-content: space-between; align-items: center; }
   .nav-links { display: flex; align-items: center; gap: 15px; }
-  .nav-links a { text-decoration: none; padding: 6px 12px; font-size: .9rem; color: #414141; border-radius: 50px; font-weight: 500; transition: all .2s; cursor: pointer; }
-  .nav-links a:hover { background-color: #2709cf79; color: #fff; transform: scale(1.05); }
-  .quote-btn { background-color: #2709cf79; color: #fff !important; padding: 6px 12px; font-size: .9rem; border-radius: 50px; font-weight: 600; transition: all .2s; }
+.nav-links a { 
+  text-decoration: none; 
+  padding: 6px 12px; 
+  font-size: .9rem; 
+  color: #414141; 
+  border-radius: 50px; 
+  font-weight: 500; 
+  transition: background-color .2s ease, color .2s ease; 
+  cursor: pointer; 
+}
+
+.nav-links a:hover { 
+  background-color: #1746a2; 
+  color: #fff; 
+}
+
+  .quote-btn { 
+    background-color: #1746a2; 
+    color: #fff !important; 
+    padding: 6px 12px; 
+    font-size: .9rem; 
+    border-radius: 50px; 
+    font-weight: 600; 
+    transition: all .2s; 
+  }
   .quote-btn:hover { transform: scale(1.05); }
   .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 8px; }
 
   /* Mobile overlay + panel (responsive) */
   .mobile-overlay {
     position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.35);
-    width: 100vw; max-width: 100vw; overflow-x: hidden; /* prevent sideways scroll */
+    width: 100vw; max-width: 100vw; overflow-x: hidden;
   }
   .mobile-panel {
     position: absolute; inset: 0; background: #fff;
-    display: grid; grid-template-rows: auto auto 1fr; /* topbar, actions, list */
+    display: grid; grid-template-rows: auto auto 1fr;
     height: 100dvh; animation: fadeIn .15s ease-out;
-    width: 100vw; max-width: 100vw; overflow-x: hidden; /* prevent sideways scroll */
+    width: 100vw; max-width: 100vw; overflow-x: hidden;
   }
 
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: translateY(0) } }
@@ -297,7 +321,6 @@
 
   .close-btn { appearance: none; background: none; border: 0; font-size: 28px; line-height: 1; cursor: pointer; color: #333; padding: 4px 8px; }
 
-  /* remove old .mobile-actions; using inline auth block instead */
   .mobile-auth {
     padding: 12px 14px;
     display: grid;
@@ -329,40 +352,6 @@
     outline: 2px solid #111; outline-offset: 2px;
   }
 
-  .nav-links { display: flex; align-items: center; gap: 15px; }
-  .nav-links a { text-decoration: none; padding: 6px 12px; font-size: .9rem; color: #414141; border-radius: 50px; font-weight: 500; transition: all .2s; cursor: pointer; }
-  .nav-links a:hover { background-color: #2709cf79; color: #fff; transform: scale(1.05); }
-  .quote-btn { background-color: #2709cf79; color: #fff !important; padding: 6px 12px; font-size: .9rem; border-radius: 50px; font-weight: 600; transition: all .2s; }
-  .quote-btn:hover { transform: scale(1.05); }
-  .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 8px; }
-
-  /* Mobile overlay + panel (responsive) */
-  .mobile-overlay {
-    position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.35);
-    width: 100vw; max-width: 100vw; overflow-x: hidden; /* prevent sideways scroll */
-  }
-  .mobile-panel {
-    position: absolute; inset: 0; background: #fff;
-    display: grid; grid-template-rows: auto auto 1fr; /* topbar, actions, list */
-    height: 100dvh; animation: fadeIn .15s ease-out;
-    width: 100vw; max-width: 100vw; overflow-x: hidden; /* prevent sideways scroll */
-  }
-
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: translateY(0) } }
-
-  .mobile-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 14px; border-bottom: 1px solid #eee; }
-  .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; }
-
-  .close-btn { appearance: none; background: none; border: 0; font-size: 28px; line-height: 1; cursor: pointer; color: #333; padding: 4px 8px; }
-
-  /* Actions just under top bar */
-  .mobile-actions {
-    position: sticky; top: 0; z-index: 1;
-    background: #fff; padding: 12px 14px;
-    border-bottom: 1px solid #eee;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-  }
-
   .mobile-list { list-style: none; margin: 0; padding: 8px 0; overflow-y: auto; }
   .mobile-list li { border-bottom: 1px solid #eee; }
 
@@ -375,9 +364,7 @@
   }
   .list-row:active { background-color: #f5f5f5; }
 
-  /* Truncate long labels to avoid horizontal overflow */
   .row-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
   .chevron { width: 14px; height: 14px; color: #9ca3af; flex: 0 0 auto; }
 
   @media screen and (max-width: 768px) {
@@ -385,5 +372,6 @@
     .hamburger { display: flex; }
   }
 
-  :global(body.menu-open) { overflow: hidden; } /* already prevents body scroll */
+  :global(body.menu-open) { overflow: hidden; }
 </style>
+

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { API_URL } from "$lib/store/api";
-  import { Toaster, toast } from "svelte-sonner";
+  import { toast } from "svelte-sonner"; // removed Toaster
   import { onMount } from "svelte";
   import { loginUser } from "../../lib/store/api";
   import { user } from "$lib/store";
@@ -113,8 +113,6 @@
     InitializeGoogleLogin();
   });
 </script>
-
-<Toaster richColors />
 
 <main class="container flex-box">
   <div class="login-container">

@@ -35,13 +35,11 @@
     class="items-center max-w-screen-xl px-4 py-8 mx-auto lg:grid lg:grid-cols-4 lg:gap-16 xl:gap-24 lg:py-24 lg:px-6"
   >
     <div class="col-span-2 mb-8">
-      <p class="text-lg font-medium text-[#1746a2] dark:text-[#1746a2]">
-        Our Working Process
-      </p>
+      <p class="text-[#1e40af] font-semibold text-lg mb-4">Our Working Process</p>
       <h2
         class="mt-3 mb-4 text-3xl font-extrabold tracking-tight text-gray-900 md:text-3xl dark:text-white"
       >
-        Trusted by over 600 million users and 10,000 teams
+        Research Made Simple:<br> Seamless Booking, Doorstep Collection & Secure Process.
       </h2>
       <p class="font-light text-gray-500 sm:text-xl dark:text-gray-400">
         We've designed a seamless service booking flow to eliminate the hassle
@@ -63,7 +61,7 @@
               />
             </svg>
           </span>
-          High reliability
+          High Reliability
         </li>
         <li>
           <span class="checkmark">
@@ -78,7 +76,7 @@
               />
             </svg>
           </span>
-          Secure processes
+          Secure Processes
         </li>
         <li>
           <span class="checkmark">
@@ -93,7 +91,7 @@
               />
             </svg>
           </span>
-          Global reach
+          Global Reach
         </li>
       </ul>
       <div
@@ -149,9 +147,8 @@
           strokeWidth={2}
           aria-hidden="true"
         />
-        <h3 class="text-2xl text-gray-500 dark:text-gray-400">99.99% uptime</h3>
         <p class="font-light text-gray-500 dark:text-gray-400">
-          For Landwind, with zero maintenance downtime
+          Browse a variety of fields and partner labs to find the right fit.
         </p>
       </div>
       <div>
@@ -160,9 +157,8 @@
           strokeWidth={2}
           aria-hidden="true"
         />
-        <h3 class="text-2xl text-gray-500 dark:text-gray-400">600M+ Users</h3>
         <p class="font-light text-gray-500 dark:text-gray-400">
-          Trusted by over 600 milion users around the world
+          No more lab visits—we take care of pickup & regulations for you.
         </p>
       </div>
       <div>
@@ -171,11 +167,8 @@
           strokeWidth={2}
           aria-hidden="true"
         />
-        <h3 class="text-2xl text-gray-500 dark:text-gray-400">
-          100+ countries
-        </h3>
         <p class="font-light text-gray-500 dark:text-gray-400">
-          Have used Landwind to create functional websites
+          Tested by highly qualified experts, ensuring reliable & accurate results.
         </p>
       </div>
       <div>
@@ -184,9 +177,8 @@
           strokeWidth={2}
           aria-hidden="true"
         />
-        <h3 class="text-2xl text-gray-500 dark:text-gray-400">5+ Million</h3>
         <p class="font-light text-gray-500 dark:text-gray-400">
-          Transactions per day
+          Receive comprehensive reports with precise and reliable results
         </p>
       </div>
     </div>

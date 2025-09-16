@@ -74,13 +74,13 @@
     font-weight: 600;
     color: #1f2937; /* Slate-800 */
     margin: 0;
-    font-family: "Roboto", Arial, Helvetica, sans-serif;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   }
 
   .folder-card-desc {
     font-size: 0.95rem;
     color: #64748b; /* Slate-500 */
-    font-family: "Roboto", Arial, Helvetica, sans-serif;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
     margin-top: 6px;
     line-height: 1.4;
   }

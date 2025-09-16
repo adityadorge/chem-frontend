@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { ArrowLeft, ArrowRight } from "lucide-svelte";
 
   const cards = [
     {
-      title: "Connecting Researchers with Certified Testing Labs <br>– Seamlessly.",
-      text: "Our mission is to streamline the lab sample delivery process, ensuring that individual researchers and institutions can seamlessly transport their samples to certified labs and receive accurate results—efficiently and hassle-free.",
-      img: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308",
+      title: "Seamless Access to Certified Labs for Every Researcher. <br>– Quickly, Reliably, Seamlessly.",
+      text: "Get Ready to Accelerate Your Research with access to a wide range of services across multiple fields — all in one place. Whether you’re a startup, researcher, or global enterprise, we connect you with trusted labs to deliver faster, more reliable results.",
+      img: "assets/carousel/carousel_1.jpg",
       advice: {
         tag: "Travel Insurance 101",
         text: "How to choose your travel insurance policy:<br> A Practical Guide",
@@ -18,9 +19,9 @@
       ]
     },
     {
-      title: "From Your Doorstep to Certified Testing Laboratory <br>– No More Lab Visits",
-      text: "Limited access to certified labs, high travel costs, and the burden of managing packaging, delivery, and coordination all fall on researchers taking valuable time away from actual research.",
-      img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+      title: "Marketplace built for research and innovation. <br>– From Your Doorstep to the Lab.",
+      text: "Say goodbye to lab-hunting, wasted trips, and delivery hassles. We simplify access, logistics, and reporting—saving you time, reducing costs, and letting you focus on what matters most: advancing discoveries.",
+      img: "assets/carousel/carousel_3.jpg",
       advice: {
         tag: "Travel Insurance 101",
         text: "How to choose your travel insurance policy:<br> A Practical Guide",
@@ -60,12 +61,19 @@
   }
 </script>
 
+<svelte:head>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</svelte:head>
+
 <div class="hero-section">
   <div class="hero-content">
     <h1>{@html cards[current].title}</h1>
     <div class="hero-buttons">
-      <a class="main-btn" href="#">Get a quote</a>
-      <a class="secondary-btn" href="#">See our products</a>
+      <a class="main-btn" href="#">Get Started</a>
+      <a class="secondary-btn" href="#">See our Services</a>
     </div>
     <p class="hero-desc">{cards[current].text}</p>
     <div class="hero-insights">
@@ -80,13 +88,13 @@
   <div class="hero-image-card">
     <div class="image-wrapper">
       <img src={cards[current].img} alt="Hero Image" />
-      <div class="advice-card">
-        <span class="advice-tag">{cards[current].advice.tag}</span>
-        <a href={cards[current].advice.link} class="advice-text">{@html cards[current].advice.text}</a>
-        <div class="advice-arrows">
-          <button on:click={() => manualNav(prevCard)} aria-label="Previous">&#8592;</button>
-          <button on:click={() => manualNav(nextCard)} aria-label="Next">&#8594;</button>
-        </div>
+      <div class="nav-arrows">
+        <button on:click={() => manualNav(prevCard)} aria-label="Previous">
+          <ArrowLeft size={18} aria-hidden="true" />
+        </button>
+        <button on:click={() => manualNav(nextCard)} aria-label="Next">
+          <ArrowRight size={18} aria-hidden="true" />
+        </button>
       </div>
     </div>
   </div>
@@ -94,6 +102,8 @@
 
 <style>
 .hero-section {
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   display: flex;
   background: #1746a2;
   border-radius: 24px;
@@ -116,8 +126,10 @@
 }
 
 .hero-content h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: clamp(2rem, 3vw + 1rem, 3.25rem); /* responsive */
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   margin-bottom: 24px;
   color: #1746a2;
 }
@@ -149,8 +161,10 @@
 }
 
 .hero-desc {
-  color: #888;
-  font-size: 1.1rem;
+  color: #475569;              /* slate-600-ish */
+  font-weight: 400;            /* lighter than headline */
+  font-size: clamp(0.95rem, 0.4vw + 0.9rem, 1.125rem);
+  line-height: 1.6;
   margin-top: 16px;
 }
 
@@ -206,43 +220,16 @@
   border-radius: 24px;
 }
 
-.advice-card {
+/* New: only the arrows in bottom-left */
+.nav-arrows {
   position: absolute;
   bottom: 24px;
   left: 24px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(23,70,162,0.08);
-  padding: 16px 20px;
-  min-width: 220px;
-  max-width: 80%;
-}
-
-.advice-tag {
-  display: block;
-  font-size: 0.9rem;
-  color: #1746a2;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.advice-text {
-  display: block;
-  color: #1746a2;
-  font-size: 1rem;
-  font-weight: 500;
-  text-decoration: none;
-  margin-bottom: 8px;
-}
-
-.advice-arrows {
   display: flex;
   gap: 8px;
-  margin-top: 4px;
-  justify-content: flex-end;
 }
 
-.advice-arrows button {
+.nav-arrows button {
   background: #eaf1fb;
   border: none;
   border-radius: 50%;
@@ -252,12 +239,18 @@
   font-size: 1.1rem;
   cursor: pointer;
   transition: background 0.2s;
+  display: inline-flex;          /* center the icon */
+  align-items: center;
+  justify-content: center;
 }
 
-.advice-arrows button:hover {
+.nav-arrows button:hover {
   background: #1746a2;
   color: #fff;
 }
+
+/* Remove old advice styles */
+/* .advice-card, .advice-tag, .advice-text, .advice-arrows { } */
 
 @media (max-width: 900px) {
   .hero-section {
@@ -265,6 +258,17 @@
     padding: 16px;
     gap: 16px;
   }
+
+  /* Tweak sizes on small screens */
+  .hero-content h1 {
+    font-size: 2rem;
+    line-height: 1.15;
+  }
+  .hero-desc {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
   .image-wrapper {
     width: 95vw;
     height: 340px;
@@ -274,27 +278,15 @@
   .hero-insights {
     display: none;
   }
-  .advice-card {
-    padding: 4px 6px;
-    min-width: 80px;
-    max-width: 80%;
-    font-size: 0.7rem;
-    border-radius: 5px;
+
+  /* Position arrows tighter on small screens */
+  .nav-arrows {
     bottom: 6px;
     left: 6px;
   }
-  .advice-tag {
-    font-size: 0.75rem;
-    margin-bottom: 2px;
-  }
-  .advice-text {
-    font-size: 0.8rem;
-    margin-bottom: 2px;
-  }
-  .advice-arrows button {
+  .nav-arrows button {
     width: 25px;
     height: 25px;
-    font-size: 0.75rem;
   }
 }
 
@@ -315,6 +307,10 @@
     padding: 72px;
     gap: 72px;
     min-height: 700px;
+  }
+  /* Make headline extra large on very wide screens */
+  .hero-content h1 {
+    font-size: 4rem;
   }
 }
 </style>

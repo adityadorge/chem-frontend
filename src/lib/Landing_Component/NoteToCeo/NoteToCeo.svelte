@@ -130,6 +130,9 @@
   </div>
 </section>
 
+<!-- Mount toaster so toast() calls show up -->
+<Toaster position="top-center" richColors />
+
 <style>
   .home-questions__container {
     background-color: #90c4ff;
@@ -356,82 +359,220 @@
 
   @media (max-width: 600px) {
     .home-questions__container {
-      margin: 10px 5px 0 5px;
+      margin: 10px 8px 0 8px; /* tighter gutters, no overlap */
       border-radius: 12px;
       padding: 0;
     }
+
     .home-questions__wrapper {
-      padding: 15px 5px 30px;
+      padding: 16px 10px 28px;
       margin-left: 0;
       margin-right: 0;
       max-width: 100%;
     }
+
     .module-questions__wrapper {
       display: block;
       padding: 0;
       margin: 0;
     }
+
     .module-questions__header {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       margin-left: 0;
       margin-right: 0;
       width: 100%;
       text-align: left;
     }
+
     .module-questions__title {
-      font-size: 2rem;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      line-height: 1.2;
       text-align: left;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      overflow-wrap: anywhere;
     }
+
     .module-questions__tag {
       font-size: 1rem;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       padding: 6px 12px;
       border-radius: 30px;
     }
+
     .module-questions__content {
       font-size: 1rem;
+      line-height: 1.6;
       margin-left: 0;
       margin-right: 0;
       width: 100%;
       text-align: left;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
+      overflow-wrap: anywhere;
     }
+
     .module-questions__form {
-      margin-top: 0;
+      margin-top: 0;          /* cancel desktop negative offset */
       grid-column: auto;
       grid-row: auto;
       align-self: auto;
     }
+
     .suggestion-form {
       padding: 16px;
       margin-top: 10px;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
     }
+
     .suggestion-form__label {
       font-size: 0.95rem;
       margin-bottom: 8px;
     }
+
+    /* Turn chips into a responsive grid for small screens */
     .suggestion-form__options {
-      gap: 8px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
       margin-bottom: 14px;
+      width: 100%;
     }
+
     .suggestion-form__options label {
-      padding: 8px 12px;
-      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
       border-radius: 20px;
+      background-color: #e5f0ff;
+      width: 100%;
+      overflow-wrap: anywhere;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
     }
+
+    /* Larger, easier-to-tap checkboxes */
+    .suggestion-form__options input[type="checkbox"] {
+      margin: 0;
+      width: 20px;
+      height: 20px;
+      flex: 0 0 auto;
+      accent-color: #0057d9;
+    }
+
+    /* Visual selected state (mobile-only) */
+    .suggestion-form__options label:has(input:checked) {
+      background-color: #d6e7ff;
+      border: 1px solid #8db6ff;
+    }
+
     .suggestion-form__textarea {
-      min-height: 80px;
+      min-height: 100px;
       font-size: 0.95rem;
       margin-bottom: 14px;
       border-radius: 8px;
+      width: 100%;
     }
+
+    /* Full-width button for easier tapping */
     .suggestion-form__button {
-      padding: 10px 18px;
-      font-size: 0.95rem;
+      width: 100%;
+      padding: 12px 18px;
+      font-size: 1rem;
       border-radius: 6px;
+    }
+  }
+
+  /* Mobile “Desktop site” / tablet range (fix responsive at 600–1024px) */
+  @media (min-width: 600px) and (max-width: 1024px) {
+    .home-questions__container {
+      /* cancel the overlapping negative bottom margin in this range */
+      margin: 10px 16px 0 16px;
+      border-radius: 16px;
+    }
+
+    .home-questions__wrapper {
+      padding: 24px 16px 40px;
+      margin-left: 0;
+      margin-right: 0;
+      max-width: 100%;
+    }
+
+    .module-questions__wrapper {
+      display: block; /* single column */
+      padding: 0;
+      margin: 0;
+    }
+
+    .module-questions__header {
+      margin: 0 0 20px 0;
+      width: 100%;
+    }
+
+    /* keep the title readable in the ~980px viewport used by “Desktop site” */
+    .module-questions__title {
+      font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+      line-height: 1.2;
+      margin-bottom: 8px;
+      overflow-wrap: anywhere;
+    }
+
+    /* override 600+ rules that squeeze content to 50% width */
+    .module-questions__content {
+      width: 100%;
+      margin: 0 0 16px 0;
+      text-align: left;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    /* cancel the desktop negative offset and grid placement */
+    .module-questions__form {
+      margin-top: 0;
+      grid-column: auto;
+      grid-row: auto;
+      align-self: auto;
+    }
+
+    .suggestion-form {
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    }
+
+    /* lay out chips in 2 columns for this width */
+    .suggestion-form__options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+
+    .suggestion-form__options label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 20px;
+      background-color: #e5f0ff;
+      word-break: break-word;
+    }
+
+    .suggestion-form__button {
+      width: 100%;
+      padding: 12px 18px;
+      font-size: 1rem;
+      border-radius: 8px;
+    }
+  }
+
+  /* Extra-small devices */
+  @media (max-width: 360px) {
+    .suggestion-form__options {
+      grid-template-columns: 1fr; /* stack chips on very narrow screens */
     }
   }
 </style>

@@ -11,21 +11,20 @@
     <section class="bg-white dark:bg-gray-900 pt-0 mt-0">
   <div class="grid max-w-screen-xl px-4 pt-4 pb-8 mx-auto lg:gap-8 xl:gap-0 lg:py-4 lg:grid-cols-12 lg:pt-4">
     <div class="flex flex-col items-center justify-center text-center lg:col-start-4 lg:col-span-6 mx-auto">
-      <p class="text-[#1e40af] font-semibold text-lg mb-4">Our Working Process</p>
-      <h1 class="max-w-2xl mb-4 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl text-black">
-        Building digital <br>products & brands.
-      </h1>
+      <p class="text-[#1e40af] font-semibold text-lg mb-4">Our Trusted Suppliers</p>
+        <h1 class="max-w-2xl mb-4 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl text-black">
+        Building Trust <br> <span class="whitespace-nowrap">Research &amp; Innovation.</span>
+        </h1>
       <p class="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
-        This free and open-source landing page template was built using the utility classes from
-        <a href="https://tailwindcss.com" class="hover:underline">Tailwind CSS</a> and based on the components from the
+        From CROs to NABL-accredited labs, our trusted partners support every stage of your research—delivering specialized testing, compliance, and advanced facilities with accuracy, reliability, and speed, so you can innovate with confidence.
+        <!-- <a href="https://tailwindcss.com" class="hover:underline">Tailwind CSS</a> and based on the components from the
         <a href="https://flowbite.com/docs/getting-started/introduction/" class="hover:underline">Flowbite Library</a> and the
-        <a href="https://flowbite.com/blocks/" class="hover:underline">Blocks System</a>.
+        <a href="https://flowbite.com/blocks/" class="hover:underline">Blocks System</a>. -->
       </p>
       <div class="space-y-4 sm:flex sm:space-y-0 sm:space-x-4 justify-center w-full">
         <a href="https://github.com/themesberg/landwind"
           class="inline-flex items-center justify-center w-full px-5 py-3 text-sm font-medium text-center text-gray-900 border border-gray-200 rounded-lg sm:w-auto hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-          <svg class="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!-- ...icon... --></svg>
-          View on GitHub
+          Explore Services
         </a>
       </div>
     </div>
