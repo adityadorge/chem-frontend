@@ -248,4 +248,16 @@
       text-align: center;
     }
   }
+
+  /* Laptop-only: add safe side padding so cards don't touch page edges */
+  @media (min-width: 1024px) {
+    .fields-cards-container {
+      padding-left: clamp(32px, 8vw, 120px);
+      padding-right: clamp(32px, 8vw, 120px);
+    }
+    /* Align the button with the new container padding */
+    .fields-action-btn {
+      left: clamp(32px, 8vw, 120px);
+    }
+  }
 </style>

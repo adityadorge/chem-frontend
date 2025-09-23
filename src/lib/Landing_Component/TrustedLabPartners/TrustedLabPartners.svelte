@@ -1,4 +1,5 @@
 <script>
+    import {Rocket } from "lucide-svelte";
 </script>
 
 <svelte:head>
@@ -11,7 +12,7 @@
     <section class="bg-white dark:bg-gray-900 pt-0 mt-0">
   <div class="grid max-w-screen-xl px-4 pt-4 pb-8 mx-auto lg:gap-8 xl:gap-0 lg:py-4 lg:grid-cols-12 lg:pt-4">
     <div class="flex flex-col items-center justify-center text-center lg:col-start-4 lg:col-span-6 mx-auto">
-      <p class="text-[#1e40af] font-semibold text-lg mb-4">Our Trusted Suppliers</p>
+      <p class="text-[#1e40af] font-semibold text-lg mb-4">Our Trusted Research Collaborators</p>
         <h1 class="max-w-2xl mb-4 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl text-black">
         Building Trust <br> <span class="whitespace-nowrap">Research &amp; Innovation.</span>
         </h1>
@@ -23,8 +24,9 @@
       </p>
       <div class="space-y-4 sm:flex sm:space-y-0 sm:space-x-4 justify-center w-full">
         <a href="https://github.com/themesberg/landwind"
-          class="inline-flex items-center justify-center w-full px-5 py-3 text-sm font-medium text-center text-gray-900 border border-gray-200 rounded-lg sm:w-auto hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-          Explore Services
+            class="inline-flex items-center justify-center w-full px-5 py-3 text-sm font-medium text-center text-gray-900 border border-gray-200 rounded-lg sm:w-auto hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+            <Rocket size={18} aria-hidden="true" class="mr-2" />
+            Explore Services
         </a>
       </div>
     </div>

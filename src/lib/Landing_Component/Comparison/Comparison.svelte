@@ -26,7 +26,7 @@
       title: "Focus on what matters: your research",
       description:
         "Enable faster research outcomes without the complexity of traditional lab processes. Streamline testing workflows, eliminate inefficiencies, & deliver accurate results with ease.",
-      image: "/assets/comparison/cdc-CfS6A4U5g8M-unsplash(1).jpg",
+      image: "/assets/comparison/figure-1.png",
       imageAlt: "dashboard feature image",
       imageFirst: false,
       features: [
@@ -41,7 +41,7 @@
       title: "We invest in the individual’s potential",
       description:
         "True growth stems from the quality of knowledge one gains. Our platform empowers researchers by removing barriers, connecting them to the right labs, and ensuring that their work is not hindered by inefficiencies.",
-      image: "assets/comparison/irham-setyaki-Vg7xbXRPiCk-unsplash.jpg",
+      image: "assets/comparison/figure-2.png",
       imageAlt: "feature image 2",
       imageFirst: true,
       features: [
@@ -57,7 +57,7 @@
       title: "Science doesn’t wait, and neither do we.",
       description:
         "Our round-the-clock service ensures uninterrupted access and support for your research needs. Managed with utmost care and strict confidentiality, safeguarding both your data and intellectual property. We ensure every report is accurate, reliable, and research-ready.",
-      image: "/assets/comparison/xiazheng1995--y5X8YFApj4-unsplash.jpg",
+      image: "/assets/comparison/figure-3.png",
       imageAlt: "dashboard feature image",
       imageFirst: false,
       features: [

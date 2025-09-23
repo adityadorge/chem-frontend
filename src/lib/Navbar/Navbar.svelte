@@ -124,10 +124,10 @@
   // Mobile-only items (different from desktop)
   const mobileNav = [
     { label: "Testing", href: "/testing" },
-    { label: "Services", href: "/services" },
+    { label: "Solutions", href: "/solutions" },
     { label: "Learn", href: "/learn" },
-    { label: "About", href: "/about" },
-    { label: "Supplier", href: "/enroll-lab" }, // moved into the list
+    { label: "About", href: "/about-us" },
+    { label: "Collaborator", href: "/enroll-lab" }, // moved into the list
   ];
 
   function openMobile() {
@@ -160,10 +160,10 @@
         on:mouseenter={handleMouseEnter}
         on:mouseleave={handleMouseLeave}
       >Testing</a>
-      <a href="/services">Services</a>
+      <a href="/solutions">Solutions</a>
       <a href="/learn">Learn</a>
-      <a href="/about">About</a>
-      <a href="/enroll-lab" class="quote-btn">Supplier</a>
+      <a href="/about-us">About</a>
+      <a href="/enroll-lab" class="quote-btn">Collaborator</a>
       {#if $isAuthenticated}
         <a href="/profile">
           <img src="/assets/profile-icon/profile.svg" alt="Profile" width="30" height="30" style="vertical-align: middle;" />
