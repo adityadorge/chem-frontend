@@ -148,7 +148,7 @@
       <div>
         <p class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium"
            style="background:{WAVE}; color:{PRIMARY}">
-          Retail Workforce
+          Solutions
         </p>
 
         <h1

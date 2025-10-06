@@ -20,6 +20,11 @@
   // Props: pass items or provide a fetchUrl that returns an array of ServiceCard
   export let items: ServiceCard[] = [];
   export let fetchUrl: string | undefined = undefined;
+      // Dynamic theme (match solutions page defaults)
+  export const PRIMARY = '#0c017b';
+  export const ACCENT = '#f26a60';
+  export const WAVE = '#ffede9';
+  export const SMALL = "#4B5563";
 
   const fallbackItems: ServiceCard[] = [
     {
@@ -113,10 +118,10 @@
           <img src={item.image} alt={item.alt ?? item.title} />
           <div class="card-content">
             {#if item.tag}<span class="badge service">{item.tag}</span>{/if}
-            <h3>{item.title}</h3>
+            <h3 style="color: {PRIMARY};">{item.title}</h3>
             <p>{item.description}</p>
             {#if item.cta}
-              <a href={item.cta.href} class="primary-btn">{item.cta.label}</a>
+              <a href={item.cta.href} class="primary-btn" style="background: {PRIMARY};">{item.cta.label}</a>
             {/if}
             {#if item.features?.length}
               <ul class="features">

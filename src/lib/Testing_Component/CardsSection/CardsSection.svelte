@@ -1,240 +1,130 @@
 <script lang="ts">
-    export let icon = "/assets/default-icon.svg"; // Default icon
-    export let title = "Default Title";
-    export let description = "Default description here.";
-    export let info = "Default info here.";
-    export let category; // The category data passed from parent component
-    export let showSubcategories; // Function passed from parent to handle category selection
+  export let icon = "/assets/default-icon.svg";
+  export let title = "Default Title";
+  export let description = "Default description here.";
+  export let info = "Default info here.";
+  export let category: any;
+  export let showSubcategories: (c: any) => void;
 
-    let showPopup = false;
+  // optional: allow overriding the kicker label (defaults to ARTICLE)
+  export let kicker: string = "ARTICLE";
 
-    function togglePopup() {
-        showPopup = !showPopup;
+  function handleActivate() {
+    showSubcategories?.(category);
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleActivate();
     }
-
-    function handleClickOutside(event: MouseEvent) {
-        if (
-            showPopup &&
-            !(event.target && (event.target as Element).closest(".popup")) &&
-            !(event.target && (event.target as Element).closest(".info-button"))
-        ) {
-            showPopup = false;
-        }
-    }
-
-    // Add/remove event listener when popup is shown/hidden
-    $: if (showPopup) {
-        window.addEventListener("mousedown", handleClickOutside);
-    } else {
-        window.removeEventListener("mousedown", handleClickOutside);
-    }
+  }
 </script>
 
-<div class="card">
-    <!-- on:click={() => showSubcategories(category)} -->
-    <div class="card-body">
-        <div class="card-icon">
-            <img src={icon} alt={`${title} Icon`} />
-        </div>
-        <div class="card-text">
-            <h3>{title}</h3>
-            <p>{description}</p>
-        </div>
-    </div>
+<!-- Card matches reference: image block + meta (kicker + title with arrow) -->
+<article
+  class="article-card"
+  role="button"
+  tabindex="0"
+  on:click={handleActivate}
+  on:keydown={handleKeydown}
+  aria-label={title}
+>
+  <div class="img-wrap">
+    <img class="img" src={icon} alt={title} loading="lazy" />
+  </div>
 
-    <button
-        type="button"
-        class="info-button"
-        aria-label="Show info"
-        on:click={togglePopup}
-    > Info
-    </button>
-
-    <!-- Popup info box -->
-    {#if showPopup}
-        <div class="popup">
-            <div class="popup-content">
-                <h4>What is {title} ?</h4>
-                <p>{info}</p>
-                <!-- <button on:click={togglePopup}>Close</button> -->
-            </div>
-        </div>
-    {/if}
-
-    <!-- Arrow link at the bottom-right -->
-    <button class="btn" on:click={() => showSubcategories(category)}>></button>
-</div>
+  <div class="meta">
+    <span class="kicker">{kicker}</span>
+    <h3 class="title">
+      {title}
+      <svg class="arrow" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </h3>
+  </div>
+</article>
 
 <style>
-    /* Individual Card */
-    .card {
-        position: relative;
-        /* Make width fluid with side gutters and cap at 450px */
-        width: clamp(280px, 100% - 32px, 450px);
-        min-width: 0;
-        max-width: 100%;
-        min-height: 240px;
-        max-height: 240px;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 20px;
-        padding: 36px 24px;
-        /* center card and keep space from screen edges */
-        margin: 16px auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition:
-            box-shadow 0.3s ease,
-            transform 0.2s ease;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-        overflow: hidden; /* Prevent content overflow */
-    }
+  /* Root card container (no fixed width; lets grid control sizing) */
+  .article-card {
+    display: block;
+    cursor: pointer;
+    outline: none;
+    background: transparent;
+    user-select: none;
+  }
+  .article-card:focus-visible .img-wrap {
+    box-shadow: 0 0 0 3px rgba(62, 39, 183, 0.35);
+  }
 
-    /* Info button (upper right corner) */
-    .info-button {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: linear-gradient(90deg, #1746a2 0%, #3066be 100%);
-        color: #fff;
-        font-size: 1rem;
-        font-family: "Roboto", sans-serif;
-        padding: 6px 18px;
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 2px 8px rgba(23, 70, 162, 0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: background 0.2s, color 0.2s;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-    }
+  /* Image block */
+  .img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(12, 1, 123, 0.08);
+    background: #f3f4f8;
+  }
+  .img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: translateZ(0);
+    transition: transform .25s ease;
+    display: block;
+  }
+  .article-card:hover .img {
+    transform: scale(1.02);
+  }
 
-    .info-button:hover {
-        background: linear-gradient(90deg, #ffb347 0%, #ffd580 100%);
-        color: #fff;
-    }
+  /* Meta (kicker + title) */
+  .meta {
+    margin-top: 12px;
+  }
+  .kicker {
+    display: inline-block;
+    color: #7a68f5;              /* purple like the reference */
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #3e27b7;              /* bold purple title */
+    font-weight: 800;
+    font-size: 20px;
+    line-height: 1.35;
+  }
+  .article-card:hover .title {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+  .arrow {
+    color: currentColor;
+    flex: 0 0 auto;
+  }
 
-    /* Popup styles */
-    .popup {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        width: min(400px, calc(100% - 40px)); /* responsive popup */
-        background-color: white;
-        border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
-        z-index: 10;
-        opacity: 0;
-        transform: translateY(-10px);
-        animation: fadeInPopup 0.3s ease-out forwards;
-    }
+  /* Clamp title to two lines to keep grid tidy */
+  .title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
 
-    @keyframes fadeInPopup {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Popup content */
-    .popup-content h4 {
-        font-family: "Alegreya", serif;
-        margin: 0;
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #1746a2; /* Blue color for heading */
-    }
-
-    .popup-content p {
-        font-family: "Alegreya", serif;
-        font-size: 0.95rem;
-        color: #555;
-    }
-
-    /* Card Body */
-    .card-body {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 18px;
-        text-align: left;
-        width: 100%;
-        height: 100%;
-        overflow: hidden; /* Prevent content overflow */
-    }
-
-    /* Icon inside the Card */
-    .card-icon {
-        width: 80px;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .card-icon img {
-        width: 60px;
-        height: 60px;
-        object-fit: contain;
-        display: block;
-    }
-
-    /* Card Text (Title and Description) */
-    .card-text {
-        width: 100%;
-        text-align: left;
-        flex: 1 1 auto;
-        overflow: hidden;
-    }
-
-    .card-text h3 {
-        font-family: "Roboto", serif;
-        margin: 0;
-        font-size: 1.2rem;
-        color: #333;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .card-text p {
-        font-family: "Roboto", serif;
-        font-size: 0.9rem;
-        color: #777;
-        padding-right: 60px; /* Add space for the button */
-        word-break: break-word;
-        white-space: normal;
-        max-height: 3.6em; /* Limit to 2 lines */
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
-
-    .btn {
-        background-color: #f1eded;
-        border: 0;
-        border-radius: 50px;
-        color: #000000;
-        font-size: 16px;
-        padding: 12px 25px;
-        position: absolute;
-        bottom: 20px;
-        right: 12px;
-        letter-spacing: 1px;
-    }
-
-    @media (max-width: 640px) {
-        .card {
-            /* tighter padding and gutters on small screens */
-            padding: 28px 16px;
-            margin: 12px auto;
-            width: calc(100% - 24px); /* keep side gaps on very small screens */
-        }
-    }
+  /* Mobile tweaks */
+  @media (max-width: 560px) {
+    .title { font-size: 18px; }
+  }
 </style>

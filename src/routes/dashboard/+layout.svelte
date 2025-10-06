@@ -149,10 +149,11 @@
                             /></a
                         >
                     </div>
-                    <div
+                    <!-- Theme toggle icons and switch -->
+                    <!-- <div
                         class="theme-toggle d-flex gap-2 align-items-center mt-2"
                     >
-                        <!-- Theme toggle icons and switch -->
+                        
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -212,7 +213,7 @@
                             >
                             </path>
                         </svg>
-                    </div>
+                    </div> -->
                     <div class="sidebar-toggler x">
                         <a href="#" class="sidebar-hide d-xl-none d-block"
                             ><i class="bi bi-x bi-middle"></i></a
@@ -241,19 +242,19 @@
                             <span>Profile</span>
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <!-- <li class="sidebar-item">
                         <a href="/dashboard/test-page" class="sidebar-link">
                             <FlaskConical />
                             <span>Test Page</span>
                         </a>
-                    </li>
+                    </li> -->
                     <li class="sidebar-item">
                         <a href="/dashboard/order-detail" class="sidebar-link">
                             <PackageOpen />
                             <span>Order Detail</span>
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <!-- <li class="sidebar-item">
                         <a
                             href="/dashboard/report-generation"
                             class="sidebar-link"
@@ -261,7 +262,7 @@
                             <NotebookPen />
                             <span>Report Generation</span>
                         </a>
-                    </li>
+                    </li> -->
                     <li class="sidebar-item">
                         <a
                             href="/dashboard/application-chat.html"
@@ -271,13 +272,13 @@
                             <span>Email Application</span>
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <!-- <li class="sidebar-item">
                         <a href="/dashboard/invoice" class="sidebar-link">
                             <BadgeIndianRupee />
                             <span>Invoice</span>
                         </a>
-                    </li>
-                    <li class="sidebar-item">
+                    </li> -->
+                    <!-- <li class="sidebar-item">
                         <a
                             href="/dashboard/application-checkout.html"
                             class="sidebar-link"
@@ -285,45 +286,18 @@
                             <ShoppingCart />
                             <span>Checkout Page</span>
                         </a>
-                    </li>
-                    <li class="sidebar-item has-sub">
-                        <a href="#" class="sidebar-link">
+                    </li> -->
+                    <li class="sidebar-item">
+                        <a href="/dashboard/verify" class="sidebar-link">
                             <ShieldUser />
-                            <span>Authentication</span>
+                            <span>Verification</span>
                         </a>
-                        <ul class="submenu">
-                            <li class="submenu-item">
-                                <a
-                                    href="/dashboard/auth/login"
-                                    class="sidebar-link">Login</a
-                                >
-                            </li>
-                            <li class="submenu-item">
-                                <a
-                                    href="/dashboard/auth/register"
-                                    class="sidebar-link">Register</a
-                                >
-                            </li>
-                            <li class="submenu-item">
-                                <a
-                                    href="/dashboard/auth/forgot"
-                                    class="sidebar-link">Forgot Password</a
-                                >
-                            </li>
-                            <li class="submenu-item">
-                                <a
-                                    href="/dashboard/auth/2fa"
-                                    class="sidebar-link"
-                                    >Two-Factor Authentication</a
-                                >
-                            </li>
-                        </ul>
                     </li>
                     <li class="sidebar-item">
-                        <a href="#" class="sidebar-link">
+                        <a href="/dashboard/settings" class="sidebar-link">
                             <Settings />
                             <span>Settings</span>
-                        </a>
+                        </a>                        
                     </li>
                 </ul>
             </div>

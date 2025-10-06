@@ -1,0 +1,220 @@
+<script lang="ts">
+  import { API_URL } from "$lib/store/api";
+  import { toast } from "svelte-sonner";
+  import { onMount } from "svelte";
+  import { loginUser } from "../../lib/store/api";
+  import { user } from "$lib/store";
+  import { onDestroy } from "svelte";
+  import { setUser, loadUser } from "$lib/store/auth";
+  import { goto } from "$app/navigation";
+  import { Mail, Lock } from "lucide-svelte";
+
+  let error = "";
+  let email = "";
+  let password = "";
+
+  async function handleLogin() {
+    const response = await loginUser({ email, password });
+    if (response?.tokens) {
+      user.set({
+        id: response.user?.id,
+        email: response.user?.email,
+        name: response.user?.name,
+        access_token: response.tokens.access,
+        refresh_token: response.tokens.refresh,
+      });
+      loadUser();
+      toast.success("Login successful!");
+      goto("/");
+    } else {
+      toast.error(response?.error || "Login failed");
+    }
+  }
+
+  async function InitializeGoogleLogin() {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.body.appendChild(script);
+    });
+    // @ts-ignore
+    google.accounts.id.initialize({
+      client_id: `${import.meta.env.VITE_GOOGLE_CLIENT_ID}`,
+      callback: handleCredentialResponse,
+    });
+    // Render into our Google button row
+    // @ts-ignore
+    google.accounts.id.renderButton(
+      document.getElementById("googleSignInButton"),
+      { theme: "outline", size: "large", width: 320 }
+    );
+  }
+
+  async function handleCredentialResponse(response: any) {
+    if (!response.credential) {
+      toast.error("Google login failed");
+      return;
+    }
+    try {
+      const backendResponse = await fetch(`${API_URL}/auth/exchange-token/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+        credentials: "include",
+      });
+      if (!backendResponse.ok) {
+        toast.error("Backend authentication failed.");
+        return;
+      }
+      const data = await backendResponse.json();
+      if (data.tokens) {
+        user.set({
+          id: data.user?.id,
+          email: data.user?.email,
+          name: data.user?.name,
+          access_token: data.tokens.access,
+          refresh_token: data.tokens.refresh,
+        });
+        toast.success("Login successful!");
+        goto("/");
+      } else {
+        toast.error("Invalid backend response: missing tokens.");
+      }
+    } catch (e) {
+      toast.error("An error occurred during authentication.");
+      console.error(e);
+    }
+  }
+
+  onMount(() => {
+    InitializeGoogleLogin();
+  });
+</script>
+
+<svelte:head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</svelte:head>
+
+<!-- Page wrapper -->
+<main class="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2 font-[Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif]">
+  <!-- Left: Feature panel -->
+  <section class="relative bg-[#3E28D9] text-white px-6 sm:px-10 lg:px-12 py-10 lg:py-14 flex items-center justify-center lg:justify-start overflow-hidden rounded-tr-[120px]">
+    <div class="max-w-xl w-full">
+      <!-- Mock slide image/card -->
+      <div class="bg-white/10 backdrop-blur-[1px] rounded-2xl p-4 sm:p-6 mb-8 border border-white/20">
+        <img
+          src="/assets/about-us/team.jpg"
+          alt="Product preview"
+          class="w-full h-56 sm:h-64 object-cover rounded-lg"
+        />
+      </div>
+
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Deputy Messaging is here</h2>
+      <p class="mt-4 text-white/90 text-base sm:text-lg leading-relaxed">
+        Smart, schedule-aware messaging built for shift-based teams. No switching apps,
+        no missed updates, just seamless communication where work happens.
+      </p>
+      <a href="#" class="mt-5 inline-block underline underline-offset-4 font-medium">Learn more</a>
+
+      <!-- Dots -->
+      <div class="mt-6 flex items-center gap-2">
+        <span class="h-2 w-4 rounded-full bg-amber-400"></span>
+        <span class="h-2 w-2 rounded-full bg-white/50"></span>
+        <span class="h-2 w-2 rounded-full bg-white/50"></span>
+      </div>
+    </div>
+
+    <!-- Decorative curve fill -->
+    <div class="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-bl-[120px] bg-[#3E28D9] lg:hidden"></div>
+  </section>
+
+  <!-- Right: Login form -->
+  <section class="w-full flex items-start lg:items-center justify-center px-4 sm:px-6">
+    <div class="w-full max-w-md pt-12 lg:pt-0">
+      <!-- Username/Email -->
+      <label class="block text-sm font-medium text-gray-700 mb-1">Username or Email</label>
+      <div class="relative">
+        <input
+          name="email"
+          type="email"
+          bind:value={email}
+          required
+          class="w-full h-12 rounded-md border border-[#4c3ee0]/40 focus:border-[#3E28D9] focus:ring-2 focus:ring-[#3E28D9]/30 outline-none px-3 pr-10 text-gray-900 placeholder:text-gray-400"
+          placeholder=""
+        />
+        <Mail class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+      </div>
+
+      <!-- Password + Forgot -->
+      <div class="mt-5 flex items-center justify-between">
+        <label class="block text-sm font-medium text-gray-700">Password</label>
+        <a href="ForgotPassword/" class="text-sm text-[#3E28D9] hover:text-[#2f1cc8]">Forgot Password?</a>
+      </div>
+      <div class="relative mt-1">
+        <input
+          name="password"
+          type="password"
+          bind:value={password}
+          required
+          class="w-full h-12 rounded-md border border-[#4c3ee0]/40 focus:border-[#3E28D9] focus:ring-2 focus:ring-[#3E28D9]/30 outline-none px-3 pr-10 text-gray-900 placeholder:text-gray-400"
+          placeholder=""
+        />
+        <Lock class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+      </div>
+
+      <!-- Log in -->
+      <button
+        class="mt-6 inline-flex w-full items-center justify-center h-12 rounded-md bg-[#3E28D9] text-white font-semibold hover:bg-[#3621c9] transition-colors"
+        on:click|preventDefault={handleLogin}
+      >
+        Log in
+      </button>
+
+      <!-- Divider -->
+      <div class="my-6 flex items-center gap-3 text-gray-400">
+        <span class="h-px flex-1 bg-gray-200"></span>
+        <span class="text-sm">or login with</span>
+        <span class="h-px flex-1 bg-gray-200"></span>
+      </div>
+
+      <!-- Social / SSO buttons -->
+      <div class="space-y-3">
+        <button type="button" class="w-full h-11 rounded-md bg-indigo-50 text-gray-900 hover:bg-indigo-100 transition flex items-center justify-center gap-2">
+          <img src="/assets/brands/facebook.svg" alt="Facebook" class="h-4 w-4" />
+          <span class="font-medium">Facebook</span>
+        </button>
+
+        <!-- Google button is rendered by Google SDK into this container -->
+        <div id="googleSignInButton" class="w-full flex items-center justify-center h-11 rounded-md bg-indigo-50 hover:bg-indigo-100"></div>
+
+        <button type="button" class="w-full h-11 rounded-md bg-indigo-50 text-gray-900 hover:bg-indigo-100 transition flex items-center justify-center gap-2">
+          <img src="/assets/brands/apple.svg" alt="Apple" class="h-4 w-4" />
+          <span class="font-medium">Apple</span>
+        </button>
+        <button type="button" class="w-full h-11 rounded-md bg-indigo-50 text-gray-900 hover:bg-indigo-100 transition flex items-center justify-center gap-2">
+          <img src="/assets/brands/xero.svg" alt="Xero" class="h-4 w-4" />
+          <span class="font-medium">Xero</span>
+        </button>
+      </div>
+
+      <p class="mt-4 text-center text-sm text-[#3E28D9]">Login with a third party service</p>
+
+      <!-- Footer links -->
+      <div class="mt-10 space-y-4 text-center">
+        <a href="#" class="text-sm text-[#3E28D9] hover:text-[#2f1cc8]">Join an existing workplace</a>
+        <p class="text-sm text-gray-500">
+          Not using Deputy?
+          <a href="#" class="ml-1 inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-[#3E28D9] hover:bg-indigo-100">
+            Start your free trial
+          </a>
+        </p>
+      </div>
+    </div>
+  </section>
+</main>

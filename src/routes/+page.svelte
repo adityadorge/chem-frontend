@@ -75,6 +75,10 @@
     },
     // Add more cards as needed
   ];
+
+  // Add theme tokens for the pill
+  const PRIMARY = '#0c017b';
+  const WAVE = '#ffede9';
 </script>
 
 <div class="carousel-stack">
@@ -101,6 +105,7 @@
     {/if}
   </div>
 
+  <!-- Services container -->
   <div class="services-carousel-container">
     <div class="svg-top-left">
       <img
@@ -108,7 +113,13 @@
         alt="quote icon"
         class="quote-icon"
       />
-      <span class="quote-label">Popular Services </span>
+      <!-- Replaced span.quote-label with themed pill -->
+      <p
+        class="inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold text-lg mb-0"
+        style="background:{WAVE}; color:{PRIMARY}"
+      >
+        Popular Services
+      </p>
     </div>
     <div class="svg-bottom-right">
       <img
@@ -127,12 +138,6 @@
 </main>
 
 <style>
-  :root {
-    --main-font: "Roboto", sans-serif;
-  }
-  * {
-    font-family: var(--main-font);
-  }
   .svg-top-left {
     display: flex;
     align-items: center;
@@ -149,21 +154,11 @@
     object-fit: contain;
   }
 
-  .quote-label {
-    background-color: #dbecff;
-    color: #001e6c;
-    font-weight: 600;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 1rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  }
-
   .services-carousel-container {
     position: relative; /* ADD THIS */
     padding: 80px 0 110px 0;
     margin-top: 0px;
-    background: #174698;
+    background:#0c017b;
   }
 
   .services-carousel {
@@ -221,7 +216,7 @@
     top: 32px;
     left: 220px; /* Changed from right: 48px to left: 48px */
     right: auto; /* Ensure right is unset */
-    background: #1746a2;
+    background: #0c017b;
     color: #fff;
     font-weight: 600;
     padding: 12px 28px;
@@ -235,9 +230,9 @@
     text-decoration: none;
   }
 
-  .fields-action-btn:hover {
+  /* .fields-action-btn:hover {
     background: #1d4ed8;
-  }
+  } */
 
   @media (max-width: 700px) {
     .fields-action-btn {

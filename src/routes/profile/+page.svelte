@@ -6,40 +6,37 @@
   import { get } from "svelte/store";
   import { goto } from "$app/navigation";
   import { clearUser } from "$lib/store/auth";
-  const currentUser = get(user);
+  // const currentUser = get(user); // remove snapshot
   let userData: { id: number; name: string; email: string } | null = null;
 
-  // ✅ Fetch profile info from Django backend
   async function fetchProfile() {
     try {
+      const currentUser = get(user);
+      if (!currentUser?.access_token) return;
+
       const res = await fetch(`${API_URL}/auth/profile/`, {
         method: "GET",
-        credentials: "include", // Send cookie with JWT
+        credentials: "include",
         headers: {
           Authorization: `Bearer ${currentUser.access_token}`,
           "Content-Type": "application/json",
         },
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch profile");
-      }
+      if (!res.ok) throw new Error("Failed to fetch profile");
 
       const data = await res.json();
       userData = data;
-      user.update((u) => (u ? { ...u, ...data } : u)); // ✅ Merge, don't overwrite!
+      user.update((u) => (u ? { ...u, ...data } : u));
     } catch (error) {
       console.error("Profile fetch error:", error);
-      toast.error("Failed to load profile");
+      toast.error("Failed to load profile. Please log in again.");
     }
   }
 
-  // 🔁 Fetch on mount
   onMount(() => {
     fetchProfile();
   });
 
-  // 🚪 Logout
   async function handleLogout() {
     try {
       await fetch(`${API_URL}/auth/logout/`, {

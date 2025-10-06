@@ -36,6 +36,10 @@
   let statusFilter: "all" | "Processing" | "Deliver" | "Shipping" = "all";
   let expandedOrderId: string | null = null;
 
+  // Track per-order download state
+  let invoiceDL: Record<string, boolean> = {};
+  let reportDL: Record<string, boolean> = {};
+
   function toggleExpand(orderId: string) {
     expandedOrderId = expandedOrderId === orderId ? null : orderId;
   }
@@ -135,6 +139,52 @@
 
     return filtered;
   }
+
+  async function downloadBlob(url: string, filename: string) {
+    const currentUser = get(user);
+    if (!currentUser?.access_token) throw new Error('Not authenticated');
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${currentUser.access_token}` }
+    });
+    if (!res.ok) throw new Error(`Download failed (${res.status})`);
+
+    const blob = await res.blob();
+    const dlUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = dlUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(dlUrl);
+  }
+
+  async function downloadInvoice(orderId: string) {
+    invoiceDL = { ...invoiceDL, [orderId]: true };
+    try {
+      // Adjust endpoint if different on your API
+      await downloadBlob(`${API_URL}/orders/${orderId}/invoice/`, `invoice-${orderId}.pdf`);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to download invoice.');
+    } finally {
+      invoiceDL = { ...invoiceDL, [orderId]: false };
+    }
+  }
+
+  async function downloadReport(orderId: string) {
+    reportDL = { ...reportDL, [orderId]: true };
+    try {
+      // Only available for completed (Delivered) orders
+      await downloadBlob(`${API_URL}/orders/${orderId}/report/`, `report-${orderId}.pdf`);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to download report.');
+    } finally {
+      reportDL = { ...reportDL, [orderId]: false };
+    }
+  }
 </script>
 
 <div class="order-page">
@@ -175,11 +225,11 @@
 
     <div class="transactions-table-wrapper">
       {#if loading}
-        <div class="loading">Loading orders…</div>
+        <div class="loading" role="status" aria-live="polite">Loading orders…</div>
       {:else if loadError}
-        <div class="error">{loadError}</div>
+        <div class="error" role="alert">{loadError}</div>
       {:else}
-        <table class="transactions-table">
+        <table class="transactions-table" aria-label="Orders">
           <thead>
             <tr>
               <th>Order</th>
@@ -189,6 +239,8 @@
               <th>Price</th>
               <th>Stock</th>
               <th>Status</th>
+              <!-- NEW: Invoice column -->
+              <th class="invoice-col">Invoice</th>
             </tr>
           </thead>
           <tbody>
@@ -198,20 +250,37 @@
                 on:click={() => toggleExpand(row.id)}
                 class:expanded={expandedOrderId === row.id}
               >
-                <td>
+                <td data-label="Order">
                   <div class="order-title">{row.title}</div>
                   <div class="order-id">#{row.id}</div>
                 </td>
-                <td>{row.customer}</td>
-                <td>{row.date}</td>
-                <td><span class={row.payment === "Paid" ? "paid" : "unpaid"}>{row.payment}</span></td>
-                <td>{row.price}</td>
-                <td>{row.stock}</td>
-                <td><span class={"status " + row.statusClass}>{row.status}</span></td>
+                <td data-label="Customer">{row.customer}</td>
+                <td data-label="Date">{row.date}</td>
+                <td data-label="Payment"><span class={row.payment === "Paid" ? "paid" : "unpaid"}>{row.payment}</span></td>
+                <td data-label="Price">{row.price}</td>
+                <td data-label="Stock">{row.stock}</td>
+                <td data-label="Status">
+                  <span class={"status " + row.statusClass}>{row.status}</span>
+                </td>
+                <!-- NEW: Invoice cell -->
+                <td data-label="Invoice" class="invoice-col">
+                  <div class="invoice-cell">
+                    <button
+                      class="btn-sm outline invoice-btn"
+                      type="button"
+                      on:click|stopPropagation={() => downloadInvoice(row.id)}
+                      disabled={!!invoiceDL[row.id]}
+                      aria-label={`Download invoice for order ${row.id}`}
+                    >
+                      {invoiceDL[row.id] ? 'Downloading…' : 'Download Invoice'}
+                    </button>
+                  </div>
+                </td>
               </tr>
               {#if expandedOrderId === row.id}
                 <tr class="order-expand-row">
-                  <td colspan="7">
+                  <!-- was colspan="7" -->
+                  <td colspan="8">
                     <div class="expand-simple" in:slide={{ duration: 180 }} out:fade={{ duration: 100 }}>
                       <div class="expand-row-grid">
                         <div><span class="expand-label">Order ID:</span><span>#{row.id}</span></div>
@@ -221,6 +290,20 @@
                         <div><span class="expand-label">Price:</span><span>{row.price}</span></div>
                         <div><span class="expand-label">Status:</span><span>{row.status}</span></div>
                       </div>
+
+                      {#if row.statusClass === 'deliver'}
+                        <div class="expand-actions">
+                          <button
+                            class="btn-sm primary"
+                            type="button"
+                            on:click={() => downloadReport(row.id)}
+                            disabled={!!reportDL[row.id]}
+                            aria-label={`Download report for order ${row.id}`}
+                          >
+                            {reportDL[row.id] ? 'Downloading…' : 'Download Report'}
+                          </button>
+                        </div>
+                      {/if}
                     </div>
                   </td>
                 </tr>
@@ -234,176 +317,265 @@
 </div>
 
 <style>
-.order-page {
-  width: 100%;
-  padding: 1rem;
-  font-family: system-ui, sans-serif;
-}
-
-.transactions-section {
-  background: #f8f9fb;
-  border-radius: 14px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-}
-
-.transactions-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tabs {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-.tab {
-  background: none;
-  border: none;
-  font-weight: 600;
-  color: #7b7b93;
-  padding: 0.4em 1em;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.tab.active {
-  background: #fff;
-  color: #4f46e5;
-  box-shadow: 0 1px 4px rgba(79,70,229,0.15);
-}
-
-.actions {
-  display: flex;
-}
-.export-btn {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  color: #4f46e5;
-  font-weight: 500;
-  border-radius: 6px;
-  padding: 0.4em 1em;
-  cursor: pointer;
-}
-
-.transactions-filters {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-.search-box input,
-.filter-btn {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.4em 0.8em;
-  font-size: 0.9em;
-}
-
-.transactions-table-wrapper {
-  background: #fff;
-  border-radius: 10px;
-  overflow-x: auto;
-}
-.transactions-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9em;
-  min-width: 700px;
-}
-.transactions-table th,
-.transactions-table td {
-  padding: 0.8em;
-  text-align: left;
-  border-bottom: 1px solid #f3f4f6;
-}
-.transactions-table th {
-  color: #7b7b93;
-  font-weight: 600;
-}
-.order-title {
-  font-weight: 600;
-}
-.order-id {
-  font-size: 0.85em;
-  color: #9ca3af;
-}
-.paid {
-  color: #22c55e;
-  font-weight: 600;
-}
-.unpaid {
-  color: #e11d48;
-  font-weight: 600;
-}
-.status {
-  padding: 0.2em 0.8em;
-  border-radius: 6px;
-  font-size: 0.85em;
-  font-weight: 600;
-}
-.status.processing {
-  background: #fff7e6;
-  color: #eab308;
-}
-.status.deliver {
-  background: #e6f9ec;
-  color: #22c55e;
-}
-.status.shipping {
-  background: #e0e7ff;
-  color: #4f46e5;
-}
-
-.order-row {
-  cursor: pointer;
-  transition: background 0.13s;
-}
-.order-row:hover,
-.order-row.expanded {
-  background: #f9fafb;
-}
-.order-expand-row td {
-  background: #f8f9fb;
-}
-
-.expand-simple {
-  padding: 1em;
-}
-.expand-row-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 0.5em 1em;
-}
-.expand-label {
-  color: #7b7b93;
-  font-weight: 600;
-  margin-right: 0.5em;
-}
-
-.loading,
-.error {
-  padding: 1rem;
-}
-.error {
-  color: #b91c1c;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .transactions-section {
+  /* Base styles */
+  .order-page {
+    width: 100%;
     padding: 1rem;
+    font-family: system-ui, sans-serif;
+  }
+
+  .transactions-section {
+    background: #f8f9fb;
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .transactions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .tab {
+    background: none;
+    border: none;
+    font-weight: 600;
+    color: #7b7b93;
+    padding: 0.4em 1em;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab.active {
+    background: #fff;
+    color: #4f46e5;
+    box-shadow: 0 1px 4px rgba(79,70,229,0.15);
+  }
+
+  .actions {
+    display: flex;
+  }
+  .export-btn {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    color: #4f46e5;
+    font-weight: 500;
+    border-radius: 6px;
+    padding: 0.4em 1em;
+    cursor: pointer;
+  }
+
+  .transactions-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .search-box input,
+  .filter-btn {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 0.4em 0.8em;
+    font-size: 0.9em;
+  }
+
+  .transactions-table-wrapper {
+    background: #fff;
+    border-radius: 10px;
+    overflow-x: auto;
   }
   .transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    min-width: 700px;
+  }
+  .transactions-table th,
+  .transactions-table td {
+    padding: 0.8em;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .transactions-table th {
+    color: #7b7b93;
+    font-weight: 600;
+  }
+  .order-title {
+    font-weight: 600;
+  }
+  .order-id {
     font-size: 0.85em;
+    color: #9ca3af;
   }
-  .tabs {
-    gap: 0.3rem;
+  .paid {
+    color: #22c55e;
+    font-weight: 600;
   }
-}
+  .unpaid {
+    color: #e11d48;
+    font-weight: 600;
+  }
+  .status {
+    padding: 0.2em 0.8em;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+  }
+  .status.processing {
+    background: #fff7e6;
+    color: #eab308;
+  }
+  .status.deliver {
+    background: #e6f9ec;
+    color: #22c55e;
+  }
+  .status.shipping {
+    background: #e0e7ff;
+    color: #4f46e5;
+  }
+
+  .order-row {
+    cursor: pointer;
+    transition: background 0.13s;
+  }
+  .order-row:hover,
+  .order-row.expanded {
+    background: #f9fafb;
+  }
+  .order-expand-row td {
+    background: #f8f9fb;
+  }
+
+  .expand-simple {
+    padding: 1em;
+  }
+  .expand-row-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.5em 1em;
+  }
+  .expand-label {
+    color: #7b7b93;
+    font-weight: 600;
+    margin-right: 0.5em;
+  }
+
+  .loading,
+  .error {
+    padding: 1rem;
+  }
+  .error {
+    color: #b91c1c;
+  }
+
+  /* ===== Bigger typography overrides ===== */
+  .order-page { font-size: 1.05rem; } /* overall base */
+
+  /* Header tabs and actions */
+  .tab { font-size: 1rem; padding: 0.5em 1.1em; }
+  .export-btn { font-size: 1rem; padding: 0.5em 1em; }
+
+  /* Filters */
+  .search-box input,
+  .filter-btn { font-size: 1rem; padding: 0.5em 0.9em; }
+
+  /* Table */
+  .transactions-table { font-size: 1rem; } /* was 0.9em */
+  .transactions-table th,
+  .transactions-table td { padding: 1em; }
+
+  .order-title { font-size: 1.05em; }
+  .order-id { font-size: 0.95em; }
+
+  /* Payment/status pills */
+  .paid, .unpaid { font-size: 0.95em; }
+  .status { font-size: 0.95em; padding: 0.3em 0.9em; }
+
+  /* Expanded details */
+  .expand-simple { font-size: 1rem; }
+  .expand-label { font-size: 0.95em; }
+
+  /* Mobile tweaks to keep readability without overflowing */
+  @media (max-width: 640px) {
+    .transactions-table { font-size: 0.95rem; }
+    .order-title { font-size: 1rem; }
+    .status { font-size: 0.95rem; }
+  }
+  @media (max-width: 768px) {
+    .transactions-table { font-size: 0.95rem; }
+  }
+
+  .status-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-sm {
+    font-size: 0.95rem;
+    padding: 0.35em 0.7em;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .btn-sm.outline {
+    background: #fff;
+    color: #4f46e5;
+    border-color: #e5e7eb;
+  }
+  .btn-sm.outline:hover {
+    border-color: #c7d2fe;
+    background: #eef2ff;
+  }
+  .btn-sm.primary {
+    background: #4f46e5;
+    color: #fff;
+    border-color: #4f46e5;
+  }
+  .btn-sm.primary:hover {
+    background: #4338ca;
+    border-color: #4338ca;
+  }
+  .btn-sm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .expand-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Align Invoice column buttons */
+  .transactions-table th.invoice-col,
+  .transactions-table td.invoice-col {
+    text-align: center;
+    width: 1%;
+    white-space: nowrap;
+  }
+  .invoice-cell {
+    display: flex;
+    justify-content: center;
+  }
+  .invoice-btn {
+    min-width: 170px; /* consistent width so buttons align down the column */
+  }
+
+  /* Responsive tweak to prevent overflow on small screens */
+  @media (max-width: 640px) {
+    .invoice-btn { min-width: 140px; }
+  }
 </style>

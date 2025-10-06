@@ -73,7 +73,7 @@
 
 <style>
 .footer {
-	background: #174698;
+	background: #0c017b;
 	color: #fff;
 	padding-top: 300px;
 	position: relative;

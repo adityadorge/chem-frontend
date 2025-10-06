@@ -1,26 +1,27 @@
 <script>
     import {Rocket } from "lucide-svelte";
+    export const PRIMARY = '#0c017b';
+    export const ACCENT = '#f26a60';
+    export const WAVE = '#ffede9';
+    export const SMALL = "#4B5563";
 </script>
 
 <svelte:head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/assets/enroll-lab/css/output.css" rel="stylesheet">
+    <link href="/assets/enroll-lab/css/tailwind_output.css" rel="stylesheet">
 </svelte:head>
  
     <!-- Start block -->
     <section class="bg-white dark:bg-gray-900 pt-0 mt-0">
   <div class="grid max-w-screen-xl px-4 pt-4 pb-8 mx-auto lg:gap-8 xl:gap-0 lg:py-4 lg:grid-cols-12 lg:pt-4">
     <div class="flex flex-col items-center justify-center text-center lg:col-start-4 lg:col-span-6 mx-auto">
-      <p class="text-[#1e40af] font-semibold text-lg mb-4">Our Trusted Research Collaborators</p>
+      <p style="background:{WAVE}; color:{PRIMARY}" class="inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold text-lg mb-4">Our Trusted Research Collaborators</p>
         <h1 class="max-w-2xl mb-4 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl text-black">
         Building Trust <br> <span class="whitespace-nowrap">Research &amp; Innovation.</span>
         </h1>
       <p class="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
         From CROs to NABL-accredited labs, our trusted partners support every stage of your research—delivering specialized testing, compliance, and advanced facilities with accuracy, reliability, and speed, so you can innovate with confidence.
-        <!-- <a href="https://tailwindcss.com" class="hover:underline">Tailwind CSS</a> and based on the components from the
-        <a href="https://flowbite.com/docs/getting-started/introduction/" class="hover:underline">Flowbite Library</a> and the
-        <a href="https://flowbite.com/blocks/" class="hover:underline">Blocks System</a>. -->
       </p>
       <div class="space-y-4 sm:flex sm:space-y-0 sm:space-x-4 justify-center w-full">
         <a href="https://github.com/themesberg/landwind"

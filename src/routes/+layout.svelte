@@ -10,32 +10,29 @@
     // Check if current route is dashboard
     const isDashboard = derived(page, $page => $page.url.pathname.startsWith('/dashboard'));
     const isLandingPage = derived(page, $page => $page.url.pathname === '/');
+    // Hide chrome on login route
+    const isAuthPage = derived(page, $page => $page.url.pathname.startsWith('/login'));
+    const isRegisterPage = derived(page, $page => $page.url.pathname.startsWith('/register'));
 </script>
 
 <div class="page-root">
-    {#if !$isDashboard}
-        <Navbar/>
-    {/if}
-    <Toaster richColors />
+  {#if !$isDashboard && !$isAuthPage && !$isRegisterPage}
+    <Navbar/>
+  {/if}
+  <Toaster richColors />
+  <main >
     <slot />
-    {#if !$isDashboard}
-        {#if $isLandingPage}
-            <FooterLanding />
-        {:else}
-            <Footer />
-        {/if}
-    {/if}
+  </main>
+  {#if !$isDashboard && !$isAuthPage && !$isRegisterPage}
+    <Footer />
+  {/if}
 </div>
 
 <style>
 .page-root {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-.page-root > :global(main), 
-.page-root > :global(.container) {
-    flex: 1 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 </style>
 

@@ -1,5 +1,9 @@
 <script>
-  import { ClipboardCheck, Truck, FlaskConical, ListTodo } from "lucide-svelte";
+  import { ClipboardCheck, Truck, FlaskConical, ListTodo, BadgeCheck } from "lucide-svelte";
+  export const PRIMARY = '#0c017b';
+  export const ACCENT = '#f26a60';
+  export const WAVE = '#ffede9';
+  export const SMALL = "#4B5563";
   const trustedSteps = [
     {
       number: "01",
@@ -35,7 +39,7 @@
     class="items-center max-w-screen-xl px-4 py-8 mx-auto lg:grid lg:grid-cols-4 lg:gap-16 xl:gap-24 lg:py-24 lg:px-6"
   >
     <div class="col-span-2 mb-8">
-      <p class="text-[#1e40af] font-semibold text-lg mb-4">Our Working Process</p>
+      <p style="background:{WAVE}; color:{PRIMARY}" class="inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold text-lg mb-4">Our Working Process</p>
       <h2
         class="mt-3 mb-4 text-3xl font-extrabold tracking-tight text-gray-900 md:text-3xl dark:text-white"
       >
@@ -47,50 +51,17 @@
         researcher, or institution, you can now book tests in just a few
         steps—completely online, with zero phone calls or emails.
       </p>
-      <ul class="trusted-bullets">
+      <ul style="color: {PRIMARY}" class="trusted-bullets">
         <li>
-          <span class="checkmark">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="10" fill="#1746a2" />
-              <path
-                d="M6 10.5l3 3 5-5"
-                stroke="#fff"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </span>
+          <BadgeCheck size={24} style="color: {ACCENT}" class="mt-0.5 shrink-0" />
           High Reliability
         </li>
         <li>
-          <span class="checkmark">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="10" fill="#1746a2" />
-              <path
-                d="M6 10.5l3 3 5-5"
-                stroke="#fff"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </span>
+          <BadgeCheck size={24} style="color: {ACCENT}" class="mt-0.5 shrink-0" />
           Secure Processes
         </li>
         <li>
-          <span class="checkmark">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="10" fill="#1746a2" />
-              <path
-                d="M6 10.5l3 3 5-5"
-                stroke="#fff"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </span>
+          <BadgeCheck size={24} style="color: {ACCENT}" class="mt-0.5 shrink-0" />
           Global Reach
         </li>
       </ul>
@@ -190,7 +161,6 @@
     margin-top: 0.75rem;
     text-align: left;
     list-style: none;
-    color: #1e40af;
     font-size: 1rem;
     padding-left: 0;
   }

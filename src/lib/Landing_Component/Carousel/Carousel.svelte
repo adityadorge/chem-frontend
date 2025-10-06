@@ -1,6 +1,11 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { ArrowLeft, ArrowRight } from "lucide-svelte";
+  import { ArrowLeft, ArrowRight, Play } from "lucide-svelte";
+    // Dynamic theme (match solutions page defaults)
+  export const PRIMARY = '#0c017b';
+  export const ACCENT = '#f26a60';
+  export const WAVE = '#ffede9';
+  export const SMALL = "#4B5563";
 
   const cards = [
     {
@@ -70,16 +75,29 @@
 
 <div class="hero-section">
   <div class="hero-content">
-    <h1>{@html cards[current].title}</h1>
+    <p
+      class="inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold text-lg mb-4 md:mb-6"
+      style="background:{WAVE}; color:{PRIMARY}"
+    >
+      Solutions
+    </p>
+    <h1 style="color:{PRIMARY}" >{@html cards[current].title}</h1>
     <div class="hero-buttons">
-      <a class="main-btn" href="#">Get Started</a>
-      <a class="secondary-btn" href="#">See our Services</a>
+      <a class="main-btn" href="#" style="background-color:{PRIMARY}">Get Started</a>
+       <a
+        href="#"
+        class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[color:var(--primary)] transition-colors hover:bg-[color:var(--wave)]"
+        style="--primary:{PRIMARY}; --wave:{WAVE}"
+      >
+        <Play size={18} style="color:{PRIMARY}" />
+        See our Services
+      </a>
     </div>
     <p class="hero-desc">{cards[current].text}</p>
     <div class="hero-insights">
       {#each cards[current].insights as insight}
         <div class="insight">
-          <span class="insight-number">{insight.number}</span>
+          <span class="insight-number" style="color:{PRIMARY}">{insight.number}</span>
           <span class="insight-label">{insight.label}</span>
         </div>
       {/each}

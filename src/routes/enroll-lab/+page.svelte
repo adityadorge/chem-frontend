@@ -6,7 +6,7 @@
     <link rel="canonical" href="https://https://demo.themesberg.com/landwind/" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/assets/enroll-lab/css/output.css" rel="stylesheet">
+    <link href="/assets/enroll-lab/css/tailwind_output.css" rel="stylesheet">
 </svelte:head>
  
     <!-- Start block -->
