@@ -5,6 +5,7 @@
   import { Check, MapPin, FileCheck2, BadgeIndianRupee } from "lucide-svelte";
   import { user } from "$lib/store";
   import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
 
   // Sample Analysis Request Form state
   let sampleForm = {
@@ -71,6 +72,7 @@
           is_business_address: sampleForm.pickup.isBusinessAddress,
           pickup_instructions: sampleForm.pickup.pickupInstructions,
           access_notes: sampleForm.pickup.accessNotes,
+          order_id: orderId, // <-- add this line
         }),
         credentials: "include",
       });
@@ -162,6 +164,20 @@
     const q = sp.get("quantity");
     testQtyParam = q ? Number(q) : null;
   }
+
+  async function handleConfirmPickup() {
+    await confirmPickup();
+    if (saved.pickup) {
+      goto("/checkout/payment");
+    }
+  }
+
+  let orderId: string | null = null;
+
+  onMount(() => {
+    orderId = localStorage.getItem("current_order_id");
+    // Now you can use orderId for API calls, etc.
+  });
 </script>
 
 <Toaster richColors />
@@ -222,55 +238,55 @@
 
         <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Location (Site/Campus)</label>
+            <label for="Location" class="block text-sm font-medium text-gray-700 mb-1">Location (Site/Campus)</label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="text" bind:value={sampleForm.pickup.location} placeholder="e.g., Corporate R&D Center" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Building & Room/Lab</label>
+            <label for="BuildingRoom" class="block text-sm font-medium text-gray-700 mb-1">Building & Room/Lab</label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="text" bind:value={sampleForm.pickup.buildingRoom} placeholder="e.g., B-Block, Lab 203" />
           </div>
 
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Street Address <span class="text-rose-500">*</span></label>
+            <label for="StreetAddress" class="block text-sm font-medium text-gray-700 mb-1">Street Address <span class="text-rose-500">*</span></label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="text" bind:value={sampleForm.pickup.streetAddress} placeholder="Street, number, unit" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-rose-500">*</span></label>
+            <label for="City" class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-rose-500">*</span></label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="text" bind:value={sampleForm.pickup.city} />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">State/Province <span class="text-rose-500">*</span></label>
+            <label for="StateProvince" class="block text-sm font-medium text-gray-700 mb-1">State/Province <span class="text-rose-500">*</span></label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="text" bind:value={sampleForm.pickup.stateProvince} />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Region/District</label>
+            <label for="RegionDistrict" class="block text-sm font-medium text-gray-700 mb-1">Region/District</label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="text" bind:value={sampleForm.pickup.region} />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code <span class="text-rose-500">*</span></label>
+            <label for="PostalCode" class="block text-sm font-medium text-gray-700 mb-1">Postal Code <span class="text-rose-500">*</span></label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="text" bind:value={sampleForm.pickup.postalCode} />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Date <span class="text-rose-500">*</span></label>
+            <label for="PreferredDate" class="block text-sm font-medium text-gray-700 mb-1">Preferred Date <span class="text-rose-500">*</span></label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="date" bind:value={sampleForm.pickup.preferredDate} />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Time Slot <span class="text-rose-500">*</span></label>
+            <label for="PreferredTimeSlot" class="block text-sm font-medium text-gray-700 mb-1">Preferred Time Slot <span class="text-rose-500">*</span></label>
             <select class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     bind:value={sampleForm.pickup.preferredTimeSlot}>
               <option value="" disabled>Select a slot</option>
@@ -279,19 +295,19 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person <span class="text-rose-500">*</span></label>
+            <label for="ContactPerson" class="block text-sm font-medium text-gray-700 mb-1">Contact Person <span class="text-rose-500">*</span></label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="text" bind:value={sampleForm.pickup.contactPerson} placeholder="Name at pickup location" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone <span class="text-rose-500">*</span></label>
+            <label for="ContactPhone" class="block text-sm font-medium text-gray-700 mb-1">Contact Phone <span class="text-rose-500">*</span></label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="tel" bind:value={sampleForm.pickup.contactPhone} placeholder="+91 98765 43210" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Alternate Phone (optional)</label>
+            <label for="AlternatePhone" class="block text-sm font-medium text-gray-700 mb-1">Alternate Phone (optional)</label>
             <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                    type="tel" bind:value={sampleForm.pickup.alternatePhone} />
           </div>
@@ -304,14 +320,14 @@
           </div>
 
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Pickup Instructions</label>
+            <label for="PickupInstructions" class="block text-sm font-medium text-gray-700 mb-1">Pickup Instructions</label>
             <textarea class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       rows="3" bind:value={sampleForm.pickup.pickupInstructions}
                       placeholder="Packaging provided? Labeling? Handover name, ID, or any special handling."></textarea>
           </div>
 
           <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Access Notes</label>
+            <label for="AccessNotes" class="block text-sm font-medium text-gray-700 mb-1">Access Notes</label>
             <textarea class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       rows="2" bind:value={sampleForm.pickup.accessNotes}
                       placeholder="Gate code, parking, security checkpoints, elevator access, etc."></textarea>
@@ -321,11 +337,12 @@
         <div class="mt-4 flex items-center justify-end">
           <button
             type="button"
-            class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
-            on:click={confirmPickup}
+            class="w-full sm:w-auto rounded-lg px-4 py-2 text-base sm:text-sm text-white font-medium transition"
+            style="background-color: #0c017b;"
+            on:click={handleConfirmPickup}
             disabled={saving.pickup}
           >
-            {saving.pickup ? "Confirming..." : "Confirm location/address"}
+            {saving.pickup ? "Confirming..." : "Confirm Pickup Address"}
           </button>
         </div>
       </section>

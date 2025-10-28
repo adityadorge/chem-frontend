@@ -11,7 +11,7 @@
         id: number;
         name: string;
         price: number;
-        quantity: number;
+        number_of_samples: number; // <-- use this
         image: string;
     };
 
@@ -46,13 +46,13 @@
                     id: number;
                     test_name: string;
                     test_price: string;
-                    quantity: number;
+                    number_of_samples: number;
                     image_url: string;
                 }) => ({
                     id: item.id,
                     name: item.test_name,
                     price: parseFloat(item.test_price),
-                    quantity: item.quantity,
+                    number_of_samples: item.number_of_samples,
                     image: item.image_url,
                 }),
             );
@@ -68,31 +68,31 @@
         isOpen = false;
     }
 
-    async function updateQuantity(id: number, newQuantity: number) {
-        if (newQuantity < 1) return;
+    // async function updateQuantity(id: number, newQuantity: number) {
+    //     if (newQuantity < 1) return;
 
-        try {
-            const response = await fetch(`${API_URL}/cart/update/`, {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${$user?.access_token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ cart_id: id, quantity: newQuantity }),
-            });
+    //     try {
+    //         const response = await fetch(`${API_URL}/cart/update/`, {
+    //             method: "PATCH",
+    //             headers: {
+    //                 Authorization: `Bearer ${$user?.access_token}`,
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify({ cart_id: id, number_of_samples: newQuantity }),
+    //         });
 
-            if (!response.ok) throw new Error("Failed to update quantity");
+    //         if (!response.ok) throw new Error("Failed to update quantity");
 
-            cartItems.update((items) =>
-                items.map((item) =>
-                    item.id === id ? { ...item, quantity: newQuantity } : item,
-                ),
-            );
-        } catch (error) {
-            toast.error("Failed to update quantity");
-            console.error(error);
-        }
-    }
+    //         cartItems.update((items) =>
+    //             items.map((item) =>
+    //                 item.id === id ? { ...item, number_of_samples: newQuantity } : item,
+    //             ),
+    //         );
+    //     } catch (error) {
+    //         toast.error("Failed to update number of samples");
+    //         console.error(error);
+    //     }
+    // }
 
     async function removeItem(id: number) {
         try {
@@ -160,9 +160,9 @@
         cartItems.set([]);
     }
 
-    $: totalItems = $cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    $: totalItems = $cartItems.reduce((sum, item) => sum + item.number_of_samples, 0);
     $: subtotal = $cartItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+        (sum, item) => sum + item.price * item.number_of_samples,
         0,
     );
 </script>
@@ -228,29 +228,29 @@
                                     <div class="item-details">
                                         <h3>{item.name}</h3>
                                         <p>
-                                            ${item.price.toFixed(2)} × {item.quantity}
+                                            ${item.price.toFixed(2)} × {item.number_of_samples}
                                         </p>
                                     </div>
                                     <div class="item-actions">
-                                        <button
+                                        <!-- <button
                                             class="quantity-btn"
                                             on:click={() =>
                                                 updateQuantity(
                                                     item.id,
-                                                    item.quantity - 1,
+                                                    item.number_of_samples - 1,
                                                 )}
-                                            disabled={item.quantity <= 1}
+                                            disabled={item.number_of_samples <= 1}
                                             >−</button
-                                        >
-                                        <span>{item.quantity}</span>
-                                        <button
+                                        > -->
+                                        <span>{item.number_of_samples}</span>
+                                        <!-- <button
                                             class="quantity-btn"
                                             on:click={() =>
                                                 updateQuantity(
                                                     item.id,
-                                                    item.quantity + 1,
+                                                    item.number_of_samples + 1,
                                                 )}>+</button
-                                        >
+                                        > -->
                                         <button
                                             class="remove-btn"
                                             on:click={() => removeItem(item.id)}
@@ -430,10 +430,69 @@
         margin-bottom: 10px;
     }
 
-    @media (max-width: 480px) {
-        .cart-container {
-            width: 100%;
-            max-height: calc(100vh - 60px);
-        }
-    }
+    /* Responsive cart for tablets and mobile */
+@media (max-width: 900px) {
+  .backdrop.cart-mobile,
+  .backdrop {
+    justify-content: center !important;
+    align-items: flex-end !important;
+    background: rgba(0,0,0,0.35) !important;
+    z-index: 3000 !important;
+  }
+  .cart-container {
+    position: static !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 80vh !important;
+    border-radius: 18px 18px 0 0 !important;
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.10) !important;
+    padding: 0 !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    z-index: 3001 !important;
+  }
+  .cart-panel {
+    min-height: 40vh !important;
+    max-height: 80vh !important;
+    border-radius: 18px 18px 0 0 !important;
+    padding: 0 !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .cart-container {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 85vh;
+    border-radius: 16px 16px 0 0;
+    padding: 0;
+  }
+  .cart-panel {
+    min-height: 35vh;
+    max-height: 85vh;
+    padding: 0;
+  }
+  .cart-header,
+  .cart-footer,
+  .cart-summary {
+    padding: 12px 8px;
+  }
+  .item-image {
+    width: 44px;
+    height: 44px;
+  }
+  .item-details h3 {
+    font-size: 0.95rem;
+  }
+  .remove-btn {
+    font-size: 1.5rem;
+  }
+  .checkout-btn {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+}
 </style>

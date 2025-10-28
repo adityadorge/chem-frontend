@@ -5,6 +5,12 @@
   import { ShieldCheck, ClipboardList, Award, Check, Download, Share2, MapPin, FileCheck2, BadgeIndianRupee, RotateCcw, Gift} from "lucide-svelte";
   import { user } from "$lib/store";
   import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
+
+  let canAddToCart = false;
+  let canMoveToAddress = false;
+  let lastRequisitionId: number | null = null;
+  let lastOrderId: string; // or string if you use order.order_id
 
   // Sample Analysis Request Form state
   let sampleForm = {
@@ -45,26 +51,7 @@
     // Section 5: Authorization and Acknowledgement
     declarationAccepted: false,
     signature: "",
-    authorizationDate: new Date().toISOString().slice(0, 10),
-
-    // Pickup details
-    pickup: {
-      location: "",           // site/campus/facility name
-      buildingRoom: "",       // building and room/lab
-      streetAddress: "",
-      city: "",
-      stateProvince: "",
-      region: "",             // district/region
-      postalCode: "",
-      preferredDate: new Date().toISOString().slice(0, 10),
-      preferredTimeSlot: "",
-      contactPerson: "",
-      contactPhone: "",
-      alternatePhone: "",
-      isBusinessAddress: false,
-      pickupInstructions: "", // packaging, labeling, handover, etc.
-      accessNotes: ""         // gate code, security desk, elevator info
-    },
+    authorizationDate: new Date().toISOString().slice(0, 10),    
   };
 
   const storageOptions = ["Room Temp", "2–8°C", "–20°C", "–70°C", "Other"];
@@ -86,12 +73,8 @@
   const amountUnits = ["mg", "g", "mL"];
   const tatOptions = ["Priority (48–72h)", "Standard (5–7 days)", "Extended (8–14 days)"];
   // Replace the static const with a default + mutable list populated from API when available
-  const defaultPickupTimeSlots = ["09:00–12:00", "12:00–15:00", "15:00–18:00", "18:00–21:00", "Anytime (Business hours)"];
-  let pickupTimeSlots: string[] = [...defaultPickupTimeSlots];
 
   // Save/submit state
-  let saving = {pickup: false };
-  let saved  = {pickup: false };
   let submitting = false;
 
   // Section validations
@@ -118,57 +101,7 @@
     ) return "Please enter a return shipping address.";
     return null;
   }
-  function validatePickup() {
-    const p = sampleForm.pickup;
-    const required = [p.streetAddress, p.city, p.stateProvince, p.postalCode, p.preferredDate, p.preferredTimeSlot, p.contactPerson, p.contactPhone];
-    if (!required.every(v => String(v).trim())) return "Please complete the pickup address and preferred date/time slot.";
-    return null;
-  }  
   let pickupAddressId: number | null = null;
-
-  async function confirmPickup() {
-    const err = validatePickup(); if (err) return toast.error(err);
-    saving.pickup = true;
-    try {
-      const res = await fetch(`${API_URL}/auth/save-address/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${$user?.access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          location: sampleForm.pickup.location,
-          building_or_room: sampleForm.pickup.buildingRoom,
-          department: "",
-          street_address: sampleForm.pickup.streetAddress,
-          city: sampleForm.pickup.city,
-          state_province: sampleForm.pickup.stateProvince,
-          region: sampleForm.pickup.region,
-          postal_code: sampleForm.pickup.postalCode,
-          preferred_time_slot: sampleForm.pickup.preferredTimeSlot,
-          preferred_date: sampleForm.pickup.preferredDate,
-          contact_person: sampleForm.pickup.contactPerson,
-          contact_phone: sampleForm.pickup.contactPhone,
-          alternate_phone: sampleForm.pickup.alternatePhone,
-          is_business_address: sampleForm.pickup.isBusinessAddress,
-          pickup_instructions: sampleForm.pickup.pickupInstructions,
-          access_notes: sampleForm.pickup.accessNotes,
-        }),
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to save pickup address.");
-
-      // Serializer now returns id
-      pickupAddressId = data?.id ?? null;
-      toast.success("Pickup address saved.");
-      saved.pickup = true;
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to save pickup address.");
-    } finally {
-      saving.pickup = false;
-    }
-  }
 
   // Normalize API date (YYYY-MM-DD) for date input
   const toYMD = (d: string | null | undefined) => {
@@ -176,53 +109,6 @@
     try { return new Date(d).toISOString().slice(0, 10); } catch { return String(d).slice(0, 10); }
   };
 
-  let pickupLoaded = false;
-  async function loadPickupAddress() {
-    if (pickupLoaded) return;
-    if (!$user?.access_token) return;
-
-    try {
-      const res = await fetch(`${API_URL}/auth/get-address/`, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${$user.access_token}` },
-        credentials: "include",
-      });
-      if (!res.ok) { pickupLoaded = true; return; }
-      const data = await res.json();
-
-      if (Array.isArray(data?.time_slots) && data.time_slots.length > 0) {
-        pickupTimeSlots = data.time_slots.map((s: { value: string }) => s.value);
-      }
-
-      const addr = data?.address || {};
-      if (addr && Object.keys(addr).length > 0) {
-        sampleForm.pickup.location           = addr.location ?? "";
-        sampleForm.pickup.buildingRoom       = addr.building_or_room ?? "";
-        sampleForm.pickup.streetAddress      = addr.street_address ?? "";
-        sampleForm.pickup.city               = addr.city ?? "";
-        sampleForm.pickup.stateProvince      = addr.state_province ?? "";
-        sampleForm.pickup.region             = addr.region ?? "";
-        sampleForm.pickup.postalCode         = addr.postal_code ?? "";
-        sampleForm.pickup.preferredTimeSlot  = addr.preferred_time_slot ?? "";
-        sampleForm.pickup.preferredDate      = toYMD(addr.preferred_date) || sampleForm.pickup.preferredDate;
-        sampleForm.pickup.contactPerson      = addr.contact_person ?? "";
-        sampleForm.pickup.contactPhone       = addr.contact_phone ?? "";
-        sampleForm.pickup.alternatePhone     = addr.alternate_phone ?? "";
-        sampleForm.pickup.isBusinessAddress  = Boolean(addr.is_business_address);
-        sampleForm.pickup.pickupInstructions = addr.pickup_instructions ?? "";
-        sampleForm.pickup.accessNotes        = addr.access_notes ?? "";
-
-        // capture id here
-        pickupAddressId = addr.id ?? null;
-
-        saved.pickup = true;
-      }
-    } catch (e) {
-      console.error("Failed to load pickup address:", e);
-    } finally {
-      pickupLoaded = true;
-    }
-  }
 
   let showPreviousPrompt = false;
   let previousRequisitionData: any = null;
@@ -283,26 +169,6 @@
     sampleForm.declarationAccepted = !!data.declaration_accepted;
     sampleForm.signature = data.signature ?? "";
     sampleForm.authorizationDate = toYMD(data.authorization_date) || new Date().toISOString().slice(0, 10);
-
-    if (data.pickup_address) {
-      const addr = data.pickup_address;
-      sampleForm.pickup.location           = addr.location ?? "";
-      sampleForm.pickup.buildingRoom       = addr.building_or_room ?? "";
-      sampleForm.pickup.streetAddress      = addr.street_address ?? "";
-      sampleForm.pickup.city               = addr.city ?? "";
-      sampleForm.pickup.stateProvince      = addr.state_province ?? "";
-      sampleForm.pickup.region             = addr.region ?? "";
-      sampleForm.pickup.postalCode         = addr.postal_code ?? "";
-      sampleForm.pickup.preferredTimeSlot  = addr.preferred_time_slot ?? "";
-      sampleForm.pickup.preferredDate      = toYMD(addr.preferred_date) || sampleForm.pickup.preferredDate;
-      sampleForm.pickup.contactPerson      = addr.contact_person ?? "";
-      sampleForm.pickup.contactPhone       = addr.contact_phone ?? "";
-      sampleForm.pickup.alternatePhone     = addr.alternate_phone ?? "";
-      sampleForm.pickup.isBusinessAddress  = Boolean(addr.is_business_address);
-      sampleForm.pickup.pickupInstructions = addr.pickup_instructions ?? "";
-      sampleForm.pickup.accessNotes        = addr.access_notes ?? "";
-      pickupAddressId = addr.id ?? null;
-    }
     toast.success("Previous requisition loaded.");
     showPreviousPrompt = false;
   }
@@ -313,16 +179,8 @@
   }
 
   onMount(() => {
-    loadPickupAddress();
     loadLatestRequisition();
   });
-
-  // If token becomes available after mount (e.g., hydration), try once
-  $: if ($user?.access_token && !pickupLoaded) {
-    loadPickupAddress();
-  }
-
-  let currentStep = 1; // 1: Form, 2: Address, 3: Payment
 
   function validateSampleForm() {
     // Full-form validation before final submit
@@ -330,7 +188,6 @@
     const e2 = validateSection2(); if (e2) return e2;
     const e3 = validateSection3(); if (e3) return e3;
     const e4 = validateSection4(); if (e4) return e4;
-    const ep = validatePickup();  if (ep) return ep;
     if (!sampleForm.declarationAccepted) return "Please accept the declaration.";
     return null;
   }
@@ -350,7 +207,7 @@ async function submitRequisition() {
       const fd = new FormData();
 
       // Link test details (from query params if present)
-      if (testIdParam) fd.append("test_id", String(testIdParam));
+      if (testIdParam) fd.append("test", String(testIdParam));
       if (testNameParam) fd.append("test_name", testNameParam);
       fd.append("quantity", String(testQtyParam ?? 1));
 
@@ -397,11 +254,6 @@ async function submitRequisition() {
       fd.append("signature", sampleForm.signature || "");
       fd.append("authorization_date", sampleForm.authorizationDate);
 
-      // Pickup link
-      if (pickupAddressId) {
-        fd.append("pickup_address", String(pickupAddressId));
-      }
-
       const res = await fetch(`${API_URL}/sample-requisitions/`, {
         method: "POST",
         headers: {
@@ -416,16 +268,49 @@ async function submitRequisition() {
       if (!res.ok) throw new Error(data?.detail || data?.error || "Failed to submit requisition.");
 
       toast.success("Requisition submitted.");
+      canAddToCart = true;
+      canMoveToAddress = true;
+      lastRequisitionId = data.requisition_id;
+      lastOrderId = data.order_id; // <-- Store order ID if returned
+      localStorage.setItem("current_order_id", lastOrderId); // <-- Store in localStorage
     } catch (e: any) {
-      console.error(e);
       toast.error(e?.message || "Failed to submit requisition.");
     } finally {
       submitting = false;
     }
   }
 
-  // Progress indicators for header
-  $: pickupConfirmed = saved.pickup;
+  async function addToCartAfterForm() {
+  if (!lastRequisitionId) {
+    toast.error("Please fill and submit the form first.");
+    return;
+  }
+  try {
+    const res = await fetch(`${API_URL}/add-to-cart/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${$user?.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        test_id: testIdParam,
+        quantity: testQtyParam ?? 1,
+        requisition_id: lastRequisitionId,
+        order_id: lastOrderId, // <-- Pass order
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.status !== "success") {
+      throw new Error(data.message || "Failed to add to cart");
+    }
+    toast.success("Test added to cart!");
+    canAddToCart = false;
+    // Optionally, redirect to cart or pickup page
+    // goto("/checkout/pickup");
+  } catch (e: any) {
+    toast.error(e?.message || "Failed to add to cart");
+  }
+}
 
   // Helper to make a safe filename
   const sanitizeFileName = (s: string) =>
@@ -458,8 +343,6 @@ async function submitRequisition() {
 
       doc.setFontSize(10);
       doc.text(`Generated: ${new Date().toLocaleString()}`, 40, y);
-      y += 10;
-      doc.text(`• Pickup: ${pickupConfirmed ? "Confirmed" : "Not set"}`, 40, y);
       y += 10;
 
       const addSection = (title: string, rows: [string, string][]) => {
@@ -518,25 +401,6 @@ async function submitRequisition() {
         ["Signature", sampleForm.signature || "-"],
         ["Authorization Date", sampleForm.authorizationDate || "-"],
       ]);
-
-      addSection("Pickup Address and Slot", [
-        ["Location", sampleForm.pickup.location || "-"],
-        ["Building/Room", sampleForm.pickup.buildingRoom || "-"],
-        ["Street Address", sampleForm.pickup.streetAddress || "-"],
-        ["City", sampleForm.pickup.city || "-"],
-        ["State/Province", sampleForm.pickup.stateProvince || "-"],
-        ["Region", sampleForm.pickup.region || "-"],
-        ["Postal Code", sampleForm.pickup.postalCode || "-"],
-        ["Preferred Date", sampleForm.pickup.preferredDate || "-"],
-        ["Preferred Time Slot", sampleForm.pickup.preferredTimeSlot || "-"],
-        ["Contact Person", sampleForm.pickup.contactPerson || "-"],
-        ["Contact Phone", sampleForm.pickup.contactPhone || "-"],
-        ["Alternate Phone", sampleForm.pickup.alternatePhone || "-"],
-        ["Business Address", sampleForm.pickup.isBusinessAddress ? "Yes" : "No"],
-        ["Pickup Instructions", sampleForm.pickup.pickupInstructions || "-"],
-        ["Access Notes", sampleForm.pickup.accessNotes || "-"],
-      ]);
-
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -592,40 +456,37 @@ async function submitRequisition() {
   </div>
   <nav class="flex items-center justify-center gap-0 w-full max-w-lg mx-auto mb-4" aria-label="Checkout Progress">
   <!-- Step 1: Form -->
-  <div class="flex flex-col items-center w-32" aria-current={currentStep === 1 ? "step" : undefined}>
+  <div class="flex flex-col items-center w-32">
     <div class="flex items-center justify-center">
-      <span class={`rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow transition
-        ${currentStep >= 1 ? 'bg-white border-4 border-[#0c017b]' : 'bg-gray-200 border-4 border-gray-300'}`}>
-        <FileCheck2 class={`h-6 w-6 ${currentStep >= 1 ? 'text-[#0c017b]' : 'text-gray-400'}`} aria-hidden="true" />
+      <span class={`rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow transition bg-white border-4 border-[#0c017b]`}>
+        <FileCheck2 class={`h-6 w-6 text-[#0c017b]`} aria-hidden="true" />
       </span>
     </div>
-    <span class={`mt-2 text-sm font-semibold tracking-wide ${currentStep >= 1 ? 'text-[#0c017b]' : 'text-gray-400'}`}>Form</span>
+    <span class={`mt-2 text-sm font-semibold tracking-wide text-[#0c017b]`}>Form</span>
   </div>
   <svg class="flex-1 mx-2" height="2" width="60" aria-hidden="true">
     <line x1="0" y1="1" x2="60" y2="1" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,6"/>
   </svg>
   <!-- Step 2: Address -->
-  <div class="flex flex-col items-center w-32" aria-current={currentStep === 2 ? "step" : undefined}>
+  <div class="flex flex-col items-center w-32" >
     <div class="flex items-center justify-center">
-      <span class={`rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow transition
-        ${currentStep >= 2 ? 'bg-[#a78bfa]' : 'bg-gray-200'}`}>
-        <MapPin class={`h-6 w-6 ${currentStep >= 2 ? 'text-white' : 'text-gray-400'}`} aria-hidden="true" />
+      <span class={`rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow transition bg-gray-200`}>
+        <MapPin class={`h-6 w-6 text-gray-400`} aria-hidden="true" />
       </span>
     </div>
-    <span class={`mt-2 text-sm font-semibold tracking-wide ${currentStep >= 2 ? 'text-[#0c017b]' : 'text-gray-400'}`}>Address</span>
+    <span class={`mt-2 text-sm font-semibold tracking-wide text-gray-400`}>Address</span>
   </div>
   <svg class="flex-1 mx-2" height="2" width="60" aria-hidden="true">
     <line x1="0" y1="1" x2="60" y2="1" stroke="#a78bfa" stroke-width="2" stroke-dasharray="6,6"/>
   </svg>
   <!-- Step 3: Payment -->
-  <div class="flex flex-col items-center w-32" aria-current={currentStep === 3 ? "step" : undefined}>
+  <div class="flex flex-col items-center w-32" >
     <div class="flex items-center justify-center">
-      <span class={`rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow transition
-        ${currentStep === 3 ? 'bg-gray-300' : 'bg-gray-200'}`}>
-        <BadgeIndianRupee class={`h-6 w-6 ${currentStep === 3 ? 'text-[#6b7280]' : 'text-gray-400'}`} aria-hidden="true" />
+      <span class={`rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow transition bg-gray-200`}>
+        <BadgeIndianRupee class={`h-6 w-6 text-gray-400`} aria-hidden="true" />
       </span>
     </div>
-    <span class={`mt-2 text-sm font-semibold tracking-wide ${currentStep === 3 ? 'text-gray-500' : 'text-gray-400'}`}>Payment</span>
+    <span class={`mt-2 text-sm font-semibold tracking-wide text-gray-400`}>Payment</span>
   </div>
 </nav>
   <div class="mx-auto w-[min(1200px,100vw-32px)]">
@@ -753,31 +614,34 @@ async function submitRequisition() {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Solubility</label>
+              <label for="solubility" class="block text-sm font-medium text-gray-700 mb-1">Solubility</label>
               <input
+                id="solubility"
                 class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 type="text" bind:value={sampleForm.solubility} placeholder="e.g., soluble in methanol"
               />
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Special Handling Instructions</label>
+              <label for="specialHandling" class="block text-sm font-medium text-gray-700 mb-1">Special Handling Instructions</label>
               <input
+                id="specialHandling"
                 class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 type="text" bind:value={sampleForm.specialHandling} placeholder="e.g., protect from light"
               />
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Product / Sample is used for</label>
+              <label for="usage" class="block text-sm font-medium text-gray-700 mb-1">Product / Sample is used for</label>
               <input
+                id="usage"
                 class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 type="text" bind:value={sampleForm.usage} placeholder="e.g., stability testing"
               />
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Storage Conditions</label>
+              <label for="StorageConditions" class="block text-sm font-medium text-gray-700 mb-1">Storage Conditions</label>
               <div class="flex flex-wrap items-center gap-4 py-2">
                 {#each storageOptions as opt}
                   <label class="inline-flex items-center gap-2 text-sm text-gray-700">
@@ -787,7 +651,7 @@ async function submitRequisition() {
               </div>
               {#if sampleForm.storageConditions.includes("Other")}
                 <div class="mt-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Specify other storage condition</label>
+                  <label for="OtherStorageConditions" class="block text-sm font-medium text-gray-700 mb-1">Specify other storage condition</label>
                   <input
                     class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     type="text" bind:value={sampleForm.storageOther} placeholder="Describe required storage"
@@ -797,7 +661,7 @@ async function submitRequisition() {
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Hazard Information</label>
+              <label for="HazardInformation" class="block text-sm font-medium text-gray-700 mb-1">Hazard Information</label>
               <div class="flex flex-wrap items-center gap-4 py-2">
                 {#each hazardOptions as hazard}
                   <label class="inline-flex items-center gap-2 text-sm text-gray-700">
@@ -813,7 +677,7 @@ async function submitRequisition() {
               {/if}
 
               <div class="mt-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">MSDS (Material Safety Data Sheet)</label>
+                <label for="MSDS" class="block text-sm font-medium text-gray-700 mb-1">MSDS (Material Safety Data Sheet)</label>
                 <p class="text-sm text-gray-600 mb-3">
                 Note: Required for hazardous samples.
               </p>
@@ -828,7 +692,7 @@ async function submitRequisition() {
 
                 {#if sampleForm.msds === "Yes"}
                   <div class="mt-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Upload MSDS file</label>
+                    <label for="MSDSUpload" class="block text-sm font-medium text-gray-700 mb-1">Upload MSDS file</label>
                     <input
                       type="file"
                       accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
@@ -861,7 +725,7 @@ async function submitRequisition() {
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="RequestedTechnique" class="block text-sm font-medium text-gray-700 mb-1">
                 Requested Technique <span class="text-rose-500">*</span>
               </label>
               <input
@@ -871,7 +735,7 @@ async function submitRequisition() {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Amount Provided</label>
+              <label for="AmountProvided" class="block text-sm font-medium text-gray-700 mb-1">Amount Provided</label>
               <div class="flex gap-2">
                 <input
                   class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -887,7 +751,7 @@ async function submitRequisition() {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Requested Turnaround</label>
+              <label for="RequestedTurnaround" class="block text-sm font-medium text-gray-700 mb-1">Requested Turnaround</label>
               <select
                 class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 bind:value={sampleForm.requestedTAT}
@@ -897,7 +761,7 @@ async function submitRequisition() {
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Analysis Purpose</label>
+              <label for="AnalysisPurpose" class="block text-sm font-medium text-gray-700 mb-1">Analysis Purpose</label>
               <div class="flex flex-wrap items-center gap-4 py-2">
                 {#each purposeOptions as p}
                   <label class="inline-flex items-center gap-2 text-sm text-gray-700">
@@ -908,7 +772,7 @@ async function submitRequisition() {
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Client Sample Code (optional)</label>
+              <label for="ClientSampleCode" class="block text-sm font-medium text-gray-700 mb-1">Client Sample Code (optional)</label>
               <input
                 class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 type="text" bind:value={sampleForm.clientSampleCode} placeholder="Your internal reference code"
@@ -984,164 +848,21 @@ async function submitRequisition() {
 
           <div class="md:col-span-2">
             <div class="mt-4 flex items-right justify-end">
-<button
-  type="button"
-  class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
-  on:click={() => {
-    // Progress to Address section if not already there
-    if (currentStep === 1) {
-      const err = validateSection1();
-      if (!err) {
-        currentStep = 2;
-        return;
-      } else {
-        toast.error(err);
-        return;
-      }
-    }
-    // Progress to Payment section if not already there
-    if (currentStep === 2) {
-      const err = validatePickup();
-      if (!err) {
-        currentStep = 3;
-        return;
-      } else {
-        toast.error(err);
-        return;
-      }
-    }
-    // Only submit when on Payment step
-    submitRequisition();
-  }}
-  disabled={submitting}
->
-  {submitting ? "Submitting..." : "Submit Requisition"}
-</button>
+        <button
+          type="button"
+          class="rounded-lg px-4 py-2 text-white font-medium transition disabled:opacity-60"
+          style="background-color: #0c017b;"
+          on:click={() => {
+            submitRequisition();
+          }}
+          disabled={submitting}
+        >
+          {submitting ? "Submitting..." : "Submit Requisition"}
+        </button>
           </div>
         </section>
 
-      <!-- Pickup address and date slot -->
-      <section class="mt-6 rounded-xl bg-white p-6 shadow-md">
-        <header class="flex items-start justify-between">
-          <h3 class="text-2xl font-bold text-[#0c017b]">Pickup address and date slot</h3>
-          {#if saved.pickup}
-            <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
-              <Check class="h-3 w-3" /> Confirmed
-            </span>
-          {/if}
-        </header>
-
-        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Location (Site/Campus)</label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="text" bind:value={sampleForm.pickup.location} placeholder="e.g., Corporate R&D Center" />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Building & Room/Lab</label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="text" bind:value={sampleForm.pickup.buildingRoom} placeholder="e.g., B-Block, Lab 203" />
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Street Address <span class="text-rose-500">*</span></label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="text" bind:value={sampleForm.pickup.streetAddress} placeholder="Street, number, unit" />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-rose-500">*</span></label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="text" bind:value={sampleForm.pickup.city} />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">State/Province <span class="text-rose-500">*</span></label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="text" bind:value={sampleForm.pickup.stateProvince} />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Region/District</label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="text" bind:value={sampleForm.pickup.region} />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code <span class="text-rose-500">*</span></label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="text" bind:value={sampleForm.pickup.postalCode} />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Date <span class="text-rose-500">*</span></label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="date" bind:value={sampleForm.pickup.preferredDate} />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Time Slot <span class="text-rose-500">*</span></label>
-            <select class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    bind:value={sampleForm.pickup.preferredTimeSlot}>
-              <option value="" disabled>Select a slot</option>
-              {#each pickupTimeSlots as t}<option value={t}>{t}</option>{/each}
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person <span class="text-rose-500">*</span></label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="text" bind:value={sampleForm.pickup.contactPerson} placeholder="Name at pickup location" />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone <span class="text-rose-500">*</span></label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="tel" bind:value={sampleForm.pickup.contactPhone} placeholder="+91 98765 43210" />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Alternate Phone (optional)</label>
-            <input class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   type="tel" bind:value={sampleForm.pickup.alternatePhone} />
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="inline-flex items-start gap-2 text-sm text-gray-700">
-              <input type="checkbox" bind:checked={sampleForm.pickup.isBusinessAddress} />
-              <span>This is a business address with receiving/security desk</span>
-            </label>
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Pickup Instructions</label>
-            <textarea class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      rows="3" bind:value={sampleForm.pickup.pickupInstructions}
-                      placeholder="Packaging provided? Labeling? Handover name, ID, or any special handling."></textarea>
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Access Notes</label>
-            <textarea class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      rows="2" bind:value={sampleForm.pickup.accessNotes}
-                      placeholder="Gate code, parking, security checkpoints, elevator access, etc."></textarea>
-          </div>
-        </div>
-
-        <div class="mt-4 flex items-center justify-end">
-          <button
-            type="button"
-            class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
-            on:click={confirmPickup}
-            disabled={saving.pickup}
-          >
-            {saving.pickup ? "Confirming..." : "Confirm location/address"}
-          </button>
-        </div>
-      </section>
-
-      {#if showPreviousPrompt}
+        {#if showPreviousPrompt}
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div class="bg-white rounded-xl shadow-lg p-6 max-w-md w-full">
             <h2 class="text-lg font-semibold mb-2">Use Previous Form?</h2>
@@ -1154,6 +875,23 @@ async function submitRequisition() {
         </div>
       {/if}
 
+      <div class="mt-6 flex flex-col sm:flex-row justify-end gap-4 w-full">
+        <button
+          class="w-full sm:w-auto rounded-lg px-4 py-2 text-base sm:text-sm text-white font-medium transition"
+          style="background-color: #0c017b;"
+          on:click={addToCartAfterForm}
+        >
+          Add Test to Cart
+        </button>
+        {#if canMoveToAddress && lastOrderId}
+          <button
+            class="w-full sm:w-auto rounded-lg bg-green-600 px-4 py-2 text-base sm:text-sm text-white font-medium hover:bg-green-700 transition"
+            on:click={() => goto(`/checkout/pickup`)}
+          >
+            Proceed to Checkout
+          </button>
+        {/if}
+      </div>
     </div>
   </div>
 </main>

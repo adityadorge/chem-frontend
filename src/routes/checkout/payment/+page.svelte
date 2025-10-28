@@ -1,10 +1,49 @@
-<script>
+<script lang="ts">
+    import { onMount } from "svelte";
+    import { API_URL } from "$lib/store/api";
+    import { user } from "$lib/store";
+    import { page } from "$app/stores";
+    
     let billing = "yearly";
     let cardholder = "";
     let cardNumber = "";
     let expiration = "";
     let cvv = "";
     let postalCode = "";
+
+    let orderId: string | null = null;
+    let orderSummary: any = null;
+    let loading = false;
+    let error = "";
+
+    onMount(() => {
+        orderId = localStorage.getItem("current_order_id");
+        if (orderId) {
+            fetchOrderSummary(orderId);
+        }
+    });
+
+    async function fetchOrderSummary(orderId: string) {
+        loading = true;
+        error = "";
+        try {
+            const res = await fetch(`${API_URL}/orders-detail/${orderId}/`, {
+               method: "GET",
+                headers: { Authorization: `Bearer ${$user.access_token}` },
+                credentials: "include",
+            });
+            if (!res.ok) throw new Error("Failed to fetch order summary");
+            orderSummary = await res.json();
+        } catch (e) {
+            if (e instanceof Error) {
+                error = e.message;
+            } else {
+                error = "Could not load order summary";
+            }
+        } finally {
+            loading = false;
+        }
+    }
 </script>
 
 <div class="container">
@@ -113,22 +152,43 @@
 
                 <!-- Summary -->
                 <div class="text-base">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-800">Subtotal</span>
-                        <span class="text-right">$144.00<br /><span class="text-sm text-gray-500">approx. £117 GBP</span></span>
+                    {#if loading}
+                    <div class="mb-8">Loading order summary...</div>
+                {:else if error}
+                    <div class="mb-8 text-red-600">{error}</div>
+                {:else if orderSummary}
+                    <div class="mb-8">
+                        <h2 class="text-xl font-bold mb-2">Order Summary</h2>
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between mb-2">
+                                <span>Test Name:</span>
+                                <span>{orderSummary.test_name}</span>
+                            </div>
+                            <div class="flex justify-between mb-2">
+                                <span>Price per Test:</span>
+                                <span>₹{orderSummary.test_price}</span>
+                            </div>
+                            <div class="flex justify-between mb-2">
+                                <span>Number of Samples:</span>
+                                <span>{orderSummary.number_of_samples}</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-lg mt-4">
+                                <span>Total Cost:</span>
+                                <span>₹{orderSummary.total_amount}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex justify-between mb-2 text-red-600">
-                        <span>Yearly plan discount</span>
-                        <span class="text-right">-$84.00<br /><span class="text-sm text-gray-500">approx. -£69 GBP</span></span>
-                    </div>
+                {/if}
                     <div class="flex justify-between items-end font-bold text-lg mt-4">
                         <span>Billed Now</span>
-                        <span class="text-right">USD $60.00<br /><span class="text-sm text-gray-500">approx. £49 GBP</span></span>
                     </div>
                     <div class="text-gray-500 text-sm mt-4">
                         All sales are charged in USD and all sales are final. You will be charged $60.00 USD immediately. You will be charged $60.00 USD yearly thereafter while the subscription is active.
                     </div>
                 </div>
+
+                <!-- Order Summary Section -->
+                
             </div>
         </div>
     </div>

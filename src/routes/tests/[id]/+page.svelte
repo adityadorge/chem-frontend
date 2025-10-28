@@ -427,7 +427,7 @@
                     >
                     <th
                       class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
-                      >Qty</th
+                      >price per sample</th
                     >
                     <th
                       class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"

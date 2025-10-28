@@ -125,7 +125,7 @@
 <section class="relative -mt-24 md:-mt-28 lg:-mt-55 z-10">
   <div class="max-w-screen-xl px-4 pt-6 pb-0 mx-auto">
     <div class="mt-6 w-full flex justify-center">
-      <img src="/assets/about-us/team.png" alt="hero image" class="w-full max-w-4xl md:max-w-5xl h-auto" />
+      <img src="/assets/about-us/team.png" alt="hero_image" class="w-full max-w-4xl md:max-w-5xl h-auto" />
     </div>
   </div>
 </section>

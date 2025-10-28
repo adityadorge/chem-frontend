@@ -30,6 +30,7 @@
   let dropdownOpen = false;
   let cartOpen = false;
   const authValid = writable(false);
+  let isMobile = false;
 
   // Mega menu
   interface Category {
@@ -53,6 +54,10 @@
     fetchCategories();
     // loadUser(); // moved to root layout so dashboard works without Navbar
     checkAuth();
+
+    const mq = window.matchMedia("(max-width: 900px)");
+    isMobile = mq.matches;
+    mq.addEventListener("change", e => isMobile = e.matches);
   });
 
   async function fetchCategories() {
@@ -335,15 +340,28 @@
         <a href="/login">Login</a>
         <!-- <a href="/register">Register</a> -->
       {/if}
-      <a href="#" class="cart-link" on:click|preventDefault={toggleCart} style="display: inline-flex; align-items: center;">
-        <img src="/assets/cart/cart1.svg" alt="Cart" width="30" height="30" style="vertical-align: middle;" />
+      <!-- Desktop: inline cart section -->
+      <a href="#" class="cart-link" on:click|preventDefault={toggleCart}>
+        <img src="/assets/cart/cart1.svg" alt="Cart" width="30" height="30" />
       </a>
-      <CartSection bind:isOpen={cartOpen} />
+      {#if cartOpen && !isMobile}
+        <CartSection bind:isOpen={cartOpen} />
+      {/if}
     </div>
-
-    <button class="hamburger" on:click={openMobile} aria-label="Open menu">
-      <img src="/assets/navbar/menu-line.svg" alt="menu" />
-    </button>
+    <!-- Mobile actions: cart + hamburger -->
+    <div class="mobile-actions">
+      <a
+        href="#"
+        class="cart-link mobile-cart"
+        on:click|preventDefault={toggleCart}
+        aria-label="Open cart"
+      >
+        <img src="/assets/cart/cart1.svg" alt="Cart" width="28" height="28" />
+      </a>
+      <button class="hamburger" on:click={openMobile} aria-label="Open menu">
+        <img src="/assets/navbar/menu-line.svg" alt="menu" />
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -460,6 +478,16 @@
     </div>
   </div>
 {/if}
+
+{#if cartOpen && isMobile}
+  <div class="cart-mobile-overlay" on:click={() => cartOpen = false}>
+    <div class="cart-mobile-panel" on:click|stopPropagation>
+      <button class="cart-mobile-close" on:click={() => cartOpen = false} aria-label="Close cart">×</button>
+      <CartSection bind:isOpen={cartOpen} />
+    </div>
+  </div>
+{/if}
+
 <style>
   /* Import Inter font */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -874,5 +902,40 @@
     clip: rect(0,0,1px,1px);
     white-space: nowrap; border: 0;
   }
+
+  /* ...existing code... */
+.cart-link.mobile-cart {
+  display: none;
+  margin-right: 8px;
+}
+@media (max-width: 900px) {
+  .cart-link.mobile-cart {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .nav-links .cart-link {
+    display: none;
+  }
+}
+
+.mobile-actions {
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+@media (max-width: 900px) {
+  .mobile-actions {
+    display: flex;
+  }
+  .cart-link.mobile-cart {
+    display: inline-flex;
+  }
+  .nav-links .cart-link {
+    display: none;
+  }
+}
 </style>
 

@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div class="hidden lg:mt-0 lg:col-span-4 lg:flex">
-                <img src="/assets/enroll-lab/images/hero.svg" alt="hero image">
+                <img src="/assets/enroll-lab/images/hero.svg" alt="hero_image">
             </div>                
         </div>
     </section>
@@ -110,7 +110,7 @@
                     <p class="text-xl font-medium text-gray-900 md:text-2xl dark:text-white">"Our platform bridges the gap between researchers and collaborators, unlocking business and brand partnerships, boosting visibility, and streamlining operations—so you can focus on advancing science while we handle logistics, payments, and outreach."</p>
                 </blockquote>
                 <figcaption class="flex items-center justify-center mt-6 space-x-3">
-                    <img class="w-6 h-6 rounded-full" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gouch.png" alt="profile picture">
+                    <img class="w-6 h-6 rounded-full" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gouch.png" alt="profile_picture">
                     <div class="flex items-center divide-x-2 divide-gray-500 dark:divide-gray-700">
                         <div class="pr-3 font-medium text-gray-900 dark:text-white">Dhanashree Kadam</div>
                         <div class="pl-3 text-sm font-light text-gray-500 dark:text-gray-400">CEO</div>
@@ -148,11 +148,11 @@
                     </ul>
                     <p class="mb-8 font-light lg:text-xl">All you do is focus on science, and we’ll handle the rest.</p>
                 </div>
-                <img class="hidden w-full mb-4 rounded-lg lg:mb-0 lg:flex" src="/assets/enroll-lab/images/figure1.png" alt="dashboard feature image">
+                <img class="hidden w-full mb-4 rounded-lg lg:mb-0 lg:flex" src="/assets/enroll-lab/images/figure1.png" alt="dashboard_feature_image">
             </div>
             <!-- Row -->
             <div class="items-center gap-8 lg:grid lg:grid-cols-2 xl:gap-16">
-                <img class="hidden w-full mb-4 rounded-lg lg:mb-0 lg:flex" src="/assets/enroll-lab/images/figure2.png" alt="feature image 2">
+                <img class="hidden w-full mb-4 rounded-lg lg:mb-0 lg:flex" src="/assets/enroll-lab/images/figure2.png" alt="feature_image_2">
                 <div class="text-gray-500 sm:text-lg dark:text-gray-400">
                     <h2 class="mb-4 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Visibility, Trust, & Intelligence<br>—All in One Platform</h2>
                     <p class="mb-8 font-light lg:text-xl">Gain greater visibility and discovery to attract the right research opportunities. Enjoy secure, transparent payments that keep your cash flow smooth. And unlock digital workflows and insights to streamline operations, reduce errors, and make smarter business decisions.</p>
