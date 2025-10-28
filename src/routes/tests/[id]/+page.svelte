@@ -115,7 +115,7 @@
       }
       toast.success(`Added ${quantity} ${test?.test_name} to order summary!`);
       // Include test info in query params for checkout header
-      goto(`/checkout?test_id=${test?.id}&quantity=${quantity}&test_name=${encodeURIComponent(test?.test_name || "")}`);
+      goto(`/checkout/form?test_id=${test?.id}&quantity=${quantity}&test_name=${encodeURIComponent(test?.test_name || "")}`);
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed to proceed");
     } finally {

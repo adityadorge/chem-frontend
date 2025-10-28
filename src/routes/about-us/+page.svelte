@@ -88,34 +88,48 @@
     <link href="/assets/enroll-lab/css/tailwind_output.css" rel="stylesheet">
 </svelte:head>
 
-<!-- Start block -->
-<section class="bg-white dark:bg-gray-900">
-    <div class="max-w-screen-xl px-4 pt-20 pb-8 mx-auto lg:py-16">
-        <div class="flex flex-col items-center text-center">
-            <h1 class="max-w-2xl mb-4 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl dark:text-black">
-                About Us <br>Making Things Better !
-            </h1>
-            <p class="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
-                We’re building solutions that put people first — because the best ideas happen when people come together.
-            </p>
-            <div class="flex items-center gap-4 sm:flex-row sm:justify-center">
-                <a href="https://github.com/themesberg/landwind" class="inline-flex items-center justify-center px-5 py-3 text-sm font-medium text-center text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800 gap-2">
-                    <Rocket size={18} aria-hidden="true" />
-                    <span>Get Started</span>
-                </a>
-                <a href="https://www.figma.com/community/file/1125744163617429490" class="inline-flex items-center justify-center px-5 py-3 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 gap-2">
-                    <PlayCircle size={18} aria-hidden="true" />
-                    <span>Watch Video</span>
-                </a>
-            </div>
-            <div class="mt-10 w-full flex justify-center">
-    <img src="/assets/about-us/team.png" alt="hero image" class="w-full max-w-4xl md:max-w-5xl h-auto">
-</div>
-        </div>
+<!-- Start block (replaced with blue hero) -->
+<section class="about-hero">
+  <!-- Decorative shapes -->
+    
+  <!-- Centered content -->
+  <div class="hero-inner">
+    <h1 class="max-w-2xl mx-auto mb-4 text-center text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl">
+      About Us <br />Making Things Better !
+    </h1>
+    <p class="max-w-2xl mb-6 mx-auto text-center font-light text-white/80 lg:mb-8 md:text-lg lg:text-xl">
+      We’re building solutions that put people first — because the best ideas happen when people come together.
+    </p>
+    <div class="flex items-center justify-center gap-4 sm:flex-row sm:justify-center">
+      <a href="https://github.com/themesberg/landwind" class="inline-flex items-center justify-center px-5 py-3 text-sm font-medium text-center text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 bg-white/95">
+        <Rocket size={18} aria-hidden="true" />
+        <span class="ml-2">Get Started</span>
+      </a>
+      <a href="https://www.figma.com/community/file/1125744163617429490" class="inline-flex items-center justify-center px-5 py-3 text-sm font-medium text-white border border-white/30 rounded-lg focus:outline-none hover:bg-white/10 focus:z-10 focus:ring-4 focus:ring-white/20">
+        <PlayCircle size={18} aria-hidden="true" />
+        <span class="ml-2">Watch Video</span>
+      </a>
     </div>
+
+    <!-- Bottom wave -->
+    <div class="hero-wave" aria-hidden="true">
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+        <path d="M0,64 C240,96 480,32 720,48 C960,64 1200,112 1440,96 L1440,120 L0,120 Z" fill="currentColor"></path>
+      </svg>
+    </div>
+  </div>
 </section>
 <!-- End block -->
- <!-- Mission / Vision / Values -->
+
+<!-- Keep your team image just below the hero -->
+<section class="relative -mt-24 md:-mt-28 lg:-mt-55 z-10">
+  <div class="max-w-screen-xl px-4 pt-6 pb-0 mx-auto">
+    <div class="mt-6 w-full flex justify-center">
+      <img src="/assets/about-us/team.png" alt="hero image" class="w-full max-w-4xl md:max-w-5xl h-auto" />
+    </div>
+  </div>
+</section>
+<!-- Mission / Vision / Values -->
 <section class="bg-white">
   <div class="mx-auto max-w-screen-xl px-4 md:px-6 py-20">
     <!-- Center the two-column block and keep a consistent content width -->
@@ -181,7 +195,7 @@
     </div>
   </div>
 </section>
- <!-- Start block -->
+<!-- Start block -->
 <section class="bg-white dark:bg-gray-900">
     <div class="max-w-screen-xl px-4 pt-20 pb-8 mx-auto lg:py-16">
         <div class="grid items-center gap-8 md:grid-cols-2">
@@ -277,3 +291,55 @@
             </div>
         </div>
     </section>
+
+<style>
+  /* Hero variables */
+  :global(:root) {
+    --hero: #0c017b;      /* deep blue */
+    --text-muted: #eff1ff;
+  }
+
+  /* Hero header (blue) */
+  .about-hero {
+    position: relative;
+    background: var(--hero);
+    color: #fff;
+    overflow: hidden;
+  }
+  .about-hero .hero-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 56px 20px 140px; /* extra bottom for wave */
+    text-align: center;
+  }
+
+  /* Decorative squiggles */
+  .about-hero .decor {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+  .about-hero .decor-left {
+    left: clamp(8px, 6vw, 80px);
+    top: 80px;
+  }
+  .about-hero .decor-right {
+    right: clamp(8px, 6vw, 120px);
+    bottom: 80px;
+  }
+
+  /* Bottom wave (inherits --hero color) */
+  .about-hero .hero-wave {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    color: var(--hero);
+    line-height: 0;
+  }
+  .about-hero .hero-wave svg {
+    width: 100%;
+    height: 120px;
+    display: block;
+  }
+</style>

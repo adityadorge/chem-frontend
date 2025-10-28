@@ -1,4 +1,392 @@
 <script lang="ts">
+  import { LayoutGrid, List } from 'lucide-svelte';
+  type Card = {
+    id: string;
+    testName?: string;   // renamed from date
+    title: string;
+    href?: string;
+    imageUrl?: string;
+    imageBg?: string;
+    badge?: string;
+    badgeColor?: string;
+    stat?: string;
+
+    // NEW: lab pill
+    lab?: string;
+    labColor?: string;
+  };
+
+  // Demo data — replace with real tests
+  export let cards: Card[] = [
+    {
+      id: '1',
+      testName: 'Atomic Spectroscopy',
+      title:
+        'Deputy Announces Exclusive Global Partnership with Predelo to Bring AI to Shift-Based Businesses.',
+      href: '#',
+      imageUrl:
+        'https://images.unsplash.com/photo-1587613865763-4b8b0b4f7a9f?q=80&w=1200&auto=format&fit=crop',
+      imageBg: '#0f007a',
+      lab: 'ASL Lab',
+      labColor: '#22e3b8'
+    },
+    {
+      id: '2',
+      testName: 'Workforce Analytics Panel',
+      title:
+        'Deputy Unveils Analytics+ to Power Smarter Workforce Decisions for Shift-Based Businesses.',
+      href: '#',
+      imageUrl:
+        'https://images.unsplash.com/photo-1543286386-713bdd548da4?q=80&w=1200&auto=format&fit=crop',
+      imageBg: '#15006a',
+      stat: '460',
+      lab: 'Analytics Lab',
+      labColor: '#ffd166'
+    },
+    {
+      id: '3',
+      testName: 'Clock-Out Behavior Study',
+      title:
+        'Deputy Announces Exclusive Global Partnership with Predelo to Bring AI to Shift-Based Businesses.',
+      href: '#',
+      imageUrl:
+        'https://images.unsplash.com/photo-1587613865763-4b8b0b4f7a9f?q=80&w=1200&auto=format&fit=crop',
+      imageBg: '#0f007a',
+      lab: 'ASL Lab',
+      labColor: '#22e3b8'
+    },
+    {
+      id: '4',
+      testName: 'Liver Function Test',
+      title:
+        'Deputy Announces Exclusive Global Partnership with Predelo to Bring AI to Shift-Based Businesses.',
+      href: '#',
+      imageUrl:
+        'https://images.unsplash.com/photo-1587613865763-4b8b0b4f7a9f?q=80&w=1200&auto=format&fit=crop',
+      imageBg: '#0f007a',
+      lab: 'ASL Lab',
+      labColor: '#22e3b8'
+    },
+    {
+      id: '5',
+      testName: 'Thyroid Panel',
+      title:
+        'Deputy Announces Exclusive Global Partnership with Predelo to Bring AI to Shift-Based Businesses.',
+      href: '#',
+      imageUrl:
+        'https://images.unsplash.com/photo-1587613865763-4b8b0b4f7a9f?q=80&w=1200&auto=format&fit=crop',
+      imageBg: '#0f007a',
+      lab: 'ASL Lab',
+      labColor: '#22e3b8'
+    },
+    {
+      id: '6',
+      testName: 'Vitamin D (25‑OH)',
+      title:
+        'Deputy Announces Exclusive Global Partnership with Predelo to Bring AI to Shift-Based Businesses.',
+      href: '#',
+      imageUrl:
+        'https://images.unsplash.com/photo-1587613865763-4b8b0b4f7a9f?q=80&w=1200&auto=format&fit=crop',
+      imageBg: '#0f007a',
+      lab: 'ASL Lab',
+      labColor: '#22e3b8'
+    }
+  ];
+
+  // View mode: 'grid' (cards) or 'list'
+  let view: 'grid' | 'list' = 'grid';
+
+  // Lightweight tooltip for full title on hover/focus
+  let tooltip = { show: false, text: '', x: 0, y: 0 };
+
+  function showTip(e: MouseEvent, text: string) {
+    tooltip = { show: true, text, x: e.clientX + 12, y: e.clientY + 12 };
+  }
+  function moveTip(e: MouseEvent) {
+    if (tooltip.show) tooltip = { ...tooltip, x: e.clientX + 12, y: e.clientY + 12 };
+  }
+  function hideTip() {
+    tooltip.show = false;
+  }
+</script>
+
+<!-- View toggle -->
+<div class="view-toggle" role="toolbar" aria-label="View toggle">
+  <button
+    class:active={view === 'grid'}
+    on:click={() => (view = 'grid')}
+    aria-pressed={view === 'grid'}
+    title="Card view"
+  >
+    <LayoutGrid size={16} />
+    Cards
+  </button>
+  <button
+    class:active={view === 'list'}
+    on:click={() => (view = 'list')}
+    aria-pressed={view === 'list'}
+    title="List view"
+  >
+    <List size={16} />
+    List
+  </button>
+</div>
+
+<section class={`cards ${view}`}>
+  {#each cards as c}
+    <a class="card" href={c.href || '#'} aria-label={c.title}>
+      <div class="media" style={`background-color: ${c.imageBg || '#0f007a'};`}>
+        {#if c.imageUrl}
+          <img src={c.imageUrl} alt="" loading="lazy" decoding="async" />
+        {/if}
+
+        <!-- lab pill (fallback to badge) -->
+        {#if c.lab || c.badge}
+          <span
+            class="badge"
+            style={`--badge-bg: ${c.labColor || c.badgeColor || '#22e3b8'};`}
+          >
+            {c.lab ?? c.badge}
+          </span>
+        {/if}
+
+        {#if c.stat}
+          <span class="stat">{c.stat} ▲</span>
+        {/if}
+      </div>
+
+      <div class="body">
+        {#if c.testName}
+          <p class="test-name">{c.testName}</p>
+        {/if}
+
+        <h3
+          class="title"
+          on:mouseenter={(e) => showTip(e, c.title)}
+          on:mousemove={moveTip}
+          on:mouseleave={hideTip}
+          on:focus={(e) => showTip(e as unknown as MouseEvent, c.title)}
+          on:blur={hideTip}
+          tabindex="0"
+        >
+          {c.title}
+        </h3>
+
+        <div class="footer">
+          <span class="see-more">
+            See more
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+    </a>
+  {/each}
+
+  {#if tooltip.show}
+    <div
+      class="tooltip"
+      style={`left:${tooltip.x}px; top:${tooltip.y}px;`}
+      role="tooltip"
+    >
+      {tooltip.text}
+    </div>
+  {/if}
+</section>
+
+<style>
+  :global(:root) {
+    --card-radius: 18px;
+    --shadow: 0 10px 25px rgba(16, 24, 40, 0.12), 0 4px 12px rgba(16, 24, 40, 0.06);
+    --shadow-hover: 0 16px 40px rgba(16, 24, 40, 0.16), 0 6px 16px rgba(16, 24, 40, 0.08);
+    --ink: #0f172a;
+    --muted: #667085;
+    --brand: #6b4eff;
+    --surface: #ffffff;
+  }
+
+  /* Toggle styles */
+  .view-toggle {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px 8px 0 8px;
+  }
+  .view-toggle button {
+    appearance: none;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-weight: 700;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .view-toggle button.active {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #4338ca;
+  }
+
+  /* Base cards container */
+  .cards {
+    display: grid;
+    gap: 28px;
+    padding: 8px;
+  }
+  /* Grid (card) view */
+  .cards.grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  /* List view (single column; each card is horizontal) */
+  .cards.list {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+    will-change: transform;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+  }
+  .card:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--brand) 35%, #a78bfa);
+    outline-offset: 2px;
+  }
+
+  .media {
+    position: relative;
+    height: 220px;
+    background: #120070;
+  }
+  .media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--badge-bg, #22e3b8);
+    color: #0a2540;
+    text-transform: uppercase;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    user-select: none;
+  }
+
+  .stat {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-weight: 800;
+    font-size: 14px;
+    color: #cbd5ff;
+    background: rgba(15, 0, 122, 0.55);
+    border: 1px solid rgba(203, 213, 255, 0.2);
+    padding: 6px 10px;
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+  }
+
+  .body {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 10px;
+    padding: 18px 22px 22px;
+  }
+
+  .test-name {
+    margin: 0 0 4px 0;
+    color: #2563eb; /* blue */
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .title {
+    margin: 0;
+    color: var(--ink);
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 6px;
+  }
+
+  .see-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--brand);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .see-more:hover {
+    filter: brightness(0.9);
+  }
+
+  .tooltip {
+    position: fixed;
+    z-index: 50;
+    max-width: min(640px, 90vw);
+    background: rgba(33, 33, 33, 0.95);
+    color: white;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.3;
+    pointer-events: none;
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  }
+
+  /* Responsive: stack back to vertical on small screens */
+  @media (max-width: 800px) {
+    .cards.list .media { width: 220px; }
+  }
+  @media (max-width: 640px) {
+    .cards.list .card { flex-direction: column; }
+    .cards.list .media { width: 100%; height: 190px; }
+    .cards.list .title { -webkit-line-clamp: 3; }
+  }
+</style>
+
++++++++++++
+<script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { page } from "$app/stores";
   import { get } from "svelte/store";
@@ -8,7 +396,6 @@
   import Navbar from "$lib/Navbar/Navbar.svelte";
   import { goto } from "$app/navigation";
   import { API_URL } from "$lib/store/api";
-  import { LayoutGrid, List } from 'lucide-svelte';
 
   let searchTerm: string = "";
 
@@ -59,14 +446,14 @@
   // Fetch subcategories for a selected category
   async function fetchData(categoryId: number) {
     const subcategories_response = await fetch(
-      `${API_URL}/app1/categories/${categoryId}/subcategories/`,
+      `${API_URL}/app1/categories/${categoryId}/subcategories/`
     );
     const subcategories_data: Subcategory[] =
       await subcategories_response.json();
     subcategories = subcategories_data;
 
     const test_response = await fetch(
-      `${API_URL}/app1/categories/${categoryId}/tests/`,
+      `${API_URL}/app1/categories/${categoryId}/tests/`
     );
     const test_data: Test[] = await test_response.json();
     tests = test_data;
@@ -133,13 +520,13 @@
     let idx = -1;
     if (item.type === "category") {
       idx = breadcrumbPath.findIndex(
-        (b) => b.type === "category" && b.data?.id === item.data.id,
+        (b) => b.type === "category" && b.data?.id === item.data.id
       );
     } else if (item.type === "subcategory") {
       idx = breadcrumbPath.findIndex(
         (b) =>
           b.type === "subcategory" &&
-          b.data?.category_name === item.data.category_name,
+          b.data?.category_name === item.data.category_name
       );
     }
     if (idx === -1) {
@@ -234,9 +621,6 @@
   let pageSubtitle =
     "The go-to place for employers, managers, and employees to connect and learn about the world of work";
 
-  // When a category is selected, update the page title
-  $: pageTitle = selectedCategory ? selectedCategory.category_name : "Testing";
-
   let selectedCategoryId: string = "";
   let selectedSubcategoryName: string = "";
 
@@ -309,7 +693,7 @@
         "Learn how top retailers are using labor demand forecasting to stay cost-efficient, match their staffing to customer demand, and maximize sales.Learn how top retailers are using labor demand forecasting to stay cost-efficient, match their staffing to customer demand, and maximize sales.",
       image:
         "https://images.unsplash.com/photo-1556761175-4b46a572b786?q=80&w=1600&auto=format&fit=crop",
-      href: "#",
+      href: "#"
     },
     {
       id: 2,
@@ -319,7 +703,7 @@
         "Learn how top retailers are using labor demand forecasting to stay cost-efficient, match their staffing to customer demand, and maximize sales.Learn how top retailers are using labor demand forecasting to stay cost-efficient, match their staffing to customer demand, and maximize sales.",
       image:
         "https://images.unsplash.com/photo-1556761175-4b46a572b786?q=80&w=1600&auto=format&fit=crop",
-      href: "#",
+      href: "#"
     },
     {
       id: 3,
@@ -329,8 +713,8 @@
         "Learn how top retailers are using labor demand forecasting to stay cost-efficient, match their staffing to customer demand, and maximize sales.Learn how top retailers are using labor demand forecasting to stay cost-efficient, match their staffing to customer demand, and maximize sales.",
       image:
         "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=1600&auto=format&fit=crop",
-      href: "#",
-    },
+      href: "#"
+    }
   ];
   let latestIndex = 0;
 
@@ -340,30 +724,65 @@
       title: "Check out state labor laws in our Compliance Hub",
       image:
         "https://images.unsplash.com/photo-1543286386-2e659306cd6c?q=80&w=600&auto=format&fit=crop",
-      href: "#",
+      href: "#"
     },
     {
       id: 2,
       title: "Guide to Fair Workweek Laws",
       image:
         "https://images.unsplash.com/photo-1554774853-b415df9eeb92?q=80&w=600&auto=format&fit=crop",
-      href: "#",
+      href: "#"
     },
     {
       id: 3,
       title: "Shift Pulse Report 2024",
       image:
         "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=600&auto=format&fit=crop",
-      href: "#",
-    },
+      href: "#"
+    }
   ];
-
-  let testsView: "grid" | "list" = "grid"; // view mode for TESTS only
-  const setTestsView = (v: "grid" | "list") => (testsView = v);
+  // ...existing code...
 </script>
 
 <!-- Replace the old breadcrumb + Filter with the new hero header -->
 <section class="testing-hero">
+  <!-- Decorative shapes -->
+  <div class="decor decor-left" aria-hidden="true">
+    <svg width="120" height="70" viewBox="0 0 120 70" fill="none">
+      <path
+        d="M5 20c20-20 40 20 60 0s40 20 50 10"
+        stroke="#FFC32E"
+        stroke-width="8"
+        stroke-linecap="round"
+        fill="none"
+      />
+      <path
+        d="M5 40c20-20 40 20 60 0s40 20 50 10"
+        stroke="#FFC32E"
+        stroke-width="8"
+        stroke-linecap="round"
+        fill="none"
+      />
+      <path
+        d="M5 60c20-20 40 20 60 0s40 20 50 10"
+        stroke="#FFC32E"
+        stroke-width="8"
+        stroke-linecap="round"
+        fill="none"
+      />
+    </svg>
+  </div>
+  <div class="decor decor-right" aria-hidden="true">
+    <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+      <path
+        d="M20 80c15-35 20-55 40-40s-5 35 10 40 20-15 30-20"
+        stroke="#B39CFF"
+        stroke-width="16"
+        stroke-linecap="round"
+        fill="none"
+      />
+    </svg>
+  </div>
 
   <!-- Centered content -->
   <div class="hero-inner">
@@ -382,16 +801,10 @@
       {/each}
     </nav>
 
-    <h1
-      class="max-w-2xl mx-auto mb-4 text-center text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl"
-    >
+    <h1 class="max-w-2xl mx-auto mb-4 text-center text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl">
       {pageTitle}
     </h1>
-    <p
-      class="max-w-2xl mb-6 mx-auto text-center font-light text-white-500 lg:mb-8 md:text-lg lg:text-xl dark:text-white-400"
-    >
-      {pageSubtitle}
-    </p>
+    <p class="max-w-2xl mb-6 mx-auto text-center font-light text-white-500 lg:mb-8 md:text-lg lg:text-xl dark:text-white-400">{pageSubtitle}</p>
 
     <!-- Blue section bottom wave -->
     <div class="hero-wave" aria-hidden="true">
@@ -417,39 +830,18 @@
       aria-controls="filtersBar"
     >
       <span>START YOUR SEARCH</span>
-      <svg
-        class:open={mobileFiltersOpen}
-        class="chev"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          d="M6 9l6 6 6-6"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-        />
+      <svg class:open={mobileFiltersOpen} class="chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
       </svg>
     </button>
 
     <!-- single-line toolbar: label + controls -->
-    <div
-      id="filtersBar"
-      class="filters-bar"
-      class:mobile-open={mobileFiltersOpen}
-    >
+    <div id="filtersBar" class="filters-bar" class:mobile-open={mobileFiltersOpen}>
       <span class="filters-label">FILTER BY</span>
       <div class="filters-row">
         <!-- Category -->
         <div class="pill">
-          <select
-            on:change={onSelectCategory}
-            bind:value={selectedCategoryId}
-            aria-label="Content type"
-          >
+          <select on:change={onSelectCategory} bind:value={selectedCategoryId} aria-label="Content type">
             <option value="">Content type</option>
             {#each categories as c}
               <option value={c.id}>{c.category_name}</option>
@@ -459,17 +851,8 @@
 
         <!-- Subcategory -->
         <div class="pill">
-          <select
-            on:change={onSelectSubcategory}
-            bind:value={selectedSubcategoryName}
-            aria-label="Topic"
-            disabled={!subcategories.length}
-          >
-            <option value=""
-              >{subcategories.length
-                ? "Topic"
-                : "Select category first"}</option
-            >
+          <select on:change={onSelectSubcategory} bind:value={selectedSubcategoryName} aria-label="Topic" disabled={!subcategories.length}>
+            <option value="">{subcategories.length ? "Topic" : "Select category first"}</option>
             {#each subcategories as sc}
               <option value={sc.category_name}>{sc.category_name}</option>
             {/each}
@@ -485,33 +868,14 @@
 
         <!-- Search -->
         <div class="pill pill-input">
-          <svg
-            class="icon"
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            aria-hidden="true"
-          >
-            <path
-              d="M21 21l-4.3-4.3m1.8-5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"
-              fill="none"
-              stroke="#9aa0a6"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
+          <svg class="icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M21 21l-4.3-4.3m1.8-5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" fill="none" stroke="#9aa0a6" stroke-width="2" stroke-linecap="round" />
           </svg>
-          <input
-            type="search"
-            placeholder="Search"
-            bind:value={searchTerm}
-            aria-label="Search tests"
-          />
+          <input type="search" placeholder="Search" bind:value={searchTerm} aria-label="Search tests" />
         </div>
 
         <!-- Button -->
-        <button class="pill-btn" type="button" on:click={showResults}
-          >Show results</button
-        >
+        <button class="pill-btn" type="button" on:click={showResults}>Show results</button>
       </div>
     </div>
   </div>
@@ -528,37 +892,18 @@
         {#if latestContent.length}
           {#key latestIndex}
             <article class="latest-card">
-              <img
-                class="latest-img"
-                src={latestContent[latestIndex].image}
-                alt=""
-              />
+              <img class="latest-img" src={latestContent[latestIndex].image} alt="" />
               <div class="latest-body">
                 <span class="type-pill">{latestContent[latestIndex].type}</span>
 
                 <a class="latest-title" href={latestContent[latestIndex].href}>
                   {latestContent[latestIndex].title}
-                  <svg
-                    class="link-arrow"
-                    viewBox="0 0 24 24"
-                    width="20"
-                    height="20"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M8 5l8 7-8 7"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
+                  <svg class="link-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                 </a>
 
-                <p class="latest-desc">
-                  {latestContent[latestIndex].description}
-                </p>
+                <p class="latest-desc">{latestContent[latestIndex].description}</p>
 
                 <div class="dots" role="tablist" aria-label="Latest slides">
                   {#each latestContent as _, i}
@@ -569,7 +914,7 @@
                       aria-selected={i === latestIndex}
                       role="tab"
                       on:click={() => (latestIndex = i)}
-                    ></button>
+                    />
                   {/each}
                 </div>
               </div>
@@ -591,21 +936,8 @@
                   <img class="thumb" src={f.image} alt="" />
                 </div>
                 <span class="feat-text">{f.title}</span>
-                <svg
-                  class="feat-arrow"
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M8 5l8 7-8 7"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
+                <svg class="feat-arrow" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </a>
             </li>
@@ -615,111 +947,63 @@
         <div class="subscribe-card" role="region" aria-label="Subscribe">
           <div class="sub-left">
             <div class="sub-icon">
-              <svg
-                viewBox="0 0 24 24"
-                width="22"
-                height="22"
-                aria-hidden="true"
-              >
-                <path d="M4 6h16v12H4z" fill="#FFC32E" /><path
-                  d="M4 6l8 6 8-6"
-                  fill="none"
-                  stroke="#A66E00"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path d="M4 6h16v12H4z" fill="#FFC32E"/><path d="M4 6l8 6 8-6" fill="none" stroke="#A66E00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
             <div class="sub-copy">
               <p class="sub-title">Subscribe to our newsletter</p>
-              <p class="sub-desc">
-                to get workplace tips delivered straight to your inbox
-              </p>
+              <p class="sub-desc">to get workplace tips delivered straight to your inbox</p>
             </div>
           </div>
           <a class="sub-btn" href="#">Subscribe now</a>
         </div>
       </aside>
     </div>
+
+    <!-- Divider between content section and cards -->
     <div
       class="content-divider"
       role="separator"
       aria-label="select from wide variety of categories"
     >
-      <span class="content-divider__text"
-        >select from wide variety of categories</span
-      >
+      <span class="content-divider__text">select from wide variety of categories</span>
     </div>
 
-    {#if !selectedCategory}
-      <!-- Divider between content section and cards -->
-
-      <!-- Categories grid ONLY when no category selected -->
-      <div class="categories-grid">
-        {#if categories.length}
-          {#each categories as c (c.id)}
-            <CardsSection
-              icon={c.image_url || "/assets/default-icon.svg"}
-              title={c.category_name}
-              description={c.description}
-              info={c.info}
-              category={c}
-              {showSubcategories}
-              kicker="CATEGORY"
-            />
-          {/each}
-        {:else}
-          <p class="empty-note">No categories available.</p>
-        {/if}
-      </div>
-    {/if}
+    <!-- NEW: Categories grid (renders CardsSection.svelte items) -->
+    <div class="categories-grid">
+      {#if categories.length}
+        {#each categories as c (c.id)}
+          <CardsSection
+            icon={c.image_url || "/assets/default-icon.svg"}
+            title={c.category_name}
+            description={c.description}
+            info={c.info}
+            category={c}
+            showSubcategories={showSubcategories}
+            kicker="CATEGORY"
+          />
+        {/each}
+      {:else}
+        <p class="empty-note">No categories available.</p>
+      {/if}
+    </div>
   </div>
 </section>
 
-{#if selectedCategory}
-  <main>
-    <div class="cards-container">
-      <!-- View toggle (hidden on small screens) -->
-      <div class="tests-toolbar" role="toolbar" aria-label="Test view options">
-        <button
-          type="button"
-          class="vt-btn"
-          class:active={testsView === 'grid'}
-          aria-pressed={testsView === 'grid'}
-          on:click={() => setTestsView('grid')}
-          title="Cards view"
-        >
-        <LayoutGrid size={16} />
-        </button>
-        <button
-          type="button"
-          class="vt-btn"
-          class:active={testsView === 'list'}
-          aria-pressed={testsView === 'list'}
-          on:click={() => setTestsView('list')}
-          title="List view"
-        >
-        <List size={16} />
-        </button>
-      </div>
-
-      <div class="cards-wrapper">
-        {#if tests?.length}
-          <div class="test-cards" data-view={testsView}>
-            {#each tests as test (test.id)}
-              <TestCardsSection {test} view={testsView} />
-            {/each}
-          </div>
-        {:else}
-          <p class="empty-note">
-            No tests found in {selectedCategory.category_name}.
-          </p>
-        {/if}
-      </div>
+<main>
+  <div class="cards-container">
+    <div class="cards-wrapper" class:list={tests.length > 0 && selectedCategory}>
+      {#if tests?.length}
+        <div class="test-cards-grid">
+          {#each tests as test (test.id)}
+            <TestCardsSection {test} />
+          {/each}
+        </div>
+      {/if}
     </div>
-  </main>
-{/if}
+  </div>
+</main>
 
 <style>
   /* Colors */
@@ -765,7 +1049,21 @@
     opacity: 0.6;
   }
 
-    /* Bottom wave of the hero (inherits --hero color) */
+  .hero-title {
+    font-size: clamp(28px, 4.2vw, 44px);
+    font-weight: 800;
+    margin: 0 0 10px;
+  }
+  .hero-subtitle {
+    max-width: 760px;
+    margin: 0 auto;
+    font-size: clamp(14px, 2vw, 18px);
+    line-height: 1.5;
+    color: #eef0ff;
+    opacity: 0.95;
+  }
+
+  /* Bottom wave of the hero (inherits --hero color) */
   .hero-wave {
     position: absolute;
     left: 0;
@@ -826,8 +1124,8 @@
     font-weight: 800;
     letter-spacing: 1.6px;
     font-size: 12px;
-    white-space: nowrap; /* keep on one line */
-    margin: 0; /* remove previous margins */
+    white-space: nowrap;   /* keep on one line */
+    margin: 0;             /* remove previous margins */
   }
 
   /* Controls row stays on one line; scrolls horizontally if cramped */
@@ -836,18 +1134,13 @@
     align-items: center;
     gap: 14px;
     flex: 1 1 auto;
-    flex-wrap: nowrap; /* force single line */
-    overflow-x: auto; /* allow horizontal scroll if needed */
+    flex-wrap: nowrap;           /* force single line */
+    overflow-x: auto;            /* allow horizontal scroll if needed */
     overflow-y: hidden;
-    scrollbar-width: thin; /* Firefox */
+    scrollbar-width: thin;       /* Firefox */
   }
-  .filters-row::-webkit-scrollbar {
-    height: 6px;
-  }
-  .filters-row::-webkit-scrollbar-thumb {
-    background: #d7daf3;
-    border-radius: 4px;
-  }
+  .filters-row::-webkit-scrollbar { height: 6px; }
+  .filters-row::-webkit-scrollbar-thumb { background: #d7daf3; border-radius: 4px; }
 
   /* Pills */
   .pill,
@@ -860,9 +1153,7 @@
   .pill {
     background: #fff;
     border: 1px solid #e6e7ee;
-    box-shadow:
-      0 1px 2px rgba(60, 64, 67, 0.16),
-      0 2px 6px rgba(60, 64, 67, 0.08);
+    box-shadow: 0 1px 2px rgba(60,64,67,.16), 0 2px 6px rgba(60,64,67,.08);
     display: flex;
     align-items: center;
     padding: 0 12px;
@@ -877,28 +1168,21 @@
     font-size: 14px;
     color: #2b2b2b;
   }
-  .pill select:disabled {
-    color: #9aa0a6;
-  }
+  .pill select:disabled { color: #9aa0a6; }
 
   /* Search grows a bit but stays on one line */
   .pill-input {
     min-width: 240px;
-    width: 320px; /* pleasant width on desktop */
+    width: 320px;       /* pleasant width on desktop */
     max-width: 420px;
     background: #fff;
     border: 1px solid #e6e7ee;
-    box-shadow:
-      0 1px 2px rgba(60, 64, 67, 0.16),
-      0 2px 6px rgba(60, 64, 67, 0.08);
+    box-shadow: 0 1px 2px rgba(60,64,67,.16), 0 2px 6px rgba(60,64,67,.08);
     padding: 0 12px;
     display: flex;
     align-items: center;
   }
-  .pill-input .icon {
-    margin-right: 8px;
-    flex: 0 0 auto;
-  }
+  .pill-input .icon { margin-right: 8px; flex: 0 0 auto; }
   .pill-input input {
     flex: 1 1 auto;
     height: 100%;
@@ -916,23 +1200,13 @@
     color: var(--accent);
     font-weight: 700;
     border: 2px solid var(--accent);
-    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.06);
+    box-shadow: 0 1px 2px rgba(60,64,67,.06);
     cursor: pointer;
-    transition:
-      background 0.15s,
-      color 0.15s,
-      transform 0.05s,
-      border-color 0.15s;
+    transition: background .15s, color .15s, transform .05s, border-color .15s;
     white-space: nowrap; /* keep button text one line */
   }
-  .pill-btn:hover {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent-2);
-  }
-  .pill-btn:active {
-    transform: translateY(1px);
-  }
+  .pill-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent-2); }
+  .pill-btn:active { transform: translateY(1px); }
 
   /* Mobile toggle (hidden by default) */
   .filters-toggle {
@@ -941,12 +1215,12 @@
 
   @media (max-width: 720px) {
     .filters-toggle {
-      display: flex; /* was inline-flex */
+      display: flex;            /* was inline-flex */
       align-items: center;
       gap: 8px;
-      width: fit-content; /* shrink to label width */
+      width: fit-content;       /* shrink to label width */
       max-width: 100%;
-      margin: 0 auto 10px; /* center horizontally */
+      margin: 0 auto 10px;      /* center horizontally */
       background: transparent;
       border: 0;
       color: var(--accent);
@@ -957,7 +1231,7 @@
       cursor: pointer;
     }
     .filters-toggle .chev {
-      transition: transform 0.2s ease;
+      transition: transform .2s ease;
     }
     .filters-toggle .chev.open {
       transform: rotate(180deg);
@@ -995,9 +1269,7 @@
       border-radius: 12px;
     }
 
-    .pill-input {
-      width: 100%;
-    }
+    .pill-input { width: 100%; }
 
     .pill-btn {
       font-weight: 700;
@@ -1056,8 +1328,8 @@
     border-bottom-right-radius: 16px;
     position: relative;
   }
-  .type-pill {
-    display: block; /* stack above the title */
+.type-pill {
+    display: block;            /* stack above the title */
     color: #7a68f5;
     letter-spacing: 1.3px;
     font-size: 12px;
@@ -1074,9 +1346,7 @@
     font-size: 20px;
     text-decoration: none;
   }
-  .latest-title:hover {
-    text-decoration: underline;
-  }
+  .latest-title:hover { text-decoration: underline; }
   .latest-desc {
     margin: 10px 0 12px;
     color: #5b5e6a;
@@ -1095,9 +1365,7 @@
     border: 0;
     cursor: pointer;
   }
-  .dot.active {
-    background: #3e27b7;
-  }
+  .dot.active { background: #3e27b7; }
 
   /* Featured list */
   .featured-list {
@@ -1106,37 +1374,32 @@
     padding: 0;
     border-bottom: 1px solid #ececf6;
   }
-  .featured-item {
-    border-top: 1px solid #ececf6;
-  }
+  .featured-item { border-top: 1px solid #ececf6; }
   .featured-item + .featured-item {
-    margin-top: 12px; /* space between items */
+    margin-top: 12px;            /* space between items */
   }
   .featured-link {
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: 16px; /* was 14px */
-    padding: 16px 2px; /* was 14px 2px */
+    gap: 16px;                  /* was 14px */
+    padding: 16px 2px;          /* was 14px 2px */
     text-decoration: none;
     color: #1b1f2a;
   }
   .thumb-wrap {
     position: relative;
-    width: 132px; /* bigger thumbnail */
+    width: 132px;                /* bigger thumbnail */
     height: 76px;
   }
   .thumb-bg {
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     background: var(--accent);
     border-radius: 10px;
   }
   .thumb {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
     object-fit: cover;
     border-radius: 10px;
     transform: translate(6px, 6px);
@@ -1145,12 +1408,10 @@
   .feat-text {
     font-weight: 700;
     color: #2b2b2b;
-    font-size: 17px; /* subtle text upsize */
+    font-size: 17px;             /* subtle text upsize */
     line-height: 1.35;
   }
-  .feat-arrow {
-    color: var(--accent-2);
-  }
+  .feat-arrow { color: var(--accent-2); }
 
   /* Subscribe card */
   .subscribe-card {
@@ -1163,19 +1424,13 @@
     padding: 18px;
     margin-top: 18px;
   }
-  .sub-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .sub-left { display: flex; align-items: center; gap: 12px; }
   .sub-icon {
     background: #ffcf6b;
     color: #a86a00;
-    width: 40px;
-    height: 40px;
+    width: 40px; height: 40px;
     border-radius: 10px;
-    display: grid;
-    place-items: center;
+    display: grid; place-items: center;
   }
   .sub-title {
     margin: 0 0 2px;
@@ -1195,9 +1450,7 @@
     font-weight: 800;
     white-space: nowrap;
   }
-  .sub-btn:hover {
-    background: var(--accent);
-  }
+  .sub-btn:hover { background: var(--accent); }
 
   /* Add space above the grid layout */
   .content-grid {
@@ -1225,82 +1478,51 @@
   }
   .content-divider__text {
     background: var(--accent-2); /* #0c017b */
-    color: #fff; /* white text */
+    color: #fff;                 /* white text */
     font-weight: 800;
-    font-size: 15px; /* a bit bigger */
+    font-size: 15px;             /* a bit bigger */
     letter-spacing: 0.04em;
-    padding: 10px 18px; /* a bit bigger */
+    padding: 10px 18px;          /* a bit bigger */
     border-radius: 9999px;
-    border: 0; /* remove light border */
+    border: 0;                   /* remove light border */
     box-shadow: 0 2px 10px rgba(12, 1, 123, 0.18);
     text-transform: none;
     white-space: nowrap;
   }
 
   @media (min-width: 981px) {
-    .content-grid {
-      margin-top: 24px;
-    }
-    .content-divider {
-      margin: 56px 0 16px;
-    }
+    .content-grid { margin-top: 24px; }
+    .content-divider { margin: 56px 0 16px; }
   }
 
   /* Responsive */
   @media (max-width: 980px) {
-    .content-grid {
-      grid-template-columns: 1fr;
-      gap: 28px;
-    }
+    .content-grid { grid-template-columns: 1fr; gap: 28px; }
   }
   @media (max-width: 560px) {
-    .thumb-wrap {
-      width: 110px;
-      height: 66px;
-    }
-    .latest-title {
-      font-size: 18px;
-    }
+    .thumb-wrap { width: 110px; height: 66px; }
+    .latest-title { font-size: 18px; }
   }
 
   /* Desktop-only: make content section wider and a touch larger */
   @media (min-width: 981px) {
-    .content-section {
-      padding: 40px 0 20px;
-    } /* a bit taller */
-    .content-container {
-      max-width: 1360px;
-    } /* was 1240px */
+    .content-section { padding: 40px 0 20px; }         /* a bit taller */
+    .content-container { max-width: 1360px; }          /* was 1240px */
 
     .content-grid {
-      grid-template-columns: 1.7fr 1.3fr; /* Latest wider, Featured still large */
-      gap: 56px; /* was 48px */
+      grid-template-columns: 1.7fr 1.3fr;              /* Latest wider, Featured still large */
+      gap: 56px;                                       /* was 48px */
     }
 
     /* Latest: longer + larger text area */
-    .latest-body {
-      padding: 36px 32px 28px;
-    } /* was 32px 28px 24px */
-    .latest-title {
-      font-size: 24px;
-    } /* was 22px */
-    .latest-desc {
-      font-size: 16px;
-      line-height: 1.7;
-    } /* more readable, taller */
+    .latest-body { padding: 36px 32px 28px; }          /* was 32px 28px 24px */
+    .latest-title { font-size: 24px; }                 /* was 22px */
+    .latest-desc { font-size: 16px; line-height: 1.7; }/* more readable, taller */
 
     /* Featured: bigger tiles */
-    .featured-link {
-      gap: 18px;
-      padding: 18px 4px;
-    } /* was 16px 2px */
-    .thumb-wrap {
-      width: 196px;
-      height: 112px;
-    } /* was 168px x 96px */
-    .feat-text {
-      font-size: 22px;
-    } /* was 20px */
+    .featured-link { gap: 18px; padding: 18px 4px; }   /* was 16px 2px */
+    .thumb-wrap { width: 196px; height: 112px; }       /* was 168px x 96px */
+    .feat-text { font-size: 22px; }                    /* was 20px */
   }
 
   /* Container to align cards with the page content width */
@@ -1310,55 +1532,30 @@
     padding: 0 16px 60px;
   }
 
-  /* Tests view toggle: hidden by default, shown ≥700px */
-  .tests-toolbar {
-    display: none;
-    gap: 8px;
-    justify-content: flex-end;
-    margin: 8px 0 16px;
-  }
-  @media (min-width: 700px) {
-    .tests-toolbar { display: flex; }
-  }
-  .vt-btn {
-    appearance: none;
-    border: 1px solid #e5e7eb;
-    background: #f8fafc;
-    color: #374151;
-    border-radius: 999px;
-    padding: 8px 12px;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .vt-btn.active {
-    background: #eef2ff;
-    border-color: #c7d2fe;
-    color: #4338ca;
-  }
-
-  /* Test cards layout switches by data-view */
-  .test-cards[data-view="grid"] {
+  /* Side-by-side test cards */
+  .test-cards-grid {
     display: grid;
     gap: 28px;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); /* was 320px */
     align-items: stretch;
   }
+
+  /* Force neat columns at common breakpoints */
   @media (min-width: 1024px) {
-    .test-cards[data-view="grid"] {
-      grid-template-columns: repeat(3, minmax(360px, 1fr));
+    .test-cards-grid {
+      grid-template-columns: repeat(3, minmax(360px, 1fr)); /* keep 3-up, but wider */
+    }
+  }
+  @media (min-width: 680px) and (max-width: 1023px) {
+    .test-cards-grid {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
   @media (max-width: 679px) {
-    .test-cards[data-view="grid"] {
+    .test-cards-grid {
       grid-template-columns: 1fr;
       gap: 18px;
     }
-  }
-  .test-cards[data-view="list"] {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
   }
 
   /* Grid that displays CardsSection items */
@@ -1376,17 +1573,11 @@
 
   @media (min-width: 1024px) {
     .categories-grid {
-      grid-template-columns: repeat(
-        3,
-        minmax(300px, 1fr)
-      ); /* neat 3-up like the mock */
+      grid-template-columns: repeat(3, minmax(300px, 1fr)); /* neat 3-up like the mock */
       gap: 32px;
     }
   }
   @media (max-width: 640px) {
-    .categories-grid {
-      grid-template-columns: 1fr;
-      gap: 18px;
-    }
+    .categories-grid { grid-template-columns: 1fr; gap: 18px; }
   }
 </style>

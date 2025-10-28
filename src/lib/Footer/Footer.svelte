@@ -242,14 +242,14 @@
       <div class="footer-links">
         <a href="#" class="locale">
           <Globe class="icon icon-4" />
-          <span>USA/Global</span>
+          <span>India/Global</span>
         </a>
         <span class="dot"></span>
-        <a href="#" class="link-muted">Legal</a>
+        <a href="/legal/terms" class="link-muted">Terms</a>
         <span class="dot"></span>
-        <a href="#" class="link-muted">Privacy Center</a>
+        <a href="/legal/privacy" class="link-muted">Privacy Center</a>
         <span class="dot"></span>
-        <a href="#" class="link-muted">Your Privacy Choices</a>
+        <a href="/legal/cookies" class="link-muted">Cookie Policy</a>
         <span class="dot"></span>
         <a href="#" class="link-muted">Sitemap</a>
       </div>
