@@ -112,7 +112,7 @@
   class="col-span-2 grid grid-cols-2 gap-4"
 >
 <div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
-  <span class="bg-[#f26a60] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+  <span class="bg-[#ffede9] rounded-full flex items-center justify-center w-16 h-16 mb-2">
     <SquareMousePointer
       class="w-14 h-12"
       strokeWidth={1}
@@ -125,7 +125,7 @@
   </p>
 </div>
 <div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
-  <span class="bg-[#f26a60] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+  <span class="bg-[#ffede9] rounded-full flex items-center justify-center w-16 h-16 mb-2">
     <Boxes
       class="w-14 h-12"
       strokeWidth={1}
@@ -138,7 +138,7 @@
   </p>
 </div>      
 <div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
-  <span class="bg-[#f26a60] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+  <span class="bg-[#ffede9] rounded-full flex items-center justify-center w-16 h-16 mb-2">
     <NotepadTextDashed
      class="w-14 h-12"
       strokeWidth={1}
@@ -151,7 +151,7 @@
   </p>
 </div>
 <div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
-  <span class="bg-[#f26a60] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+  <span class="bg-[#ffede9] rounded-full flex items-center justify-center w-16 h-16 mb-2">
     <FlaskConical
       class="w-14 h-12"
       strokeWidth={1}
