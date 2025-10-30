@@ -1,5 +1,5 @@
 <script>
-  import { ClipboardCheck, Truck, FlaskConical, ListTodo, BadgeCheck } from "lucide-svelte";
+  import { SquareMousePointer, Boxes, FlaskConical, NotepadTextDashed, BadgeCheck } from "lucide-svelte";
   export const PRIMARY = '#0c017b';
   export const ACCENT = '#f26a60';
   export const WAVE = '#ffede9';
@@ -109,50 +109,61 @@
       </div>
     </div>
     <div
-      class="col-span-2 space-y-8 md:grid md:grid-cols-2 md:gap-12 md:space-y-0"
-    >
-      <div>
-        <!-- Replace the inline SVG below with ClipboardCheck -->
-        <ClipboardCheck
-          class="w-10 h-10 mb-2 text-[#1746a2] md:w-12 md:h-12"
-          strokeWidth={2}
-          aria-hidden="true"
-        />
-        <p class="font-light text-gray-500 dark:text-gray-400">
-          Browse a variety of fields and partner labs to find the right fit.
-        </p>
-      </div>
-      <div>
-        <Truck
-          class="w-12 h-10 mb-2 text-[#1746a2] md:w-12 md:h-12"
-          strokeWidth={2}
-          aria-hidden="true"
-        />
-        <p class="font-light text-gray-500 dark:text-gray-400">
-          No more lab visits—we take care of pickup & regulations for you.
-        </p>
-      </div>
-      <div>
-        <FlaskConical
-          class="w-12 h-10 mb-2 text-[#1746a2] md:w-12 md:h-12"
-          strokeWidth={2}
-          aria-hidden="true"
-        />
-        <p class="font-light text-gray-500 dark:text-gray-400">
-          Tested by highly qualified experts, ensuring reliable & accurate results.
-        </p>
-      </div>
-      <div>
-        <ListTodo
-          class="w-12 h-10 mb-2 text-[#1746a2] md:w-12 md:h-12"
-          strokeWidth={2}
-          aria-hidden="true"
-        />
-        <p class="font-light text-gray-500 dark:text-gray-400">
-          Receive comprehensive reports with precise and reliable results
-        </p>
-      </div>
-    </div>
+  class="col-span-2 grid grid-cols-2 gap-4"
+>
+<div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
+  <span class="bg-[#f26a60] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+    <SquareMousePointer
+      class="w-14 h-12"
+      strokeWidth={1}
+      aria-hidden="true"
+      fill="white"
+    />
+  </span>
+  <p class="font-light text-gray-500 dark:text-gray-400 text-center">
+    Browse a variety of fields and partner labs to find the right fit.
+  </p>
+</div>
+<div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
+  <span class="bg-[#f26a60] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+    <Boxes
+      class="w-14 h-12"
+      strokeWidth={1}
+      aria-hidden="true"
+      fill="white"
+    />
+  </span>
+  <p class="font-light text-gray-500 dark:text-gray-400 text-center">
+    No more lab visits—we take care of pickup & regulations for you.
+  </p>
+</div>      
+<div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
+  <span class="bg-[#f26a60] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+    <NotepadTextDashed
+     class="w-14 h-12"
+      strokeWidth={1}
+      aria-hidden="true"
+      fill="white"
+    />
+  </span>
+  <p class="font-light text-gray-500 dark:text-gray-400 text-center">
+    Receive comprehensive reports with precise and reliable results
+  </p>
+</div>
+<div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
+  <span class="bg-[#f26a60] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+    <FlaskConical
+      class="w-14 h-12"
+      strokeWidth={1}
+      aria-hidden="true"
+      fill="white"
+    />
+  </span>
+  <p class="font-light text-gray-500 dark:text-gray-400 text-center">
+    Tested by highly qualified experts, ensuring reliable & accurate results.
+  </p>
+</div>
+</div>
   </div>
 </section>
 
