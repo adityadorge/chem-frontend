@@ -271,9 +271,7 @@
 
 <nav class="nav-bar {scrolled ? 'sticky' : ''}">
   <div class="container nav-contains">
-    <div class="app-name">
-      <a href="/"><span>APP NAME</span></a>
-    </div>
+      <a href="/"><span class="inter-brand"><span class="phi-big">φ</span>hial</span></a>
     <div class="nav-links">
       <!-- desktop (unchanged) -->
       <a
@@ -449,7 +447,7 @@
       <div class="mobile-topbar">
         <div class="brand">
           <img src="/favicon.png" alt="Logo" width="24" height="24" />
-          <span>APP NAME</span>
+          <span class="inter-brand">φhial</span>
         </div>
         <button class="close-btn" on:click={closeMobile} aria-label="Close menu">×</button>
       </div>
@@ -489,6 +487,8 @@
 {/if}
 
 <style>
+
+  @import url('https://fonts.googleapis.com/css2?family=Averia+Gruesa+Libre&display=swap');  
   /* Import Inter font */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -498,6 +498,30 @@
     --brand: #1746a2; 
   }
   * { font-family: var(--main-font); }
+
+  .inter-brand {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.05em;
+  color: #0c017b;
+  font-weight: 700;
+}
+
+.averia-brand {
+  font-family: 'Averia Gruesa Libre', cursive;
+  font-size: 2rem;
+  letter-spacing: 0.05em;
+  color: #1746a2;
+  font-weight: 700;
+}
+
+.phi-big {
+  font-size: 2.5rem;
+  vertical-align: middle;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0;
+}
 
   /* Avoid animating layout properties; keep transforms/opacity only */
   .nav-bar {
