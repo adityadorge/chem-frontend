@@ -11,20 +11,17 @@ html, body {
 /* Content Container */
 .container {
   font-family: "Inter", serif;
+  width: 100%;
   max-width: 1400px;
-  /* Limit content width */
   margin: 0 auto;
-  /* Center the content */
   padding: 0 15px;
   /* Add padding on the sides for small screens */
 }
 /* carousel Container */
 .carousel-container {
-  /* font-family: 'Alegreya', serif; */
+  width: 100%;
   max-width: 1600px;
-  /* Limit content width */
   margin: 0 auto;
-  /* Center the content */
   padding: 0 15px;
   /* Add padding on the sides for small screens */
 }
@@ -54,16 +51,13 @@ html, body {
 
 /* Card Container for testing page*/
 .card-container {
+  width: 100%;
   max-width: 1400px;
   display: flex;
   gap: 80px;
   justify-content: center; /* Align cards in the center */
   flex-wrap: wrap; /* Allow cards to wrap if the screen is too small */
-  /* padding: 20px; */
-  max-width: 1400px;
-  /* Limit content width */
   margin: 0 auto;
-  /* Center the content */
   padding: 0 15px;
   /* Add padding on the sides for small screens */
 }
