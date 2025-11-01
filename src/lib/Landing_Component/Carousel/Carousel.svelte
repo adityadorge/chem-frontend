@@ -105,7 +105,7 @@
   </div>
   <div class="hero-image-card">
     <div class="image-wrapper">
-      <img src={cards[current].img} alt="Hero Image" />
+      <img src={cards[current].img} alt="Hero_Image" />
       <div class="nav-arrows">
         <button on:click={() => manualNav(prevCard)} aria-label="Previous">
           <ArrowLeft size={18} aria-hidden="true" />
@@ -158,7 +158,7 @@
   margin-bottom: 24px;
 }
 
-.main-btn, .secondary-btn {
+.main-btn{
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -170,12 +170,6 @@
 .main-btn {
   background: #1746a2;
   color: #fff;
-}
-
-.secondary-btn {
-  background: #eaf1fb;
-  color: #1746a2;
-  border: 1px solid #1746a2;
 }
 
 .hero-desc {

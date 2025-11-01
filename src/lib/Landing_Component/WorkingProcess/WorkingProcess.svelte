@@ -1,5 +1,5 @@
 <script>
-  import { SquareMousePointer, Boxes, FlaskConical, NotepadTextDashed, BadgeCheck } from "lucide-svelte";
+  import { FolderSearch, Boxes, FlaskConical, NotepadText, BadgeCheck } from "lucide-svelte";
   export const PRIMARY = '#0c017b';
   export const ACCENT = '#f26a60';
   export const WAVE = '#ffede9';
@@ -112,8 +112,8 @@
   class="col-span-2 grid grid-cols-2 gap-4"
 >
 <div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
-  <span class="bg-[#ffede9] rounded-full flex items-center justify-center w-16 h-16 mb-2">
-    <SquareMousePointer
+  <span class="bg-[#d7e3fc] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+    <FolderSearch
       class="w-14 h-12"
       strokeWidth={1}
       aria-hidden="true"
@@ -125,7 +125,7 @@
   </p>
 </div>
 <div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
-  <span class="bg-[#ffede9] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+  <span class="bg-[#d7e3fc] rounded-full flex items-center justify-center w-16 h-16 mb-2">
     <Boxes
       class="w-14 h-12"
       strokeWidth={1}
@@ -138,8 +138,8 @@
   </p>
 </div>      
 <div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
-  <span class="bg-[#ffede9] rounded-full flex items-center justify-center w-16 h-16 mb-2">
-    <NotepadTextDashed
+  <span class="bg-[#d7e3fc] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+    <NotepadText
      class="w-14 h-12"
       strokeWidth={1}
       aria-hidden="true"
@@ -151,7 +151,7 @@
   </p>
 </div>
 <div class="bg-white shadow-lg rounded-lg p-5 flex flex-col items-center">
-  <span class="bg-[#ffede9] rounded-full flex items-center justify-center w-16 h-16 mb-2">
+  <span class="bg-[#d7e3fc] rounded-full flex items-center justify-center w-16 h-16 mb-2">
     <FlaskConical
       class="w-14 h-12"
       strokeWidth={1}

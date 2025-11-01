@@ -780,22 +780,7 @@
     display: block;
   }
 
-  /* Decorative squiggles */
-  .decor {
-    position: absolute;
-    pointer-events: none;
-    opacity: 0.9;
-  }
-  .decor-left {
-    left: clamp(8px, 6vw, 80px);
-    top: 80px;
-  }
-  .decor-right {
-    right: clamp(8px, 6vw, 120px);
-    bottom: 80px;
-  }
-
-  /* Light underlay below the wave, hosting the filter bar */
+    /* Light underlay below the wave, hosting the filter bar */
   /* Bigger light-blue section */
   .testing-underlay {
     position: relative;
