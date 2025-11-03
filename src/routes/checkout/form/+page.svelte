@@ -7,9 +7,7 @@
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
 
-  let canAddToCart = false;
-  let canMoveToAddress = false;
-  let lastRequisitionId: number | null = null;
+  let canProceed = false;
   let lastOrderId: string; // or string if you use order.order_id
 
   // Sample Analysis Request Form state
@@ -268,11 +266,9 @@ async function submitRequisition() {
       if (!res.ok) throw new Error(data?.detail || data?.error || "Failed to submit requisition.");
 
       toast.success("Requisition submitted.");
-      canAddToCart = true;
-      canMoveToAddress = true;
-      lastRequisitionId = data.requisition_id;
+      canProceed = true;
       lastOrderId = data.order_id; // <-- Store order ID if returned
-      localStorage.setItem("current_order_id", lastOrderId); // <-- Store in localStorage
+      localStorage.setItem("current_order_id", lastOrderId); 
     } catch (e: any) {
       toast.error(e?.message || "Failed to submit requisition.");
     } finally {
@@ -281,7 +277,7 @@ async function submitRequisition() {
   }
 
   async function addToCartAfterForm() {
-  if (!lastRequisitionId) {
+  if (!canProceed) {
     toast.error("Please fill and submit the form first.");
     return;
   }
@@ -293,9 +289,6 @@ async function submitRequisition() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        test_id: testIdParam,
-        quantity: testQtyParam ?? 1,
-        requisition_id: lastRequisitionId,
         order_id: lastOrderId, // <-- Pass order
       }),
     });
@@ -304,7 +297,7 @@ async function submitRequisition() {
       throw new Error(data.message || "Failed to add to cart");
     }
     toast.success("Test added to cart!");
-    canAddToCart = false;
+    canProceed = false;
     // Optionally, redirect to cart or pickup page
     // goto("/checkout/pickup");
   } catch (e: any) {
@@ -442,8 +435,8 @@ async function submitRequisition() {
     const sp = $page.url.searchParams;
     testIdParam = sp.get("test_id") || "";
     testNameParam = sp.get("test_name") || "";
-    const q = sp.get("quantity");
-    testQtyParam = q ? Number(q) : null;
+    // const q = sp.get("quantity");
+    // testQtyParam = q ? Number(q) : null;
   }
 </script>
 
@@ -883,7 +876,7 @@ async function submitRequisition() {
         >
           Add Test to Cart
         </button>
-        {#if canMoveToAddress && lastOrderId}
+        {#if canProceed && lastOrderId}
           <button
             class="w-full sm:w-auto rounded-lg bg-green-600 px-4 py-2 text-base sm:text-sm text-white font-medium hover:bg-green-700 transition"
             on:click={() => goto(`/checkout/pickup`)}

@@ -6,7 +6,7 @@
   import { user } from "$lib/store";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
-
+  import { currentOrderId } from "$lib/store/auth";
   // Sample Analysis Request Form state
   let sampleForm = {
     // Pickup details
@@ -72,7 +72,7 @@
           is_business_address: sampleForm.pickup.isBusinessAddress,
           pickup_instructions: sampleForm.pickup.pickupInstructions,
           access_notes: sampleForm.pickup.accessNotes,
-          order_id: orderId, // <-- add this line
+          order_id: $currentOrderId,
         }),
         credentials: "include",
       });

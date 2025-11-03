@@ -30,11 +30,28 @@ export function clearUser(): void {
     localStorage.removeItem('user');
 }
 
-// Function to load user info from local storage on app initialization
 export function loadUser(): void {
+  if (typeof window === 'undefined') return; // Prevent SSR errors
+
   const storedUser = localStorage.getItem('user');
   if (storedUser) {
-        user.set(JSON.parse(storedUser));
-        isAuthenticated.set(true);
+    try {
+      const parsed = JSON.parse(storedUser);
+      user.set(parsed);
+      isAuthenticated.set(true);
+    } catch {
+      localStorage.removeItem('user'); // corrupted data
     }
+  }
+}
+
+export const currentOrderId = writable<string | null>(
+  typeof window !== 'undefined' ? localStorage.getItem("current_order_id") : null
+);
+
+if (typeof window !== 'undefined') {
+  currentOrderId.subscribe((value) => {
+    if (value) localStorage.setItem("current_order_id", value);
+    else localStorage.removeItem("current_order_id");
+  });
 }

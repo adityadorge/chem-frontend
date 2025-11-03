@@ -446,7 +446,6 @@
     <div class="mobile-panel" on:click|stopPropagation>
       <div class="mobile-topbar">
         <div class="brand">
-          <img src="/favicon.png" alt="Logo" width="24" height="24" />
           <span class="inter-brand">φhial</span>
         </div>
         <button class="close-btn" on:click={closeMobile} aria-label="Close menu">×</button>
@@ -457,9 +456,7 @@
           <li>
             <button class="list-row" on:click={() => go(item.href)} aria-label={item.label}>
               <span class="row-text">{item.label}</span>
-              <svg class="chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707A1 1 0 118.707 5.293l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-              </svg>
+              <span class="row-text">&gt;</span>
             </button>
           </li>
 
@@ -659,16 +656,23 @@
   .mobile-list li { border-bottom: 1px solid #eee; }
 
   .list-row {
-    width: 100%;
-    padding: 16px 16px;
-    text-align: left; background: none; border: 0; cursor: pointer;
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    font-size: clamp(16px, 4.2vw, 19px); color: #111;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Pushes arrow to the right */
+  gap: 8px;
+  width: 100%;
+  padding: 16px 16px;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: clamp(20px, 4.2vw, 20px);
+  color: #0c017b;
+  font-weight: 500;
+}
   .list-row:active { background-color: #f5f5f5; }
 
   .row-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .chevron { width: 14px; height: 14px; color: #9ca3af; flex: 0 0 auto; }
 
   /* -------- Solutions Mega Menu Styles (desktop only) -------- */
   .solutions-trigger {

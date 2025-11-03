@@ -65,62 +65,40 @@
     quantity = Number.isNaN(val) ? 1 : Math.max(1, Math.min(val, 999));
   }
 
-  async function handleAddToCart() {
-    if (!get(isAuthenticated)) {
-      toast.error("Please login to add items to your cart.");
-      return;
-    }
-    isAdding = true;
-    try {
-      const { access_token } = get(user) ?? {};
-      const res = await fetch(`${API_URL}/add-to-cart/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ test_id: test?.id, quantity }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.status !== "success") {
-        throw new Error(data.message || "Failed to add to cart");
-      }
-      toast.success(`Added ${quantity} ${test?.test_name} to cart!`);
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Failed to add to cart");
-    } finally {
-      isAdding = false;
-    }
-  }
+  // async function handleAddToCart() {
+  //   if (!get(isAuthenticated)) {
+  //     toast.error("Please login to add items to your cart.");
+  //     return;
+  //   }
+  //   isAdding = true;
+  //   try {
+  //     const { access_token } = get(user) ?? {};
+  //     const res = await fetch(`${API_URL}/add-to-cart/`, {
+  //       method: "POST",
+  //       headers: {
+  //         Authorization: `Bearer ${access_token}`,
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ test_id: test?.id, quantity }),
+  //     });
+  //     const data = await res.json();
+  //     if (!res.ok || data.status !== "success") {
+  //       throw new Error(data.message || "Failed to add to cart");
+  //     }
+  //     toast.success(`Added ${quantity} ${test?.test_name} to cart!`);
+  //   } catch (e: unknown) {
+  //     toast.error(e instanceof Error ? e.message : "Failed to add to cart");
+  //   } finally {
+  //     isAdding = false;
+  //   }
+  // }
 
-  async function goToCheckout() {
+  async function goToCheckoutForm() {
     if (!get(isAuthenticated)) {
       toast.error("Please login before buying.");
       return;
     }
-    isAccepting = true;
-    try {
-      const { access_token } = get(user) ?? {};
-      const res = await fetch(`${API_URL}/add-to-ordersummary/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ test_id: test?.id, quantity }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.status !== "success") {
-        throw new Error(data.message || "Failed to add to order summary");
-      }
-      toast.success(`Added ${quantity} ${test?.test_name} to order summary!`);
-      // Include test info in query params for checkout header
-      goto(`/checkout/form?test_id=${test?.id}&quantity=${quantity}&test_name=${encodeURIComponent(test?.test_name || "")}`);
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Failed to proceed");
-    } finally {
-      isAccepting = false;
-    }
+    goto(`/checkout/form?test_id=${test?.id}&test_name=${encodeURIComponent(test?.test_name || "")}`);
   }
 
   // change later to select lab specific test
@@ -397,16 +375,16 @@
         <div class="mt-6 rounded-xl border border-gray-200 bg-white">
           <!-- Buttons -->
           <div class="flex items-center justify-end gap-3 p-4">
-            <button
+            <!-- <button
               class="rounded-lg bg-white px-4 py-2 text-indigo-600 ring-1 ring-inset ring-indigo-200 font-medium hover:bg-indigo-50 transition disabled:opacity-50"
               on:click={handleAddToCart}
               disabled={isAdding || isAccepting}
             >
               {isAdding ? "Adding..." : "Save"}
-            </button>
+            </button> -->
             <button
               class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-50"
-              on:click={goToCheckout}
+              on:click={goToCheckoutForm}
               disabled={isAdding || isAccepting}
             >
               {isAccepting ? "Processing..." : "Accept"}
