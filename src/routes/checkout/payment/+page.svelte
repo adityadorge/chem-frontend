@@ -3,7 +3,8 @@
     import { API_URL } from "$lib/store/api";
     import { user } from "$lib/store";
     import { page } from "$app/stores";
-    
+    import { toast } from "svelte-sonner";
+
     let billing = "yearly";
     let cardholder = "";
     let cardNumber = "";
@@ -37,6 +38,26 @@
             error = e instanceof Error ? e.message : "Could not load order summaries";
         } finally {
             loading = false;
+        }
+    }
+
+    async function removeOrderSummaryItem(itemId: number) {
+        try {
+            const res = await fetch(`${API_URL}/delete-ordersummary-item/${itemId}/`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${$user.access_token}` },
+                credentials: "include",
+            });
+            const data = await res.json();
+            if (!res.ok || data.status !== "success") {
+                toast.error(data.message || "Failed to remove item");
+                return;
+            }
+            toast.success("Order removed!");
+            // Refresh the order summary list
+            fetchOrderSummaries();
+        } catch (e) {
+            toast.error("Could not remove item");
         }
     }
 </script>
@@ -155,38 +176,53 @@
                     <div>No pending orders found.</div>
                 {:else}
                     <div class="mb-8">
+                        <div class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-700"><circle cx="14" cy="14" r="12"/><path d="M9 14l3 3 5-5"/></svg>
+                            Order Summary
+                        </div>
                         {#each orderSummaries as order}
-                            <div class="border rounded-lg p-4 bg-gray-50 mb-4">
-                                <div class="flex justify-between mb-2">
-                                    <span>Test Name:</span>
-                                    <span>{order.test_name}</span>
+                            <div class="border rounded-2xl p-6 bg-blue-50 mb-6 shadow-sm flex flex-col gap-2 relative group order-summary-card">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="font-semibold text-lg text-blue-900">{order.test_name}</div>
+                                    <button
+                                        class="ml-2 px-3 py-1 bg-red-500 text-white rounded-full text-sm font-semibold hover:bg-red-600 transition"
+                                        on:click={() => removeOrderSummaryItem(order.id)}
+                                        aria-label="Remove order"
+                                    >
+                                        ✕ Remove
+                                    </button>
                                 </div>
-                                <div class="flex justify-between mb-2">
-                                    <span>Price per Sample:</span>
-                                    <span>₹{order.test_price}</span>
+                                <div class="flex flex-wrap gap-6 text-gray-700 text-base">
+                                    <div>
+                                        <span class="font-medium">Price/sample:</span>
+                                        <span class="ml-1 text-blue-700 font-semibold">₹{order.test_price}</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Quantity:</span>
+                                        <span class="ml-1">{order.number_of_samples}</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Total:</span>
+                                        <span class="ml-1 text-pink-700 font-bold">₹{order.total_price}</span>
+                                    </div>
                                 </div>
-                                <div class="flex justify-between mb-2">
-                                    <span>Quantity:</span>
-                                    <span>{order.number_of_samples}</span>
-                                </div>
-                                <div class="flex justify-between font-bold text-lg mt-4">
-                                    <span>Total Price:</span>
-                                    <span>₹{order.total_price}</span>
+                                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
+                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">Pending</span>
                                 </div>
                             </div>
                         {/each}
+                        <div class="flex justify-between items-center font-bold text-xl mt-6 border-t pt-6">
+                            <span class="text-gray-700">Final Total</span>
+                            <span class="text-blue-700">₹{grandTotal}</span>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-end font-bold text-xl mt-4 border-t pt-4">
-                        <span>Final Total</span>
-                        <span>₹{grandTotal}</span>
-                    </div>
-                {/if}
                     <div class="flex justify-between items-end font-bold text-lg mt-4">
                         <span>Billed Now</span>
                     </div>
                     <div class="text-gray-500 text-sm mt-4">
                         All sales are charged in USD and all sales are final. You will be charged $60.00 USD immediately. You will be charged $60.00 USD yearly thereafter while the subscription is active.
                     </div>
+                {/if}
                 </div>
 
                 <!-- Order Summary Section -->
@@ -195,4 +231,14 @@
         </div>
     </div>
 </div>
+
+<style>
+/* Add these styles for improved UI */
+.order-summary-card {
+    transition: box-shadow 0.2s;
+}
+.order-summary-card:hover {
+    box-shadow: 0 4px 16px rgba(44, 62, 80, 0.08);
+}
+</style>
 

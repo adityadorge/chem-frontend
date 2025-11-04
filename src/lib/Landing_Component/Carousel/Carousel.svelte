@@ -89,16 +89,16 @@
             Solutions
         </p>
         <h1 style="color:{PRIMARY}">{@html cards[current].title}</h1>
-        <div class="mb-[24px] flex flex-row gap-2 md:gap-4 md:flex-col">
+        <div class="mb-[24px] flex flex-row gap-2 md:gap-2 items-center justify-start">
             <a
                 class="main-btn inline-flex justify-center"
                 href="#"
-                style="background-color:{PRIMARY}">Get Started</a
-            >
+                style="background-color:{PRIMARY}; min-width: 120px; padding: 10px 22px; font-size: 1.125rem; border-radius: 9px; height: 48px;"
+            >Get Started</a>
             <a
                 href="#"
                 class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-[color:var(--primary)] transition-colors hover:bg-[color:var(--wave)]"
-                style="--primary:{PRIMARY}; --wave:{WAVE}"
+                style="--primary:{PRIMARY}; --wave:{WAVE}; font-size: 1.05rem; height: 48px; padding: 10px 14px; border-radius: 9px;"
             >
                 <Play size={18} style="color:{PRIMARY}" />
                 See our Services
@@ -178,17 +178,19 @@
     }
 
     .main-btn {
-        padding: 12px 24px;
-        border-radius: 8px;
+        padding: 10px 22px;
+        border-radius: 9px;
         font-weight: 600;
         text-decoration: none;
-        font-size: 1rem;
-        transition: background 0.2s;
-    }
-
-    .main-btn {
+        font-size: 1.125rem;
+        height: 48px;
+        min-width: 120px;
         background: #1746a2;
         color: #fff;
+        transition: background 0.2s, transform 0.12s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .hero-desc {

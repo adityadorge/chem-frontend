@@ -4,73 +4,13 @@
 
 /* Global font */
 html, body {
-  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-}
-
-/* Content Container */
-.container {
-  font-family: "Inter", serif;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 15px;
-  /* Add padding on the sides for small screens */
-}
-/* carousel Container */
-.carousel-container {
-  width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 15px;
-  /* Add padding on the sides for small screens */
-}
-
-.flex-row {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-}
-
-@media (max-width: 768px) {
-  .flex-row {
-    flex-direction: column;
-  }
-}
-
-/* Default blur effect for all slides */
-.splide__slide {
-  transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out; /* Smooth transition */
-  transform: scale(0.98); /* Slightly shrink side slides */
-}
-
-/* Remove blur effect from the active (centered) slide */
-.splide__slide.is-active {
-  transform: scale(1); /* Restore full size */
-}
-
-/* Card Container for testing page*/
-.card-container {
-  width: 100%;
-  max-width: 1400px;
-  display: flex;
-  gap: 80px;
-  justify-content: center; /* Align cards in the center */
-  flex-wrap: wrap; /* Allow cards to wrap if the screen is too small */
-  margin: 0 auto;
-  padding: 0 15px;
-  /* Add padding on the sides for small screens */
-}
-.testpage-container {
-  width: 100%;
-  max-width: 1350px;
-  margin: 0 auto;
-  padding: 20px;
-  /* padding: 0 15px; */
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 
 }
 
 
-@media screen and (max-width: 576px){}
-@media (min-width: 577px) and (max-width: 768px){}
-@media (min-width: 769px) and (max-width: 992px){}
-@media (min-width: 1400px) {}
+/* Utility: Hide scrollbars on mobile */
+body {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+}
+
