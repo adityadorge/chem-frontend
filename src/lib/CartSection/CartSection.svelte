@@ -6,19 +6,33 @@
     import { user, isAuthenticated } from "$lib/store";
     import { writable } from "svelte/store";
     import { goto } from "$app/navigation";
-    // Define the type for cart items
+    import { browser } from "$app/environment";
+
     type CartItem = {
         id: number;
         name: string;
         price: number;
-        number_of_samples: number; // <-- use this
+        number_of_samples: number;
         image: string;
     };
 
     export let isOpen = false;
     export const cartItems = writable<CartItem[]>([]);
 
-    // Fetch cart items from the backend
+    // Responsive: track window width
+    let width = 1200;
+    if (browser) {
+        onMount(() => {
+            width = window.innerWidth;
+            const resize = () => width = window.innerWidth;
+            window.addEventListener('resize', resize);
+            return () => window.removeEventListener('resize', resize);
+        });
+    }
+
+    $: isMobile = width <= 480;
+    $: isTablet = width > 480 && width <= 900;
+
     $: if ($isAuthenticated && isOpen) {
         fetchCart();
     }
@@ -67,33 +81,6 @@
     function closeCart() {
         isOpen = false;
     }
-
-    // async function updateQuantity(id: number, newQuantity: number) {
-    //     if (newQuantity < 1) return;
-
-    //     try {
-    //         const response = await fetch(`${API_URL}/cart/update/`, {
-    //             method: "PATCH",
-    //             headers: {
-    //                 Authorization: `Bearer ${$user?.access_token}`,
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify({ cart_id: id, number_of_samples: newQuantity }),
-    //         });
-
-    //         if (!response.ok) throw new Error("Failed to update quantity");
-
-    //         cartItems.update((items) =>
-    //             items.map((item) =>
-    //                 item.id === id ? { ...item, number_of_samples: newQuantity } : item,
-    //             ),
-    //         );
-    //     } catch (error) {
-    //         toast.error("Failed to update number of samples");
-    //         console.error(error);
-    //     }
-    // }
-
     async function removeItem(id: number) {
         try {
             const response = await fetch(`${API_URL}/cart/delete/${id}/`, {
@@ -120,42 +107,37 @@
         }
     }
 
-
     async function proceedToCheckout() {
-    try {
-        const response = await fetch(`${API_URL}/add-cart-to-ordersummary/`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${$user?.access_token}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                cart: $cartItems
-            }),
-        });
+        try {
+            const response = await fetch(`${API_URL}/add-cart-to-ordersummary/`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${$user?.access_token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    cart: $cartItems
+                }),
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        if (!response.ok || data.status !== "success") {
-            toast.error(data.message || "Failed to proceed to checkout");
-            return;
+            if (!response.ok || data.status !== "success") {
+                toast.error(data.message || "Failed to proceed to checkout");
+                return;
+            }
+
+            toast.success("Order summary created!");
+            goto("/checkout/payment");
+        } catch (error) {
+            toast.error("Something went wrong!");
+            console.error(error);
         }
-
-        toast.success("Order summary created!");
-        // cartItems.set([]); // Clear cart
-        // Redirect to checkout page (adjust the path as needed)
-        goto("/checkout/payment");
-    } catch (error) {
-        toast.error("Something went wrong!");
-        console.error(error);
     }
-}
 
-    // Reactively fetch cart when opened or when auth changes
     $: if (isOpen && $isAuthenticated) {
         fetchCart();
     }
-    // Clear cart when logged out
     $: if (! $isAuthenticated) {
         cartItems.set([]);
     }
@@ -167,10 +149,9 @@
     );
 </script>
 
-<!-- Cart Section -->
 {#if isOpen}
     <div
-        class="backdrop"
+        class="backdrop {isMobile ? 'mobile' : isTablet ? 'tablet' : ''}"
         role="button"
         tabindex="0"
         aria-label="Close cart"
@@ -180,15 +161,27 @@
     >
         <div
             class="cart-container"
+            style="
+                width: {isMobile ? '100vw' : isTablet ? '90vw' : '500px'};
+                max-width: {isMobile ? '100vw' : isTablet ? '90vw' : '500px'};
+                top: {isMobile || isTablet ? 'auto' : '70px'};
+                border-radius: {isMobile || isTablet ? '18px 18px 0 0' : '20px'};
+            "
             role="presentation"
             aria-label="Cart container"
             transition:fade={{ duration: 200 }}
             on:click|stopPropagation
             on:keydown|stopPropagation
         >
-            <div class="cart-panel" transition:fly={{ x: 400, duration: 300 }}>
+            <div class="cart-panel" style="
+                min-height: {isMobile ? '35vh' : isTablet ? '40vh' : '400px'};
+                max-height: {isMobile ? '85vh' : isTablet ? '80vh' : 'calc(100vh - 60px)'};
+                border-radius: {isMobile || isTablet ? '18px 18px 0 0' : '20px'};
+            " transition:fly={{ x: isMobile ? 0 : 400, duration: 300 }}>
                 <div class="cart-header">
-                    <h2>Your Cart ({totalItems})</h2>
+                    <h2 style="font-size: {isMobile ? '1.1rem' : '1.4rem'}">
+                        Your Cart ({totalItems})
+                    </h2>
                     <button
                         class="close-btn"
                         on:click={closeCart}
@@ -219,40 +212,24 @@
                     {:else}
                         <div class="cart-items">
                             {#each $cartItems as item (item.id)}
-                                <div class="cart-item">
+                                <div class="cart-item" style="gap: {isMobile ? '8px' : '15px'};">
                                     <img
                                         src={item.image}
                                         alt={item.name}
                                         class="item-image"
+                                        style="width: {isMobile ? '44px' : isTablet ? '60px' : '80px'}; height: {isMobile ? '44px' : isTablet ? '60px' : '80px'};"
                                     />
                                     <div class="item-details">
-                                        <h3>{item.name}</h3>
+                                        <h3 style="font-size: {isMobile ? '0.95rem' : '18px'}">{item.name}</h3>
                                         <p>
                                             ${item.price.toFixed(2)} × {item.number_of_samples}
                                         </p>
                                     </div>
-                                    <div class="item-actions">
-                                        <!-- <button
-                                            class="quantity-btn"
-                                            on:click={() =>
-                                                updateQuantity(
-                                                    item.id,
-                                                    item.number_of_samples - 1,
-                                                )}
-                                            disabled={item.number_of_samples <= 1}
-                                            >−</button
-                                        > -->
+                                    <div class="item-actions" style="gap: {isMobile ? '6px' : '10px'};">
                                         <span>{item.number_of_samples}</span>
-                                        <!-- <button
-                                            class="quantity-btn"
-                                            on:click={() =>
-                                                updateQuantity(
-                                                    item.id,
-                                                    item.number_of_samples + 1,
-                                                )}>+</button
-                                        > -->
                                         <button
                                             class="remove-btn"
+                                            style="font-size: {isMobile ? '1.5rem' : '2rem'}"
                                             on:click={() => removeItem(item.id)}
                                             >×</button
                                         >
@@ -273,7 +250,7 @@
                 {/if}
 
                 <div class="cart-footer">
-                    <button class="checkout-btn" on:click={proceedToCheckout}>Proceed to Checkout</button>
+                    <button class="checkout-btn" style="font-size: {isMobile ? '0.95rem' : '1.1rem'}" on:click={proceedToCheckout}>Proceed to Checkout</button>
                 </div>
             </div>
         </div>
@@ -285,47 +262,34 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100svw;
-        height: 100svh;
+        width: 100vw;
+        height: 100vh;
         z-index: 99;
         display: flex;
         justify-content: flex-end;
     }
-
+    .backdrop.mobile, .backdrop.tablet {
+        justify-content: center !important;
+        align-items: flex-end !important;
+        z-index: 3000 !important;
+    }
     .cart-container {
         position: fixed;
-        top: 70px;
         right: 0;
-        width: 500px; /* Increased width */
-        max-height: calc(100vh - 60px);
-        z-index: 1000;
         pointer-events: auto;
         display: flex;
         flex-direction: column;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        background: white;
     }
-
     .cart-panel {
         width: 100%;
-        height: auto;
-        min-height: 400px; /* Increased min-height */
-        max-height: calc(100vh - 60px);
         background: white;
-        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        border-radius: 20px;
         z-index: 1000;
     }
-
-    .cart-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
-    }
-
     .cart-header {
         padding: 20px;
         border-bottom: 1px solid #eee;
@@ -333,31 +297,26 @@
         justify-content: space-between;
         align-items: center;
     }
-
     .close-btn {
         background: none;
         border: none;
         cursor: pointer;
         padding: 5px;
     }
-
     .cart-content {
         flex: 1;
         padding: 20px;
         overflow-y: auto;
     }
-
     .empty-message {
         text-align: center;
         color: #666;
         margin-top: 40px;
     }
-
     .cart-footer {
         padding: 20px;
         border-top: 1px solid #eee;
     }
-
     .checkout-btn {
         width: 100%;
         padding: 12px;
@@ -367,117 +326,45 @@
         border-radius: 50px;
         cursor: pointer;
         font-weight: bold;
+        transition: transform 0.3s;
     }
-
     .checkout-btn:hover {
         transform: scale(1.05);
-        transition: all 0.3s;
     }
-
-    .item-image {
-        width: 80px; /* increased image width */
-        height: 80px; /* increased image height */
-        object-fit: cover;
-        border-radius: 4px;
+    .cart-item {
+        display: flex;
+        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
     }
-
     .item-details {
         flex: 1;
     }
-
     .item-details h3 {
         margin: 0 0 5px 0;
-        font-size: 18px; /* increased font size */
     }
-
     .item-actions {
         display: flex;
         align-items: center;
-        gap: 10px; /* increased gap */
     }
-
     .remove-btn {
         background: none;
         border: none;
         color: #ff3d00;
         cursor: pointer;
-        font-size: 40px; /* increased font size */
         margin-left: 5px;
+        transition: color 0.2s;
     }
-
+    .remove-btn:hover {
+        color: #b71c1c;
+    }
     .cart-summary {
         padding: 15px 20px;
         border-top: 1px solid #eee;
     }
-
     .summary-row {
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
     }
-
-    /* Responsive cart for tablets and mobile */
-@media (max-width: 900px) {
-  .backdrop {
-    justify-content: center !important;
-    align-items: flex-end !important;
-    background: rgba(0,0,0,0.35) !important;
-    z-index: 3000 !important;
-  }
-  .cart-container {
-    position: static !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    max-height: 80vh !important;
-    border-radius: 18px 18px 0 0 !important;
-    box-shadow: 0 -2px 16px rgba(0,0,0,0.10) !important;
-    padding: 0 !important;
-    top: auto !important;
-    right: auto !important;
-    left: auto !important;
-    z-index: 3001 !important;
-  }
-  .cart-panel {
-    min-height: 40vh !important;
-    max-height: 80vh !important;
-    border-radius: 18px 18px 0 0 !important;
-    padding: 0 !important;
-    overflow-y: auto !important;
-  }
-}
-
-/* Extra small screens */
-@media (max-width: 480px) {
-  .cart-container {
-    width: 100vw;
-    max-width: 100vw;
-    max-height: 85vh;
-    border-radius: 16px 16px 0 0;
-    padding: 0;
-  }
-  .cart-panel {
-    min-height: 35vh;
-    max-height: 85vh;
-    padding: 0;
-  }
-  .cart-header,
-  .cart-footer,
-  .cart-summary {
-    padding: 12px 8px;
-  }
-  .item-image {
-    width: 44px;
-    height: 44px;
-  }
-  .item-details h3 {
-    font-size: 0.95rem;
-  }
-  .remove-btn {
-    font-size: 1.5rem;
-  }
-  .checkout-btn {
-    padding: 12px;
-    font-size: 0.95rem;
-  }
-}
 </style>

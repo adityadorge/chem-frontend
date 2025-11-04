@@ -22,8 +22,11 @@
     Zap,
     Smile,
     ChevronRight,
-    ChevronDown ,
-    ChevronUp
+    ChevronDown,
+    ChevronUp,
+    PackageCheck,
+    PackageOpen,
+    Blocks
   } from "lucide-svelte";
 
   let scrolled = false;
@@ -57,7 +60,7 @@
 
     const mq = window.matchMedia("(max-width: 900px)");
     isMobile = mq.matches;
-    mq.addEventListener("change", e => isMobile = e.matches);
+    mq.addEventListener("change", (e) => (isMobile = e.matches));
   });
 
   async function fetchCategories() {
@@ -117,8 +120,8 @@
     ticking = true;
     requestAnimationFrame(() => {
       const y = window.scrollY || 0;
-      const ON = 70;   // turn sticky on after this
-      const OFF = 30;  // turn sticky off only when above is undone enough
+      const ON = 70; // turn sticky on after this
+      const OFF = 30; // turn sticky off only when above is undone enough
       scrolled = scrolled ? y > OFF : y > ON;
       ticking = false;
     });
@@ -193,36 +196,57 @@
     { label: "Hospitality", href: "/solutions/hospitality", icon: Utensils },
     { label: "Healthcare", href: "/solutions/healthcare", icon: HeartPulse },
     { label: "Hotels", href: "/solutions/hotels", icon: Hotel },
-    { label: "See all industries", href: "/solutions/industries", icon: Building2 }
+    {
+      label: "See all industries",
+      href: "/solutions/industries",
+      icon: Building2,
+    },
   ];
 
   const businessTypes: MegaItem[] = [
-    { label: "Single location", href: "/solutions/single-location", icon: MapPin },
-    { label: "Multi-location", href: "/solutions/multi-location", icon: MapPin },
+    {
+      label: "Single location",
+      href: "/solutions/single-location",
+      icon: MapPin,
+    },
+    {
+      label: "Multi-location",
+      href: "/solutions/multi-location",
+      icon: MapPin,
+    },
     { label: "Franchise", href: "/solutions/franchise", icon: Store },
-    { label: "Enterprise", href: "/solutions/enterprise", icon: Building2 }
+    { label: "Enterprise", href: "/solutions/enterprise", icon: Building2 },
   ];
 
   const businessOutcomes: MegaItem[] = [
-    { label: "Profitability", href: "/solutions/profitability", icon: TrendingUp },
+    {
+      label: "Profitability",
+      href: "/solutions/profitability",
+      icon: TrendingUp,
+    },
     { label: "Compliance", href: "/solutions/compliance", icon: ShieldCheck },
     { label: "Efficiency", href: "/solutions/efficiency", icon: Zap },
-    { label: "Team engagement", href: "/solutions/team-engagement", icon: Smile }
+    {
+      label: "Team engagement",
+      href: "/solutions/team-engagement",
+      icon: Smile,
+    },
   ];
 
   const latestResource = {
-    image: "/assets/solutions/national-cancer-institute-DYQfoftWGXw-unsplash.jpg", // replace with actual asset
+    image:
+      "/assets/solutions/national-cancer-institute-DYQfoftWGXw-unsplash.jpg", // replace with actual asset
     title: "Guide: Cost saving hacks",
     excerpt:
       "Strategies & tools to build a resilient, cost‑efficient operation.",
-    href: "/resources/cost-saving-hacks"
+    href: "/resources/cost-saving-hacks",
   };
 
   // Optional: enable first tap on touch devices to just open mega menu, second tap navigates.
   function handleSolutionsClick(e: MouseEvent) {
     // Only intercept on large screens (desktop mega menu visible) AND touch/pointer coarse
-    if (window.matchMedia('(max-width: 768px)').matches) return; // mobile uses normal nav
-    if (window.matchMedia('(pointer: coarse)').matches && !solutionsOpen) {
+    if (window.matchMedia("(max-width: 768px)").matches) return; // mobile uses normal nav
+    if (window.matchMedia("(pointer: coarse)").matches && !solutionsOpen) {
       e.preventDefault();
       openSolutions();
     }
@@ -248,7 +272,10 @@
   async function handleLogout() {
     loggingOut = true; // add
     try {
-      await fetch(`${API_URL}/auth/logout/`, { method: "POST", credentials: "include" });
+      await fetch(`${API_URL}/auth/logout/`, {
+        method: "POST",
+        credentials: "include",
+      });
       toast.success("Logged out");
     } catch (_) {
       // no-op
@@ -266,12 +293,16 @@
 <svelte:window
   on:scroll={handleScroll}
   on:click={onWindowClick}
-  on:keydown={(e)=>{ if (e.key === 'Escape') profileOpen = false; }}
+  on:keydown={(e) => {
+    if (e.key === "Escape") profileOpen = false;
+  }}
 />
 
 <nav class="nav-bar {scrolled ? 'sticky' : ''}">
   <div class="container nav-contains">
-      <a href="/"><span class="inter-brand"><span class="phi-big">φ</span>hial</span></a>
+    <a href="/"
+      ><span class="inter-brand"><span class="phi-big">φ</span>hial</span></a
+    >
     <div class="nav-links">
       <!-- desktop (unchanged) -->
       <a
@@ -279,8 +310,8 @@
         class="mega-box-btn"
         on:click|preventDefault={() => goto("/testing")}
         on:mouseenter={handleMouseEnter}
-        on:mouseleave={handleMouseLeave}
-      >Testing</a>
+        on:mouseleave={handleMouseLeave}>Testing</a
+      >
       <a
         href="/solutions"
         class="solutions-trigger {solutionsOpen ? 'active' : ''}"
@@ -289,7 +320,12 @@
         on:mouseleave={scheduleCloseSolutions}
         on:blur={scheduleCloseSolutions}
         on:click={handleSolutionsClick}
-        on:keydown={(e)=>{ if(e.key === 'Escape'){ closeSolutionsImmediate(); (e.currentTarget as HTMLElement).blur(); }}}
+        on:keydown={(e) => {
+          if (e.key === "Escape") {
+            closeSolutionsImmediate();
+            (e.currentTarget as HTMLElement).blur();
+          }
+        }}
         aria-haspopup="true"
         aria-expanded={solutionsOpen}
       >
@@ -312,11 +348,22 @@
             aria-expanded={profileOpen}
             aria-label="Open profile menu"
           >
-            <img src="/assets/profile-icon/profile.svg" alt="Profile" width="30" height="30" style="vertical-align: middle;" />
+            <img
+              src="/assets/profile-icon/profile.svg"
+              alt="Profile"
+              width="30"
+              height="30"
+              style="vertical-align: middle;"
+            />
           </button>
           {#if profileOpen}
             <div class="profile-dropdown" role="menu">
-              <a href="/dashboard" class="menu-item" role="menuitem" on:click={closeProfileMenu}>Dashboard</a>
+              <a
+                href="/dashboard"
+                class="menu-item"
+                role="menuitem"
+                on:click={closeProfileMenu}>Dashboard</a
+              >
               <button
                 class="menu-item danger"
                 role="menuitem"
@@ -339,8 +386,8 @@
         <!-- <a href="/register">Register</a> -->
       {/if}
       <!-- Desktop: inline cart section -->
-      <a href="#" class="cart-link" on:click|preventDefault={toggleCart}>
-        <img src="/assets/cart/cart1.svg" alt="Cart" width="30" height="30" />
+      <a href="#" on:click|preventDefault={toggleCart} class="cart-link">
+        <PackageOpen size={30} class="text-[#0c017b]" />
       </a>
       {#if cartOpen && !isMobile}
         <CartSection bind:isOpen={cartOpen} />
@@ -354,7 +401,7 @@
         on:click|preventDefault={toggleCart}
         aria-label="Open cart"
       >
-        <img src="/assets/cart/cart1.svg" alt="Cart" width="28" height="28" />
+        <PackageOpen size={30} class="text-[#0c017b]" />
       </a>
       <button class="hamburger" on:click={openMobile} aria-label="Open menu">
         <img src="/assets/navbar/menu-line.svg" alt="menu" />
@@ -381,7 +428,7 @@
             {#each industries as item}
               <li>
                 <a href={item.href} class="mega-link" role="menuitem">
-                  <span >
+                  <span>
                     <svelte:component this={item.icon} size={26} />
                   </span>
                   <span class="text">{item.label}</span>
@@ -427,10 +474,16 @@
           <h4 class="mega-heading">LATEST RESOURCES</h4>
           <div class="resource-card">
             <div class="res-image">
-              <img src={latestResource.image} alt="Resource cover" loading="lazy" />
+              <img
+                src={latestResource.image}
+                alt="Resource cover"
+                loading="lazy"
+              />
             </div>
             <div class="res-body">
-              <a class="res-title" href={latestResource.href}>{latestResource.title}</a>
+              <a class="res-title" href={latestResource.href}
+                >{latestResource.title}</a
+              >
               <p class="res-excerpt">{latestResource.excerpt}</p>
             </div>
           </div>
@@ -448,13 +501,19 @@
         <div class="brand">
           <span class="inter-brand">φhial</span>
         </div>
-        <button class="close-btn" on:click={closeMobile} aria-label="Close menu">×</button>
+        <button class="close-btn" on:click={closeMobile} aria-label="Close menu"
+          >×</button
+        >
       </div>
 
       <ul class="mobile-list">
         {#each mobileNav as item}
           <li>
-            <button class="list-row" on:click={() => go(item.href)} aria-label={item.label}>
+            <button
+              class="list-row"
+              on:click={() => go(item.href)}
+              aria-label={item.label}
+            >
               <span class="row-text">{item.label}</span>
               <span class="row-text">&gt;</span>
             </button>
@@ -463,8 +522,14 @@
           {#if item.href === "/enroll-lab" && !$isAuthenticated}
             <li class="auth-li">
               <div class="mobile-auth">
-                <button class="btn-outline auth-btn" on:click={() => go("/login")}>Login</button>
-                <button class="btn-primary auth-btn" on:click={() => go("/register")}>Register</button>
+                <button
+                  class="btn-outline auth-btn"
+                  on:click={() => go("/login")}>Login</button
+                >
+                <button
+                  class="btn-primary auth-btn"
+                  on:click={() => go("/register")}>Register</button
+                >
               </div>
             </li>
           {/if}
@@ -475,50 +540,42 @@
 {/if}
 
 {#if cartOpen && isMobile}
-  <div class="cart-mobile-overlay" on:click={() => cartOpen = false}>
+  <div class="cart-mobile-overlay" on:click={() => (cartOpen = false)}>
     <div class="cart-mobile-panel" on:click|stopPropagation>
-      <button class="cart-mobile-close" on:click={() => cartOpen = false} aria-label="Close cart">×</button>
+      <button
+        class="cart-mobile-close"
+        on:click={() => (cartOpen = false)}
+        aria-label="Close cart">×</button
+      >
       <CartSection bind:isOpen={cartOpen} />
     </div>
   </div>
 {/if}
 
 <style>
-
-  @import url('https://fonts.googleapis.com/css2?family=Averia+Gruesa+Libre&display=swap');  
-  /* Import Inter font */
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-  :root { 
-    --main-font: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-    --brand: #1746a2; 
+  .container {
+    max-width: 1240px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 2vw;
+    box-sizing: border-box;
   }
-  * { font-family: var(--main-font); }
 
   .inter-brand {
-  font-family: 'Inter', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 0.05em;
-  color: #0c017b;
-  font-weight: 700;
-}
+    font-family: "Inter", sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+    color: #0c017b;
+    font-weight: 700;
+  }
 
-.averia-brand {
-  font-family: 'Averia Gruesa Libre', cursive;
-  font-size: 2rem;
-  letter-spacing: 0.05em;
-  color: #1746a2;
-  font-weight: 700;
-}
-
-.phi-big {
-  font-size: 2.5rem;
-  vertical-align: middle;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: 0;
-}
+  .phi-big {
+    font-size: 2.5rem;
+    vertical-align: middle;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
 
   /* Avoid animating layout properties; keep transforms/opacity only */
   .nav-bar {
@@ -529,11 +586,14 @@
     z-index: 1000;
     width: 85%;
     border-radius: 40px;
-    background-color: rgba(255,255,255,0.9);
+    background-color: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    transition: background-color .2s ease, box-shadow .2s ease, transform .2s ease;
-    box-shadow: 0 3px 12px rgba(0,0,0,.12);
+    transition:
+      background-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
     will-change: transform;
     transform: translateZ(0);
   }
@@ -542,8 +602,8 @@
     width: 100%;
     margin: 0;
     border-radius: 0;
-    box-shadow: 0 3px 12px rgba(0,0,0,.18);
-    background-color: rgba(255,255,255,.95);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
+    background-color: rgba(255, 255, 255, 0.95);
   }
 
   /* Mobile: keep dimensions constant to prevent bounce */
@@ -562,64 +622,123 @@
     }
   }
 
-  .nav-contains { display: flex; justify-content: space-between; align-items: center; }
-  .nav-links { display: flex; align-items: center; gap: 15px; }
-.nav-links a { 
-  text-decoration: none; 
-  padding: 6px 12px; 
-  font-size: .9rem; 
-  color: #414141; 
-  border-radius: 50px; 
-  font-weight: 500; 
-  transition: background-color .2s ease, color .2s ease; 
-  cursor: pointer; 
-}
-
-/* Limit hover styling to top-level nav links only */
-.nav-links > a:hover { 
-  background-color: #1746a2; 
-  color: #fff; 
-}
-
-/* Keep dropdown (Dashboard) text dark and readable on hover */
-.profile-dropdown .menu-item { 
-  color: #1f2937; /* slate-800 */
-}
-.profile-dropdown .menu-item:hover,
-.profile-dropdown .menu-item:focus {
-  background: #eaf1fb;  /* light brand tint */
-  color: #111827;       /* gray-900 */
-}
-
-  .quote-btn { 
-    background-color: #1746a2; 
-    color: #fff !important; 
-    padding: 6px 12px; 
-    font-size: .9rem; 
-    border-radius: 50px; 
-    font-weight: 600; 
-    transition: all .2s; 
+  .nav-contains {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-  .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 8px; }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .nav-links a {
+    text-decoration: none;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    color: #414141;
+    border-radius: 50px;
+    font-weight: 500;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+    cursor: pointer;
+  }
+
+  /* Limit hover styling to top-level nav links only */
+  .nav-links > a:hover {
+    background-color: #1746a2;
+    color: #fff;
+  }
+
+  /* Keep dropdown (Dashboard) text dark and readable on hover */
+  .profile-dropdown .menu-item {
+    color: #1f2937; /* slate-800 */
+  }
+  .profile-dropdown .menu-item:hover,
+  .profile-dropdown .menu-item:focus {
+    background: #eaf1fb; /* light brand tint */
+    color: #111827; /* gray-900 */
+  }
+
+  .quote-btn {
+    background-color: #1746a2;
+    color: #fff !important;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+  }
 
   /* Mobile overlay + panel (responsive) */
   .mobile-overlay {
-    position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.35);
-    width: 100vw; max-width: 100vw; overflow-x: hidden;
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.35);
+    width: 100vw;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
   .mobile-panel {
-    position: absolute; inset: 0; background: #fff;
-    display: grid; grid-template-rows: auto auto 1fr;
-    height: 100dvh; animation: fadeIn .15s ease-out;
-    width: 100vw; max-width: 100vw; overflow-x: hidden;
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    height: 100dvh;
+    animation: fadeIn 0.15s ease-out;
+    width: 100vw;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: translateY(0) } }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-  .mobile-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 14px; border-bottom: 1px solid #eee; }
-  .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; }
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 14px;
+    border-bottom: 1px solid #eee;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 18px;
+  }
 
-  .close-btn { appearance: none; background: none; border: 0; font-size: 28px; line-height: 1; cursor: pointer; color: #333; padding: 4px 8px; }
+  .close-btn {
+    appearance: none;
+    background: none;
+    border: 0;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    color: #333;
+    padding: 4px 8px;
+  }
 
   .mobile-auth {
     padding: 12px 14px;
@@ -628,7 +747,9 @@
     gap: 10px;
     background: #fff;
   }
-  .auth-li { border-bottom: 0; }
+  .auth-li {
+    border-bottom: 0;
+  }
 
   .auth-btn {
     padding: 12px 14px;
@@ -647,32 +768,50 @@
     color: var(--brand);
     border: 1px solid var(--brand);
   }
-  .btn-primary:active, .btn-outline:active { transform: scale(0.98); }
-  .btn-primary:focus-visible, .btn-outline:focus-visible {
-    outline: 2px solid #111; outline-offset: 2px;
+  .btn-primary:active,
+  .btn-outline:active {
+    transform: scale(0.98);
+  }
+  .btn-primary:focus-visible,
+  .btn-outline:focus-visible {
+    outline: 2px solid #111;
+    outline-offset: 2px;
   }
 
-  .mobile-list { list-style: none; margin: 0; padding: 8px 0; overflow-y: auto; }
-  .mobile-list li { border-bottom: 1px solid #eee; }
+  .mobile-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+    overflow-y: auto;
+  }
+  .mobile-list li {
+    border-bottom: 1px solid #eee;
+  }
 
   .list-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Pushes arrow to the right */
-  gap: 8px;
-  width: 100%;
-  padding: 16px 16px;
-  text-align: left;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font-size: clamp(20px, 4.2vw, 20px);
-  color: #0c017b;
-  font-weight: 500;
-}
-  .list-row:active { background-color: #f5f5f5; }
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Pushes arrow to the right */
+    gap: 8px;
+    width: 100%;
+    padding: 16px 16px;
+    text-align: left;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: clamp(20px, 4.2vw, 20px);
+    color: #0c017b;
+    font-weight: 500;
+  }
+  .list-row:active {
+    background-color: #f5f5f5;
+  }
 
-  .row-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   /* -------- Solutions Mega Menu Styles (desktop only) -------- */
   .solutions-trigger {
@@ -690,18 +829,26 @@
     top: 100px; /* below initial nav height (~margin + height) */
     width: 100%;
     z-index: 900;
-    background: linear-gradient(90deg,#ffffff 0%, #ffffff 65%, #f5f6ff 100%);
+    background: linear-gradient(90deg, #ffffff 0%, #ffffff 65%, #f5f6ff 100%);
     border-top: 1px solid #e9e9f3;
-    box-shadow: 0 8px 28px -6px rgba(23,25,70,0.15), 0 2px 6px rgba(23,25,70,0.08);
-    animation: megaFade .16s ease-out;
+    box-shadow:
+      0 8px 28px -6px rgba(23, 25, 70, 0.15),
+      0 2px 6px rgba(23, 25, 70, 0.08);
+    animation: megaFade 0.16s ease-out;
     font-size: 14px;
   }
   .nav-bar.sticky + .solutions-mega {
     top: 64px; /* smaller when sticky */
   }
   @keyframes megaFade {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   .solutions-inner {
     max-width: 1240px;
@@ -714,10 +861,9 @@
     gap: 52px;
     align-items: start;
   }
-  .mega-col {}
   .mega-heading {
     font-size: 11px;
-    letter-spacing: .15em;
+    letter-spacing: 0.15em;
     font-weight: 700;
     color: #b01273;
     margin: 0 0 18px;
@@ -744,7 +890,9 @@
     font-weight: 500;
     border-radius: 8px;
     position: relative;
-    transition: background .15s ease, color .15s ease;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
   }
   .mega-link:focus-visible {
     outline: 2px solid #2e2fa2;
@@ -753,26 +901,6 @@
   .mega-link:hover {
     background: #f2f4ff;
     color: #181946;
-  }
-  .icon-bubble {
-    width: 34px;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: var(--icon-bg);
-    border: 1px solid var(--icon-border);
-    color: var(--icon-color);
-  }
-  .mega-link .chev {
-    color: #6f72a8;
-    opacity: 0;
-    transition: opacity .15s ease, transform .15s ease;
-  }
-  .mega-link:hover .chev {
-    opacity: 1;
-    transform: translateX(2px);
   }
   .mega-resource {
     border-left: 1px solid #ececf6;
@@ -783,14 +911,14 @@
     border: 1px solid #ececf6;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
   }
   .res-image {
     width: 100%;
     aspect-ratio: 16/9;
-    background: linear-gradient(135deg,#d6dbff,#e9ecff);
+    background: linear-gradient(135deg, #d6dbff, #e9ecff);
     overflow: hidden;
   }
   .res-image img {
@@ -827,12 +955,12 @@
     }
     .solutions-columns {
       gap: 40px;
-      grid-template-columns: repeat(3,1fr) 300px;
+      grid-template-columns: repeat(3, 1fr) 300px;
     }
   }
   @media (max-width: 980px) {
     .solutions-columns {
-      grid-template-columns: repeat(3,1fr);
+      grid-template-columns: repeat(3, 1fr);
     }
     .mega-resource {
       display: none;
@@ -847,11 +975,17 @@
     }
   }
   @media (max-width: 900px) {
-    .nav-links { display: none; }
-    .hamburger { display: flex; }
+    .nav-links {
+      display: none;
+    }
+    .hamburger {
+      display: flex;
+    }
   }
 
-  :global(body.menu-open) { overflow: hidden; }
+  :global(body.menu-open) {
+    overflow: hidden;
+  }
 
   /* Profile dropdown */
   .profile-menu {
@@ -878,7 +1012,7 @@
     background: #fff;
     border: 1px solid #e6e6e6;
     border-radius: 10px;
-    box-shadow: 0 10px 24px rgba(0,0,0,.08);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
     padding: 6px;
     z-index: 1200;
     display: grid;
@@ -919,51 +1053,63 @@
     border-radius: 50%;
     display: inline-block;
     margin-right: 8px;
-    animation: spin .6s linear infinite;
+    animation: spin 0.6s linear infinite;
     vertical-align: middle;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
   .sr-only {
     position: absolute;
-    width: 1px; height: 1px;
-    padding: 0; margin: -1px; overflow: hidden;
-    clip: rect(0,0,1px,1px);
-    white-space: nowrap; border: 0;
-  }
-
-  /* ...existing code... */
-.cart-link.mobile-cart {
-  display: none;
-  margin-right: 8px;
-}
-@media (max-width: 900px) {
-  .cart-link.mobile-cart {
-    display: inline-flex;
-    align-items: center;
-    background: none;
-    border: none;
+    width: 1px;
+    height: 1px;
     padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 1px, 1px);
+    white-space: nowrap;
+    border: 0;
   }
-  .nav-links .cart-link {
-    display: none;
-  }
-}
 
-.mobile-actions {
-  display: none;
-  align-items: center;
-  gap: 10px;
-}
-@media (max-width: 900px) {
-  .mobile-actions {
-    display: flex;
-  }
   .cart-link.mobile-cart {
-    display: inline-flex;
-  }
-  .nav-links .cart-link {
     display: none;
+    margin-right: 8px;
   }
-}
-</style>
+  @media (max-width: 900px) {
+    .cart-link.mobile-cart {
+      display: inline-flex;
+      align-items: center;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .nav-links .cart-link {
+      display: none;
+    }
+  }
 
+  .mobile-actions {
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+  @media (max-width: 900px) {
+    .mobile-actions {
+      display: flex;
+    }
+    .cart-link.mobile-cart {
+      display: inline-flex;
+    }
+    .nav-links .cart-link {
+      display: none;
+    }
+  }
+
+  .nav-links .cart-link:hover {
+    /* Remove hover effect for cart icon */
+    background: none;
+    color: inherit;
+  }
+</style>

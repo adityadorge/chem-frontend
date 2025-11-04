@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
-    import { ArrowLeft, ArrowRight, Play } from "lucide-svelte";
+    import { Play } from "lucide-svelte";
     // Dynamic theme (match solutions page defaults)
     export const PRIMARY = "#0c017b";
     export const ACCENT = "#f26a60";
@@ -47,9 +47,6 @@
         current = (current + 1) % cards.length;
     }
 
-    function prevCard() {
-        current = (current - 1 + cards.length) % cards.length;
-    }
 
     onMount(() => {
         interval = setInterval(nextCard, 7000);
@@ -59,26 +56,7 @@
         if (interval) clearInterval(interval);
     });
 
-    function manualNav(fn: () => void) {
-        if (interval) clearInterval(interval);
-        fn();
-        interval = setInterval(nextCard, 7000);
-    }
 </script>
-
-<svelte:head>
-    <!-- Inter font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin="anonymous"
-    />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    />
-</svelte:head>
 
 <div class="hero-section">
     <div class="hero-content">
@@ -125,17 +103,6 @@
 
 <style>
     .hero-section {
-        font-family:
-            "Inter",
-            ui-sans-serif,
-            system-ui,
-            -apple-system,
-            "Segoe UI",
-            Roboto,
-            "Helvetica Neue",
-            Arial,
-            "Noto Sans",
-            sans-serif;
         display: flex;
         background: #1746a2;
         border-radius: 24px;

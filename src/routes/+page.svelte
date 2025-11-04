@@ -5,7 +5,6 @@
   import { onMount } from "svelte";
   import TrustedLabPartners from "$lib/Landing_Component/TrustedLabPartners/TrustedLabPartners.svelte";
   import Services from "$lib/Landing_Component/Services/Services.svelte";
-  import TrailSnackLayout from "$lib/Landing_Component/TrailSnackLayout/TrailSnackLayout.svelte";
   import NoteToCeo from "$lib/Landing_Component/NoteToCeo/NoteToCeo.svelte";
   import WorkingProcess from "$lib/Landing_Component/WorkingProcess/WorkingProcess.svelte";
   import Comparison from "$lib/Landing_Component/Comparison/Comparison.svelte";
