@@ -2,6 +2,7 @@
     import { API_URL } from "$lib/store/api";
     import { toast } from "svelte-sonner";
     import { fade, fly } from "svelte/transition";
+    import { onMount } from "svelte";
     import { user, isAuthenticated } from "$lib/store";
     import { writable } from "svelte/store";
     import { goto } from "$app/navigation";
@@ -67,15 +68,42 @@
         isOpen = false;
     }
 
-   async function removeItem(id: number) {
+    // async function updateQuantity(id: number, newQuantity: number) {
+    //     if (newQuantity < 1) return;
+
+    //     try {
+    //         const response = await fetch(`${API_URL}/cart/update/`, {
+    //             method: "PATCH",
+    //             headers: {
+    //                 Authorization: `Bearer ${$user?.access_token}`,
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify({ cart_id: id, number_of_samples: newQuantity }),
+    //         });
+
+    //         if (!response.ok) throw new Error("Failed to update quantity");
+
+    //         cartItems.update((items) =>
+    //             items.map((item) =>
+    //                 item.id === id ? { ...item, number_of_samples: newQuantity } : item,
+    //             ),
+    //         );
+    //     } catch (error) {
+    //         toast.error("Failed to update number of samples");
+    //         console.error(error);
+    //     }
+    // }
+
+    async function removeItem(id: number) {
         try {
             const response = await fetch(`${API_URL}/cart/delete/${id}/`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${$user?.access_token}`,
-                    "Content-Type": "application/json",
+                        "Content-Type": "application/json",
+                    },
                 },
-            });
+            );
 
             const data = await response.json();
 
@@ -92,52 +120,47 @@
         }
     }
 
+
     async function proceedToCheckout() {
-        try {
-            const response = await fetch(
-                `${API_URL}/add-cart-to-ordersummary/`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${$user?.access_token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        cart: $cartItems,
-                    }),
-                },
-            );
+    try {
+        const response = await fetch(`${API_URL}/add-cart-to-ordersummary/`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${$user?.access_token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                cart: $cartItems
+            }),
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if (!response.ok || data.status !== "success") {
-                toast.error(data.message || "Failed to proceed to checkout");
-                return;
-            }
-
-            toast.success("Order summary created!");
-            // cartItems.set([]); // Clear cart
-            // Redirect to checkout page (adjust the path as needed)
-            goto("/checkout/payment");
-        } catch (error) {
-            toast.error("Something went wrong!");
-            console.error(error);
+        if (!response.ok || data.status !== "success") {
+            toast.error(data.message || "Failed to proceed to checkout");
+            return;
         }
+
+        toast.success("Order summary created!");
+        // cartItems.set([]); // Clear cart
+        // Redirect to checkout page (adjust the path as needed)
+        goto("/checkout/payment");
+    } catch (error) {
+        toast.error("Something went wrong!");
+        console.error(error);
     }
+}
 
     // Reactively fetch cart when opened or when auth changes
     $: if (isOpen && $isAuthenticated) {
         fetchCart();
     }
     // Clear cart when logged out
-    $: if (!$isAuthenticated) {
+    $: if (! $isAuthenticated) {
         cartItems.set([]);
     }
 
-    $: totalItems = $cartItems.reduce(
-        (sum, item) => sum + item.number_of_samples,
-        0,
-    );
+    $: totalItems = $cartItems.reduce((sum, item) => sum + item.number_of_samples, 0);
     $: subtotal = $cartItems.reduce(
         (sum, item) => sum + item.price * item.number_of_samples,
         0,
@@ -152,11 +175,7 @@
         tabindex="0"
         aria-label="Close cart"
         on:click={closeCart}
-        on:keydown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-                closeCart();
-            }
-        }}
+        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { closeCart(); } }}
         transition:fade
     >
         <div
@@ -254,9 +273,7 @@
                 {/if}
 
                 <div class="cart-footer">
-                    <button class="checkout-btn" on:click={proceedToCheckout}
-                        >Proceed to Checkout</button
-                    >
+                    <button class="checkout-btn" on:click={proceedToCheckout}>Proceed to Checkout</button>
                 </div>
             </div>
         </div>
@@ -264,32 +281,23 @@
 {/if}
 
 <style>
-
-body {
-    overflow-x: hidden !important;
-}
-
     .backdrop {
         position: fixed;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
-        overflow-x: hidden;
+        width: 100svw;
+        height: 100svh;
         z-index: 99;
         display: flex;
         justify-content: flex-end;
-        align-items: flex-start;
     }
 
     .cart-container {
         position: fixed;
-        top: 4vw;
+        top: 70px;
         right: 0;
-        width: min(500px, 100vw); /* ensure it never exceeds viewport */
-        max-width: 100vw;
-        overflow-x: hidden;
-        max-height: calc(100vh - 10vw);
+        width: 500px; /* Increased width */
+        max-height: calc(100vh - 60px);
         z-index: 1000;
         pointer-events: auto;
         display: flex;
@@ -299,26 +307,27 @@ body {
     .cart-panel {
         width: 100%;
         height: auto;
-        min-height: 40vh;
-        max-height: calc(100vh - 10vw);
+        min-height: 400px; /* Increased min-height */
+        max-height: calc(100vh - 60px);
         background: white;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
         display: flex;
         flex-direction: column;
-        overflow-x: hidden;
-        border-radius: 2vw;
+        overflow: hidden;
+        border-radius: 20px;
         z-index: 1000;
     }
 
     .cart-item {
         display: flex;
         align-items: center;
-        gap: 2vw;
-        padding-bottom: 2vw;
+        gap: 15px;
+        padding-bottom: 15px;
         border-bottom: 1px solid #eee;
     }
 
     .cart-header {
-        padding: 2vw;
+        padding: 20px;
         border-bottom: 1px solid #eee;
         display: flex;
         justify-content: space-between;
@@ -329,36 +338,40 @@ body {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 0.5vw;
+        padding: 5px;
     }
 
     .cart-content {
         flex: 1;
-        padding: 2vw;
+        padding: 20px;
         overflow-y: auto;
     }
 
     .empty-message {
         text-align: center;
         color: #666;
-        margin-top: 2vw;
+        margin-top: 40px;
     }
 
     .cart-footer {
-        padding: 1vw;
+        padding: 20px;
         border-top: 1px solid #eee;
     }
 
     .checkout-btn {
         width: 100%;
-        padding: 0.5vw ;
+        padding: 12px;
         background: #0c017b;
         color: white;
         border: none;
-        border-radius: 2vw;
+        border-radius: 50px;
         cursor: pointer;
         font-weight: bold;
-        font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+
+    .checkout-btn:hover {
+        transform: scale(1.05);
+        transition: all 0.3s;
     }
 
     .item-image {
@@ -372,15 +385,15 @@ body {
         flex: 1;
     }
 
-    /* .item-details h3 {
-        margin: 0 0 0.5vw 0;
-        font-size: clamp(1rem, 2vw, 1.2rem);
-    } */
+    .item-details h3 {
+        margin: 0 0 5px 0;
+        font-size: 18px; /* increased font size */
+    }
 
     .item-actions {
         display: flex;
         align-items: center;
-        gap: 1vw;
+        gap: 10px; /* increased gap */
     }
 
     .remove-btn {
@@ -388,83 +401,83 @@ body {
         border: none;
         color: #ff3d00;
         cursor: pointer;
-        font-size: clamp(1.5rem, 4vw, 2.5rem);
-        margin-left: 0.5vw;
+        font-size: 40px; /* increased font size */
+        margin-left: 5px;
     }
 
     .cart-summary {
-    padding: 1vw 2vw;
-    border-top: 1px solid #eee;
-}
+        padding: 15px 20px;
+        border-top: 1px solid #eee;
+    }
 
     .summary-row {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 0.5vw;
+        margin-bottom: 10px;
     }
 
     /* Responsive cart for tablets and mobile */
-    @media (max-width: 900px) {
-        .backdrop {
-            justify-content: center !important;
-            align-items: flex-end !important;
-            background: rgba(0, 0, 0, 0.35) !important;
-            z-index: 3000 !important;
-        }
-        .cart-container {
-            position: static !important;
-            width: 100vw !important;
-            max-width: 100vw !important;
-            max-height: 80vh !important;
-            border-radius: 18px 18px 0 0 !important;
-            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1) !important;
-            padding: 0 !important;
-            top: auto !important;
-            right: auto !important;
-            left: auto !important;
-            z-index: 3001 !important;
-        }
-        .cart-panel {
-            min-height: 40vh !important;
-            max-height: 80vh !important;
-            border-radius: 18px 18px 0 0 !important;
-            padding: 0 !important;
-            overflow-y: auto !important;
-        }
-    }
+@media (max-width: 900px) {
+  .backdrop {
+    justify-content: center !important;
+    align-items: flex-end !important;
+    background: rgba(0,0,0,0.35) !important;
+    z-index: 3000 !important;
+  }
+  .cart-container {
+    position: static !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 80vh !important;
+    border-radius: 18px 18px 0 0 !important;
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.10) !important;
+    padding: 0 !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    z-index: 3001 !important;
+  }
+  .cart-panel {
+    min-height: 40vh !important;
+    max-height: 80vh !important;
+    border-radius: 18px 18px 0 0 !important;
+    padding: 0 !important;
+    overflow-y: auto !important;
+  }
+}
 
-    /* Extra small screens */
-    @media (max-width: 480px) {
-        .cart-container {
-            width: 100vw;
-            max-width: 100vw;
-            max-height: 85vh;
-            border-radius: 16px 16px 0 0;
-            padding: 0;
-        }
-        .cart-panel {
-            min-height: 35vh;
-            max-height: 85vh;
-            padding: 0;
-        }
-        .cart-header,
-        .cart-footer,
-        .cart-summary {
-            padding: 12px 8px;
-        }
-        .item-image {
-            width: 44px;
-            height: 44px;
-        }
-        .item-details h3 {
-            font-size: 0.95rem;
-        }
-        .remove-btn {
-            font-size: 1.5rem;
-        }
-        .checkout-btn {
-            padding: 12px;
-            font-size: 0.95rem;
-        }
-    }
+/* Extra small screens */
+@media (max-width: 480px) {
+  .cart-container {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 85vh;
+    border-radius: 16px 16px 0 0;
+    padding: 0;
+  }
+  .cart-panel {
+    min-height: 35vh;
+    max-height: 85vh;
+    padding: 0;
+  }
+  .cart-header,
+  .cart-footer,
+  .cart-summary {
+    padding: 12px 8px;
+  }
+  .item-image {
+    width: 44px;
+    height: 44px;
+  }
+  .item-details h3 {
+    font-size: 0.95rem;
+  }
+  .remove-btn {
+    font-size: 1.5rem;
+  }
+  .checkout-btn {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+}
 </style>
