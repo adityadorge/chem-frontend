@@ -118,18 +118,7 @@
     </div>
     <div class="hero-image-card">
         <div class="image-wrapper">
-            <img src={cards[current].img} alt="Hero_Image" />
-            <div class="nav-arrows">
-                <button
-                    on:click={() => manualNav(prevCard)}
-                    aria-label="Previous"
-                >
-                    <ArrowLeft size={18} aria-hidden="true" />
-                </button>
-                <button on:click={() => manualNav(nextCard)} aria-label="Next">
-                    <ArrowRight size={18} aria-hidden="true" />
-                </button>
-            </div>
+            <img src={cards[current].img} alt="Hero_Image" />            
         </div>
     </div>
 </div>
@@ -178,12 +167,12 @@
     }
 
     .main-btn {
-        padding: 10px 22px;
+        padding: 0.7em 2em;
         border-radius: 9px;
         font-weight: 600;
         text-decoration: none;
-        font-size: 1.125rem;
-        height: 48px;
+        font-size: clamp(1rem, 2vw, 1.25rem); /* Responsive font size */
+        height: 3em;
         min-width: 120px;
         background: #1746a2;
         color: #fff;
@@ -191,6 +180,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        box-sizing: border-box;
+        white-space: nowrap;
     }
 
     .hero-desc {
@@ -253,46 +244,15 @@
         border-radius: 24px;
     }
 
-    /* New: only the arrows in bottom-left */
-    .nav-arrows {
-        position: absolute;
-        bottom: 24px;
-        left: 24px;
-        display: flex;
-        gap: 8px;
-    }
-
-    .nav-arrows button {
-        background: #eaf1fb;
-        border: none;
-        border-radius: 50%;
-        width: 28px;
-        height: 28px;
-        color: #1746a2;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: background 0.2s;
-        display: inline-flex; /* center the icon */
-        align-items: center;
-        justify-content: center;
-    }
-
-    .nav-arrows button:hover {
-        background: #1746a2;
-        color: #fff;
-    }
-
-    /* Remove old advice styles */
-    /* .advice-card, .advice-tag, .advice-text, .advice-arrows { } */
-
+   
     @media (max-width: 900px) {
         .hero-section {
             flex-direction: column;
-            padding: 16px;
-            gap: 16px;
+            padding: 4vw 2vw;
+            gap: 4vw;
+            max-width: 100vw;
         }
 
-        /* Tweak sizes on small screens */
         .hero-content h1 {
             font-size: 2rem;
             line-height: 1.15;
@@ -310,16 +270,6 @@
         }
         .hero-insights {
             display: none;
-        }
-
-        /* Position arrows tighter on small screens */
-        .nav-arrows {
-            bottom: 6px;
-            left: 6px;
-        }
-        .nav-arrows button {
-            width: 25px;
-            height: 25px;
         }
     }
 
