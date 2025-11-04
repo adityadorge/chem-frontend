@@ -245,7 +245,7 @@
     }
 
    
-    @media (max-width: 900px) {
+    @media (max-width: 440px) {
         .hero-section {
             flex-direction: column;
             padding: 4vw 2vw;
