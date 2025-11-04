@@ -267,10 +267,13 @@
         z-index: 99;
         display: flex;
         justify-content: flex-end;
+        background: rgba(0,0,0,0.15);
+        transition: background 0.2s;
     }
     .backdrop.mobile, .backdrop.tablet {
         justify-content: center !important;
         align-items: flex-end !important;
+        background: rgba(0,0,0,0.35) !important;
         z-index: 3000 !important;
     }
     .cart-container {
