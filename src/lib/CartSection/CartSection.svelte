@@ -166,6 +166,10 @@
                 max-width: {isMobile ? '100vw' : isTablet ? '90vw' : '500px'};
                 top: {isMobile || isTablet ? 'auto' : '70px'};
                 border-radius: {isMobile || isTablet ? '18px 18px 0 0' : '20px'};
+                bottom: {isMobile ? '0' : 'auto'};
+                left: {isMobile ? '0' : 'auto'};
+                right: {isMobile ? '0' : '0'};
+                box-shadow: {isMobile ? '0 -2px 16px rgba(0,0,0,0.18)' : '0 5px 15px rgba(0,0,0,0.15)'};
             "
             role="presentation"
             aria-label="Cart container"
@@ -177,19 +181,20 @@
                 min-height: {isMobile ? '35vh' : isTablet ? '40vh' : '400px'};
                 max-height: {isMobile ? '85vh' : isTablet ? '80vh' : 'calc(100vh - 60px)'};
                 border-radius: {isMobile || isTablet ? '18px 18px 0 0' : '20px'};
-            " transition:fly={{ x: isMobile ? 0 : 400, duration: 300 }}>
-                <div class="cart-header">
-                    <h2 style="font-size: {isMobile ? '1.1rem' : '1.4rem'}">
+                padding-bottom: {isMobile ? '80px' : '0'};
+            " transition:fly={{ x: isMobile ? 0 : 400, y: isMobile ? 200 : 0, duration: 300 }}>
+                <div class="cart-header {isMobile ? 'mobile-header' : ''}">
+                    <h2 style="font-size: {isMobile ? '1.2rem' : '1.4rem'}">
                         Your Cart ({totalItems})
                     </h2>
                     <button
-                        class="close-btn"
+                        class="close-btn {isMobile ? 'mobile-close' : ''}"
                         on:click={closeCart}
                         aria-label="Close cart"
                     >
                         <svg
-                            width="24"
-                            height="24"
+                            width={isMobile ? "32" : "24"}
+                            height={isMobile ? "32" : "24"}
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -204,7 +209,7 @@
                     </button>
                 </div>
 
-                <div class="cart-content">
+                <div class="cart-content {isMobile ? 'mobile-content' : ''}">
                     {#if $cartItems.length === 0}
                         <p class="empty-message">
                             Your cart is currently empty
@@ -212,24 +217,24 @@
                     {:else}
                         <div class="cart-items">
                             {#each $cartItems as item (item.id)}
-                                <div class="cart-item" style="gap: {isMobile ? '8px' : '15px'};">
+                                <div class="cart-item {isMobile ? 'mobile-item' : ''}" style="gap: {isMobile ? '10px' : '15px'};">
                                     <img
                                         src={item.image}
                                         alt={item.name}
                                         class="item-image"
-                                        style="width: {isMobile ? '44px' : isTablet ? '60px' : '80px'}; height: {isMobile ? '44px' : isTablet ? '60px' : '80px'};"
+                                        style="width: {isMobile ? '48px' : isTablet ? '60px' : '80px'}; height: {isMobile ? '48px' : isTablet ? '60px' : '80px'};"
                                     />
                                     <div class="item-details">
-                                        <h3 style="font-size: {isMobile ? '0.95rem' : '18px'}">{item.name}</h3>
-                                        <p>
+                                        <h3 style="font-size: {isMobile ? '1rem' : '18px'}">{item.name}</h3>
+                                        <p style="font-size: {isMobile ? '0.98rem' : '1rem'}">
                                             ${item.price.toFixed(2)} × {item.number_of_samples}
                                         </p>
                                     </div>
-                                    <div class="item-actions" style="gap: {isMobile ? '6px' : '10px'};">
-                                        <span>{item.number_of_samples}</span>
+                                    <div class="item-actions" style="gap: {isMobile ? '8px' : '10px'};">
+                                        <span style="font-size: {isMobile ? '1rem' : '1.1rem'}">{item.number_of_samples}</span>
                                         <button
                                             class="remove-btn"
-                                            style="font-size: {isMobile ? '1.5rem' : '2rem'}"
+                                            style="font-size: {isMobile ? '2rem' : '2rem'}"
                                             on:click={() => removeItem(item.id)}
                                             >×</button
                                         >
@@ -241,7 +246,7 @@
                 </div>
 
                 {#if $cartItems.length > 0}
-                    <div class="cart-summary">
+                    <div class="cart-summary {isMobile ? 'mobile-summary' : ''}">
                         <div class="summary-row">
                             <span>Subtotal:</span>
                             <span>${subtotal.toFixed(2)}</span>
@@ -249,8 +254,8 @@
                     </div>
                 {/if}
 
-                <div class="cart-footer">
-                    <button class="checkout-btn" style="font-size: {isMobile ? '0.95rem' : '1.1rem'}" on:click={proceedToCheckout}>Proceed to Checkout</button>
+                <div class="cart-footer {isMobile ? 'mobile-footer' : ''}">
+                    <button class="checkout-btn" style="font-size: {isMobile ? '1.1rem' : '1.1rem'}" on:click={proceedToCheckout}>Proceed to Checkout</button>
                 </div>
             </div>
         </div>
@@ -366,5 +371,109 @@
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
+    }
+
+    /* --- MOBILE ONLY STYLES --- */
+    @media (max-width: 480px) {
+        .backdrop.mobile {
+            align-items: flex-end !important;
+            background: rgba(0,0,0,0.18);
+        }
+        .cart-container {
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            top: auto !important;
+            border-radius: 18px 18px 0 0 !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            box-shadow: 0 -2px 16px rgba(0,0,0,0.18) !important;
+        }
+        .cart-panel {
+            min-height: 35vh !important;
+            max-height: 85vh !important;
+            border-radius: 18px 18px 0 0 !important;
+            padding-bottom: 80px !important;
+            overflow-x: hidden;
+        }
+        .cart-header {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 10;
+            padding: 18px 16px 18px 20px !important;
+            border-radius: 18px 18px 0 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .close-btn {
+            font-size: 2rem !important;
+            padding: 8px !important;
+        }
+        .cart-content {
+            padding: 16px 10px 10px 10px !important;
+            max-height: 45vh !important;
+            overflow-y: auto;
+        }
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .cart-item {
+            padding: 10px 0 10px 0 !important;
+            border-bottom: 1px solid #f2f2f2;
+            align-items: center;
+            gap: 10px !important;
+        }
+        .item-image {
+            border-radius: 10px;
+            object-fit: cover;
+            width: 48px !important;
+            height: 48px !important;
+        }
+        .item-details h3 {
+            font-size: 1rem !important;
+            margin-bottom: 2px !important;
+        }
+        .item-details p {
+            font-size: 0.98rem !important;
+        }
+        .item-actions {
+            gap: 8px !important;
+        }
+        .remove-btn {
+            font-size: 2rem !important;
+            padding: 0 6px !important;
+        }
+        .cart-summary {
+            padding: 10px 16px !important;
+            border-top: 1px solid #eee;
+            background: #fafaff;
+            font-size: 1.05rem;
+        }
+        .cart-footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #fff;
+            border-radius: 0 0 18px 18px;
+            padding: 14px 18px 18px 18px !important;
+            box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+            z-index: 20;
+        }
+        .checkout-btn {
+            width: 100%;
+            padding: 15px 0 !important;
+            font-size: 1.1rem !important;
+            border-radius: 50px;
+        }
+        .empty-message {
+            margin-top: 30px !important;
+            font-size: 1.05rem !important;
+        }
     }
 </style>
