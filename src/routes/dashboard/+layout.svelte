@@ -6,12 +6,19 @@
     { name: "Home", icon: Home, href: "/" },
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Profile", icon: User, href: "/dashboard/profile" },
-    { name: "Order", icon: Boxes, href: "/dashboard/orders" },
+    { name: "Order", icon: Boxes, href: "/dashboard/order-detail" },
     { name: "Email", icon: MessageSquare, href: "/dashboard/email" },
-    { name: "Verification", icon: ShieldCheck, href: "/dashboard/verification" },
+    { name: "Verification", icon: ShieldCheck, href: "/dashboard/verify" },
     { name: "Settings", icon: Settings, href: "/dashboard/settings" },
     { name: "Logout", icon: LogOut, href: "/logout" },
   ];
+
+  function handleMenuClick() {
+    // Close only for screens < 1024px (Tailwind lg)
+    if (window.innerWidth < 1024) {
+      collapsed = true;
+    }
+  }
 </script>
 
 <aside
@@ -19,8 +26,7 @@
     transition-[width,transform] duration-300
     ${collapsed
       ? 'w-[80px] -translate-x-full lg:translate-x-0'
-      : 'w-[256px] translate-x-0'}
-    lg:static`}
+      : 'w-[256px] translate-x-0'}`}
 >
   <!-- Brand -->
   <div class="flex items-center h-[72px]">
@@ -47,6 +53,7 @@
         <li>
           <a
             href={item.href}
+            on:click={handleMenuClick}
             class="menu-item group relative flex items-center h-12 rounded-lg hover:bg-gray-100 text-[#0c017b] transition-colors duration-150 px-2 text-base md:text-[1.05rem] leading-[1.25]"
           >
             <span class="icon flex items-center justify-center w-9 h-9 shrink-0">
@@ -65,6 +72,15 @@
   </nav>
 </aside>
 
+{#if !collapsed}
+  <!-- Backdrop on small screens; click to close -->
+  <div
+    class="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-30 lg:hidden"
+    on:click={() => (collapsed = true)}
+    aria-hidden="true"
+  ></div>
+{/if}
+
 {#if collapsed}
   <button
     class="fixed top-[18px] left-6 z-50 lg:hidden bg-white shadow-lg rounded-full p-0"
@@ -77,8 +93,17 @@
   </button>
 {/if}
 
+<main
+  class={`h-screen box-border overflow-y-auto bg-gray-50 transition-[margin] duration-300
+    pt-8 pb-16 px-6
+    ml-0 ${collapsed ? 'lg:ml-[80px]' : 'lg:ml-[256px]'}
+  `}
+>
+  <slot />
+</main>
+
 <style>
-    .phi-big {
+  .phi-big {
     font-size: 2.4rem;
     font-weight: bold;
     vertical-align: middle;
