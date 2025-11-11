@@ -36,7 +36,6 @@
   let statusFilter: "all" | "Processing" | "Deliver" | "Shipping" = "all";
   let expandedOrderId: string | null = null;
 
-  // Track per-order download state
   let invoiceDL: Record<string, boolean> = {};
   let reportDL: Record<string, boolean> = {};
 
@@ -163,7 +162,6 @@
   async function downloadInvoice(orderId: string) {
     invoiceDL = { ...invoiceDL, [orderId]: true };
     try {
-      // Adjust endpoint if different on your API
       await downloadBlob(`${API_URL}/orders/${orderId}/invoice/`, `invoice-${orderId}.pdf`);
     } catch (e) {
       console.error(e);
@@ -176,7 +174,6 @@
   async function downloadReport(orderId: string) {
     reportDL = { ...reportDL, [orderId]: true };
     try {
-      // Only available for completed (Delivered) orders
       await downloadBlob(`${API_URL}/orders/${orderId}/report/`, `report-${orderId}.pdf`);
     } catch (e) {
       console.error(e);
@@ -187,13 +184,89 @@
   }
 </script>
 
-<div class="order-page">
-  <section class="transactions-section">
-    <div class="transactions-header">
-      <div class="tabs">
+<div class="w-full p-4 font-[system-ui] text-[1.05rem]">
+  <header class="flex justify-between items-start gap-4 py-1 pb-4 mb-3 border-b border-[#edf0f3] flex-col md:flex-row">
+    <div class="order-header__left max-w-[980px]">
+      <h1 class="m-0 text-[1.5rem] font-bold text-[#111827] inline-flex items-center gap-2">
+        Order Details
+        <button
+          class="info inline-flex items-center justify-center w-9 h-9 rounded-lg border border-[#e5e7eb] bg-white text-[#6b7280] hover:bg-[#f9fafb] hover:border-[#d1d5db] hover:text-[#374151] transition"
+          type="button"
+          aria-label="About this page"
+          title="About this page"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 10v6" />
+            <circle cx="12" cy="7" r="1.2" />
+          </svg>
+        </button>
+      </h1>
+      <p class="mt-1 text-[#6b7280] leading-[1.5] text-[0.98rem]">
+        In the order details section, you can review and manage all orders with their details. You can view and edit many information such as IDs of all orders, ordered product, order date, price and order status. Access to this area is limited. Only administrators and team leaders can reach. The changes you make will be approved after they are checked.
+      </p>
+
+      <div class="mt-5 mb-3 flex items-center gap-4">
+        <h2 class="m-0 text-[1.2rem] font-semibold text-[#111827]">Orders</h2>
+        <button
+          type="button"
+          class="bg-white border border-[#e5e7eb] px-3 py-2 rounded-lg text-[0.85rem] cursor-pointer text-[#374151] hover:bg-[#f9fafb] hover:border-[#d1d5db] transition"
+        >
+          Jan 1 - Jan 30, 2024 ▾
+        </button>
+      </div>
+
+      <div class="grid gap-4 mb-5 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
+        <div class="bg-white border border-[#e5e7eb] rounded-[10px] p-4 flex flex-col gap-1 min-h-[108px]">
+          <div class="text-[0.75rem] font-semibold tracking-[0.5px] uppercase text-[#6b7280]">Total Orders</div>
+            <div class="text-[1.5rem] font-semibold text-[#111827] leading-[1.1]">21 -</div>
+          <div class="up text-[0.7rem] font-medium inline-flex items-center gap-1 tracking-[0.3px] text-[#059669]">▲ 25.2% last week</div>
+        </div>
+        <div class="bg-white border border-[#e5e7eb] rounded-[10px] p-4 flex flex-col gap-1 min-h-[108px]">
+          <div class="text-[0.75rem] font-semibold tracking-[0.5px] uppercase text-[#6b7280]">Order items over time</div>
+          <div class="text-[1.5rem] font-semibold text-[#111827] leading-[1.1]">15 -</div>
+          <div class="up text-[0.7rem] font-medium inline-flex items-center gap-1 tracking-[0.3px] text-[#059669]">▲ 18.2% last week</div>
+        </div>
+        <div class="bg-white border border-[#e5e7eb] rounded-[10px] p-4 flex flex-col gap-1 min-h-[108px]">
+          <div class="text-[0.75rem] font-semibold tracking-[0.5px] uppercase text-[#6b7280]">Returns Orders</div>
+          <div class="text-[1.5rem] font-semibold text-[#111827] leading-[1.1]">0 -</div>
+          <div class="down text-[0.7rem] font-medium inline-flex items-center gap-1 tracking-[0.3px] text-[#dc2626]">▼ 1.2% last week</div>
+        </div>
+        <div class="bg-white border border-[#e5e7eb] rounded-[10px] p-4 flex flex-col gap-1 min-h-[108px]">
+          <div class="text-[0.75rem] font-semibold tracking-[0.5px] uppercase text-[#6b7280]">Fulfilled orders over time</div>
+          <div class="text-[1.5rem] font-semibold text-[#111827] leading-[1.1]">12 -</div>
+          <div class="up text-[0.7rem] font-medium inline-flex items-center gap-1 tracking-[0.3px] text-[#059669]">▲ 12.2% last week</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 flex-nowrap self-start">
+      <button class="btn-md outline bg-white text-[#111827] border border-[#e5e7eb] px-3 py-2 rounded-lg text-[0.98rem] font-medium hover:bg-[#f9fafb] hover:border-[#d1d5db] transition">
+        Open Documentation
+      </button>
+      <button class="bg-[#4f46e5] text-white border border-[#4f46e5] px-3 py-2 rounded-lg text-[0.98rem] font-medium shadow-sm hover:bg-[#4338ca] hover:border-[#4338ca] transition">
+        Setup Details
+      </button>
+      <button
+        class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-[#e5e7eb] bg-white text-[#6b7280] hover:bg-[#f9fafb] hover:border-[#d1d5db] hover:text-[#374151] transition"
+        type="button"
+        aria-label="More actions"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="currentColor">
+          <circle cx="5" cy="12" r="2" />
+          <circle cx="12" cy="12" r="2" />
+          <circle cx="19" cy="12" r="2" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <section class=" bg-white rounded-[14px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)]">
+    <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+      <div class="flex gap-2 flex-wrap">
         {#each tabs as tab}
           <button
-            class="tab {activeTab === tab.key ? 'active' : ''}"
+            class="font-semibold px-4 py-2 rounded-md cursor-pointer transition text-[#7b7b93] bg-transparent hover:bg-white hover:shadow-sm hover:text-[#4f46e5] {activeTab === tab.key ? 'bg-white text-[#4f46e5] shadow-[0_1px_4px_rgba(79,70,229,0.15)]' : ''}"
             on:click={() => (activeTab = tab.key)}
             type="button"
           >
@@ -201,21 +274,34 @@
           </button>
         {/each}
       </div>
-      <div class="actions">
-        <button class="export-btn">Export CSV</button>
+      <div class="actions flex">
+        <button class="bg-white border border-[#e5e7eb] text-[#4f46e5] font-medium rounded-md px-4 py-2 cursor-pointer hover:bg-[#f9fafb] transition">
+          Export CSV
+        </button>
       </div>
     </div>
 
-    <div class="transactions-filters">
+    <div class="flex items-center gap-2 mb-4 flex-wrap">
       <div class="search-box">
-        <input type="text" placeholder="Search..." bind:value={search} />
+        <input
+          type="text"
+          placeholder="Search..."
+          bind:value={search}
+          class="border border-[#e5e7eb] rounded-md px-3 py-2 text-[1rem] focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        />
       </div>
-      <select class="filter-btn" bind:value={paymentFilter}>
+      <select
+        class="border border-[#e5e7eb] rounded-md px-3 py-2 text-[1rem] focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        bind:value={paymentFilter}
+      >
         <option value="all">All Payments</option>
         <option value="Paid">Paid</option>
         <option value="Unpaid">Unpaid</option>
       </select>
-      <select class="filter-btn" bind:value={statusFilter}>
+      <select
+        class="border border-[#e5e7eb] rounded-md px-3 py-2 text-[1rem] focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        bind:value={statusFilter}
+      >
         <option value="all">All Status</option>
         <option value="Processing">Processing</option>
         <option value="Deliver">Deliver</option>
@@ -223,50 +309,53 @@
       </select>
     </div>
 
-    <div class="transactions-table-wrapper">
+    <div class="bg-white rounded-[10px] overflow-x-auto">
       {#if loading}
-        <div class="loading" role="status" aria-live="polite">Loading orders…</div>
+        <div class="loading p-4" role="status" aria-live="polite">Loading orders…</div>
       {:else if loadError}
-        <div class="error" role="alert">{loadError}</div>
+        <div class="error p-4 text-[#b91c1c]" role="alert">{loadError}</div>
       {:else}
-        <table class="transactions-table" aria-label="Orders">
+        <table class="w-full border-collapse text-[1rem] min-w-[700px]">
           <thead>
-            <tr>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Date</th>
-              <th>Payment</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Status</th>
-              <!-- NEW: Invoice column -->
-              <th class="invoice-col">Invoice</th>
+            <tr class="text-left">
+              <th class="py-4 px-4 font-semibold text-[#7b7b93]">Order</th>
+              <th class="py-4 px-4 font-semibold text-[#7b7b93]">Customer</th>
+              <th class="py-4 px-4 font-semibold text-[#7b7b93]">Date</th>
+              <th class="py-4 px-4 font-semibold text-[#7b7b93]">Payment</th>
+              <th class="py-4 px-4 font-semibold text-[#7b7b93]">Price</th>
+              <th class="py-4 px-4 font-semibold text-[#7b7b93]">Stock</th>
+              <th class="py-4 px-4 font-semibold text-[#7b7b93]">Status</th>
+              <th class="py-4 px-4 font-semibold text-[#7b7b93] text-center w-[1%] whitespace-nowrap">Invoice</th>
             </tr>
           </thead>
           <tbody>
             {#each getFilteredOrders() as row}
               <tr
-                class="order-row card-row"
+                class="cursor-pointer transition hover:bg-[#f9fafb] {expandedOrderId === row.id ? 'bg-[#f9fafb]' : ''}"
                 on:click={() => toggleExpand(row.id)}
-                class:expanded={expandedOrderId === row.id}
               >
-                <td data-label="Order">
-                  <div class="order-title">{row.title}</div>
-                  <div class="order-id">#{row.id}</div>
+                <td data-label="Order" class="py-4 px-4 border-b border-[#f3f4f6]">
+                  <div class="font-semibold text-[1.05em]">{row.title}</div>
+                  <div class="text-[0.95em] text-[#9ca3af]">#{row.id}</div>
                 </td>
-                <td data-label="Customer">{row.customer}</td>
-                <td data-label="Date">{row.date}</td>
-                <td data-label="Payment"><span class={row.payment === "Paid" ? "paid" : "unpaid"}>{row.payment}</span></td>
-                <td data-label="Price">{row.price}</td>
-                <td data-label="Stock">{row.stock}</td>
-                <td data-label="Status">
-                  <span class={"status " + row.statusClass}>{row.status}</span>
+                <td data-label="Customer" class="py-4 px-4 border-b border-[#f3f4f6]">{row.customer}</td>
+                <td data-label="Date" class="py-4 px-4 border-b border-[#f3f4f6]">{row.date}</td>
+                <td data-label="Payment" class="py-4 px-4 border-b border-[#f3f4f6]">
+                  <span class="{row.payment === 'Paid' ? 'text-[#22c55e] font-semibold' : 'text-[#e11d48] font-semibold'}">
+                    {row.payment}
+                  </span>
                 </td>
-                <!-- NEW: Invoice cell -->
-                <td data-label="Invoice" class="invoice-col">
-                  <div class="invoice-cell">
+                <td data-label="Price" class="py-4 px-4 border-b border-[#f3f4f6]">{row.price}</td>
+                <td data-label="Stock" class="py-4 px-4 border-b border-[#f3f4f6]">{row.stock}</td>
+                <td data-label="Status" class="py-4 px-4 border-b border-[#f3f4f6]">
+                  <span
+                    class="rounded-md font-semibold text-[0.95em] px-3 py-[0.3em] {row.statusClass === 'processing' ? 'bg-[#fff7e6] text-[#eab308]' : row.statusClass === 'deliver' ? 'bg-[#e6f9ec] text-[#22c55e]' : row.statusClass === 'shipping' ? 'bg-[#e0e7ff] text-[#4f46e5]' : ''}"
+                  >{row.status}</span>
+                </td>
+                <td data-label="Invoice" class="py-4 px-4 border-b border-[#f3f4f6] text-center w-[1%] whitespace-nowrap">
+                  <div class="flex justify-center">
                     <button
-                      class="btn-sm outline invoice-btn"
+                      class="outline min-w-[170px] text-[0.95rem] px-3 py-2 rounded-md cursor-pointer transition border border-[#e5e7eb] bg-white text-[#4f46e5] hover:border-[#c7d2fe] hover:bg-[#eef2ff] disabled:opacity-60 disabled:cursor-not-allowed"
                       type="button"
                       on:click|stopPropagation={() => downloadInvoice(row.id)}
                       disabled={!!invoiceDL[row.id]}
@@ -278,23 +367,22 @@
                 </td>
               </tr>
               {#if expandedOrderId === row.id}
-                <tr class="order-expand-row">
-                  <!-- was colspan="7" -->
-                  <td colspan="8">
-                    <div class="expand-simple" in:slide={{ duration: 180 }} out:fade={{ duration: 100 }}>
-                      <div class="expand-row-grid">
-                        <div><span class="expand-label">Order ID:</span><span>#{row.id}</span></div>
-                        <div><span class="expand-label">Customer:</span><span>{row.customer}</span></div>
-                        <div><span class="expand-label">Date:</span><span>{row.date}</span></div>
-                        <div><span class="expand-label">Payment:</span><span>{row.payment}</span></div>
-                        <div><span class="expand-label">Price:</span><span>{row.price}</span></div>
-                        <div><span class="expand-label">Status:</span><span>{row.status}</span></div>
+                <tr>
+                  <td colspan="8" class="bg-[#f8f9fb] p-0">
+                    <div class="p-4 text-[1rem]" in:slide={{ duration: 180 }} out:fade={{ duration: 100 }}>
+                      <div class="grid gap-x-4 gap-y-2 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
+                        <div><span class="text-[#7b7b93] font-semibold mr-2 text-[0.95em]">Order ID:</span><span>#{row.id}</span></div>
+                        <div><span class="text-[#7b7b93] font-semibold mr-2 text-[0.95em]">Customer:</span><span>{row.customer}</span></div>
+                        <div><span class="text-[#7b7b93] font-semibold mr-2 text-[0.95em]">Date:</span><span>{row.date}</span></div>
+                        <div><span class="text-[#7b7b93] font-semibold mr-2 text-[0.95em]">Payment:</span><span>{row.payment}</span></div>
+                        <div><span class="text-[#7b7b93] font-semibold mr-2 text-[0.95em]">Price:</span><span>{row.price}</span></div>
+                        <div><span class="text-[#7b7b93] font-semibold mr-2 text-[0.95em]">Status:</span><span>{row.status}</span></div>
                       </div>
 
                       {#if row.statusClass === 'deliver'}
-                        <div class="expand-actions">
+                        <div class="mt-3 flex gap-2">
                           <button
-                            class="btn-sm primary"
+                            class="primary text-[0.95rem] px-3 py-2 rounded-md cursor-pointer transition bg-[#4f46e5] text-white border border-[#4f46e5] hover:bg-[#4338ca] hover:border-[#4338ca] disabled:opacity-60 disabled:cursor-not-allowed"
                             type="button"
                             on:click={() => downloadReport(row.id)}
                             disabled={!!reportDL[row.id]}
@@ -315,267 +403,3 @@
     </div>
   </section>
 </div>
-
-<style>
-  /* Base styles */
-  .order-page {
-    width: 100%;
-    padding: 1rem;
-    font-family: system-ui, sans-serif;
-  }
-
-  .transactions-section {
-    background: #f8f9fb;
-    border-radius: 14px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  }
-
-  .transactions-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .tabs {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-  .tab {
-    background: none;
-    border: none;
-    font-weight: 600;
-    color: #7b7b93;
-    padding: 0.4em 1em;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .tab.active {
-    background: #fff;
-    color: #4f46e5;
-    box-shadow: 0 1px 4px rgba(79,70,229,0.15);
-  }
-
-  .actions {
-    display: flex;
-  }
-  .export-btn {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    color: #4f46e5;
-    font-weight: 500;
-    border-radius: 6px;
-    padding: 0.4em 1em;
-    cursor: pointer;
-  }
-
-  .transactions-filters {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-  }
-  .search-box input,
-  .filter-btn {
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    padding: 0.4em 0.8em;
-    font-size: 0.9em;
-  }
-
-  .transactions-table-wrapper {
-    background: #fff;
-    border-radius: 10px;
-    overflow-x: auto;
-  }
-  .transactions-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9em;
-    min-width: 700px;
-  }
-  .transactions-table th,
-  .transactions-table td {
-    padding: 0.8em;
-    text-align: left;
-    border-bottom: 1px solid #f3f4f6;
-  }
-  .transactions-table th {
-    color: #7b7b93;
-    font-weight: 600;
-  }
-  .order-title {
-    font-weight: 600;
-  }
-  .order-id {
-    font-size: 0.85em;
-    color: #9ca3af;
-  }
-  .paid {
-    color: #22c55e;
-    font-weight: 600;
-  }
-  .unpaid {
-    color: #e11d48;
-    font-weight: 600;
-  }
-  .status {
-    padding: 0.2em 0.8em;
-    border-radius: 6px;
-    font-size: 0.85em;
-    font-weight: 600;
-  }
-  .status.processing {
-    background: #fff7e6;
-    color: #eab308;
-  }
-  .status.deliver {
-    background: #e6f9ec;
-    color: #22c55e;
-  }
-  .status.shipping {
-    background: #e0e7ff;
-    color: #4f46e5;
-  }
-
-  .order-row {
-    cursor: pointer;
-    transition: background 0.13s;
-  }
-  .order-row:hover,
-  .order-row.expanded {
-    background: #f9fafb;
-  }
-  .order-expand-row td {
-    background: #f8f9fb;
-  }
-
-  .expand-simple {
-    padding: 1em;
-  }
-  .expand-row-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 0.5em 1em;
-  }
-  .expand-label {
-    color: #7b7b93;
-    font-weight: 600;
-    margin-right: 0.5em;
-  }
-
-  .loading,
-  .error {
-    padding: 1rem;
-  }
-  .error {
-    color: #b91c1c;
-  }
-
-  /* ===== Bigger typography overrides ===== */
-  .order-page { font-size: 1.05rem; } /* overall base */
-
-  /* Header tabs and actions */
-  .tab { font-size: 1rem; padding: 0.5em 1.1em; }
-  .export-btn { font-size: 1rem; padding: 0.5em 1em; }
-
-  /* Filters */
-  .search-box input,
-  .filter-btn { font-size: 1rem; padding: 0.5em 0.9em; }
-
-  /* Table */
-  .transactions-table { font-size: 1rem; } /* was 0.9em */
-  .transactions-table th,
-  .transactions-table td { padding: 1em; }
-
-  .order-title { font-size: 1.05em; }
-  .order-id { font-size: 0.95em; }
-
-  /* Payment/status pills */
-  .paid, .unpaid { font-size: 0.95em; }
-  .status { font-size: 0.95em; padding: 0.3em 0.9em; }
-
-  /* Expanded details */
-  .expand-simple { font-size: 1rem; }
-  .expand-label { font-size: 0.95em; }
-
-  /* Mobile tweaks to keep readability without overflowing */
-  @media (max-width: 640px) {
-    .transactions-table { font-size: 0.95rem; }
-    .order-title { font-size: 1rem; }
-    .status { font-size: 0.95rem; }
-  }
-  @media (max-width: 768px) {
-    .transactions-table { font-size: 0.95rem; }
-  }
-
-  .status-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .btn-sm {
-    font-size: 0.95rem;
-    padding: 0.35em 0.7em;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-    border: 1px solid transparent;
-    white-space: nowrap;
-  }
-  .btn-sm.outline {
-    background: #fff;
-    color: #4f46e5;
-    border-color: #e5e7eb;
-  }
-  .btn-sm.outline:hover {
-    border-color: #c7d2fe;
-    background: #eef2ff;
-  }
-  .btn-sm.primary {
-    background: #4f46e5;
-    color: #fff;
-    border-color: #4f46e5;
-  }
-  .btn-sm.primary:hover {
-    background: #4338ca;
-    border-color: #4338ca;
-  }
-  .btn-sm:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .expand-actions {
-    margin-top: 0.75rem;
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  /* Align Invoice column buttons */
-  .transactions-table th.invoice-col,
-  .transactions-table td.invoice-col {
-    text-align: center;
-    width: 1%;
-    white-space: nowrap;
-  }
-  .invoice-cell {
-    display: flex;
-    justify-content: center;
-  }
-  .invoice-btn {
-    min-width: 170px; /* consistent width so buttons align down the column */
-  }
-
-  /* Responsive tweak to prevent overflow on small screens */
-  @media (max-width: 640px) {
-    .invoice-btn { min-width: 140px; }
-  }
-</style>

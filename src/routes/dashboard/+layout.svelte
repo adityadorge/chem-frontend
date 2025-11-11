@@ -1,6 +1,14 @@
 <script lang="ts">
   import { Home, LayoutDashboard, User, Boxes, MessageSquare, ShieldCheck, Settings, LogOut, Menu } from "lucide-svelte";
+  import { toast } from "svelte-sonner";
+  import { user } from "$lib/store";
+  import { clearUser } from "$lib/store/auth";
+  import { API_URL } from "$lib/store/api";
+  import { goto } from "$app/navigation";
+
   let collapsed = false;
+  let showConfirmLogout = false;
+  let loggingOut = false;
 
   const menu = [
     { name: "Home", icon: Home, href: "/" },
@@ -14,9 +22,36 @@
   ];
 
   function handleMenuClick() {
-    // Close only for screens < 1024px (Tailwind lg)
     if (window.innerWidth < 1024) {
       collapsed = true;
+    }
+  }
+
+  function handleNavClick(e: MouseEvent, item: { name: string; href: string }) {
+    if (item.name === "Logout") {
+      e.preventDefault();
+      showConfirmLogout = true;
+      return;
+    }
+    handleMenuClick();
+  }
+
+  async function handleLogout() {
+    loggingOut = true;
+    try {
+      await fetch(`${API_URL}/auth/logout/`, {
+        method: "POST",
+        credentials: "include"
+      });
+      toast.success("Logged out");
+    } catch (_) {
+      // silent
+    } finally {
+      user.set(null);
+      clearUser();
+      loggingOut = false;
+      showConfirmLogout = false;
+      goto("/");
     }
   }
 </script>
@@ -53,8 +88,9 @@
         <li>
           <a
             href={item.href}
-            on:click={handleMenuClick}
+            on:click={(e) => handleNavClick(e, item)}
             class="menu-item group relative flex items-center h-12 rounded-lg hover:bg-gray-100 text-[#0c017b] transition-colors duration-150 px-2 text-base md:text-[1.05rem] leading-[1.25]"
+            aria-label={item.name}
           >
             <span class="icon flex items-center justify-center w-9 h-9 shrink-0">
               <svelte:component this={item.icon} size="28" class="text-[#0c017b] block" />
@@ -101,6 +137,29 @@
 >
   <slot />
 </main>
+
+{#if showConfirmLogout}
+  <div class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-5 space-y-4" role="dialog" aria-modal="true" aria-label="Logout confirmation">
+      <h2 class="text-lg font-semibold">Confirm logout</h2>
+      <p class="text-sm text-gray-600">Are you sure you want to logout?</p>
+      <div class="flex justify-end gap-3">
+        <button
+          class="px-4 py-2 text-sm rounded-md border border-gray-300"
+          on:click={() => showConfirmLogout = false}
+          disabled={loggingOut}
+        >Cancel</button>
+        <button
+          class="px-4 py-2 text-sm rounded-md bg-[#0c017b] text-white disabled:opacity-60"
+          on:click={handleLogout}
+          disabled={loggingOut}
+        >
+          {#if loggingOut}Logging out…{:else}logout{/if}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   .phi-big {
