@@ -5,9 +5,6 @@ export default {
     extend: {
       fontFamily: {
         sans: ["InterVariable", "Inter", "system-ui", "sans-serif"]
-      },
-      screens: {
-        'xs': '320px',
       }
     },
   },

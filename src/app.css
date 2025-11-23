@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
-
+html {
+  -webkit-text-size-adjust: 100%; /* iOS/Safari and some WebKit browsers */
+  -ms-text-size-adjust: 100%;     /* IE/Edge */
+  text-size-adjust: 100%;
+}
 /* Utility: Hide scrollbars on mobile */
 body {
   -webkit-overflow-scrolling: touch;
