@@ -22,7 +22,17 @@
     image_url: string;
     test_description: string;
     test_price: number;
-    supplier_name?: string;
+    supplier_name?: string; // will be set from selected lab
+  }
+
+  // Add the labs payload type we already use in /testing page
+  interface LabProvided {
+    id: number;
+    lab_name: string;
+    turnaround_time?: string;
+    email?: string;
+    test_id?: number;
+    test_price?: number; // <-- added
   }
 
   let test: Test | null = null;
@@ -36,6 +46,11 @@
 
   // route param
   $: id = $page.params.id;
+  // lab (join row) id from query
+  $: labParam = $page.url.searchParams.get("lab");
+
+  // Prevent re-applying for same param
+  let appliedLabId: string | null = null;
 
   async function loadTest() {
     loading = true;
@@ -44,12 +59,43 @@
       const res = await fetch(`${API_URL}/app1/tests/${id}/`);
       if (!res.ok) throw new Error("Failed to fetch test");
       test = await res.json();
+      // Try to apply selected lab right after test loads
+      await applySelectedLab();
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : "Failed to load";
     } finally {
       loading = false;
     }
   }
+
+  // When a lab is specified (?lab=<LabProvidedTest.id>), fetch labs for this test
+  // and set the supplier_name in the header.
+  async function applySelectedLab() {
+    if (!test || !labParam || appliedLabId === labParam) return;
+    try {
+      const res = await fetch(`${API_URL}/app1/tests/${id}/labs/`);
+      if (!res.ok) return;
+      const list: LabProvided[] = await res.json();
+      const selected = list.find((l) => String(l.id) === String(labParam));
+      if (selected) {
+        test = {
+          ...test,
+          supplier_name: selected.lab_name,
+          test_price: selected.test_price ?? test.test_price // <-- override price with lab-provided price
+        };
+        appliedLabId = labParam;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // Re-apply when query param changes (e.g., user shares link with ?lab=)
+  $: (async () => {
+    if (test && labParam && appliedLabId !== labParam) {
+      await applySelectedLab();
+    }
+  })();
 
   onMount(loadTest);
 
@@ -65,40 +111,17 @@
     quantity = Number.isNaN(val) ? 1 : Math.max(1, Math.min(val, 999));
   }
 
-  // async function handleAddToCart() {
-  //   if (!get(isAuthenticated)) {
-  //     toast.error("Please login to add items to your cart.");
-  //     return;
-  //   }
-  //   isAdding = true;
-  //   try {
-  //     const { access_token } = get(user) ?? {};
-  //     const res = await fetch(`${API_URL}/add-to-cart/`, {
-  //       method: "POST",
-  //       headers: {
-  //         Authorization: `Bearer ${access_token}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ test_id: test?.id, quantity }),
-  //     });
-  //     const data = await res.json();
-  //     if (!res.ok || data.status !== "success") {
-  //       throw new Error(data.message || "Failed to add to cart");
-  //     }
-  //     toast.success(`Added ${quantity} ${test?.test_name} to cart!`);
-  //   } catch (e: unknown) {
-  //     toast.error(e instanceof Error ? e.message : "Failed to add to cart");
-  //   } finally {
-  //     isAdding = false;
-  //   }
-  // }
-
   async function goToCheckoutForm() {
     if (!get(isAuthenticated)) {
       toast.error("Please login before buying.");
       return;
     }
-    goto(`/checkout/form?test_id=${test?.id}&test_name=${encodeURIComponent(test?.test_name || "")}`);
+    goto(
+      `/checkout/form?test_id=${test?.id}` +
+      `&test_name=${encodeURIComponent(test?.test_name || "")}` +
+      `&lab_provided_test_id=${encodeURIComponent(labParam || "")}` +
+      `&lab_name=${encodeURIComponent(test?.supplier_name || "")}`
+    );
   }
 
   // change later to select lab specific test
@@ -125,9 +148,7 @@
   let lineItems: LineItem[] = [];
   // Recompute the quote row whenever test or quantity changes
   $: if (test) {
-    lineItems = [
-      { name: test.test_name, unit: test.test_price, qty: quantity },
-    ];
+    lineItems = [{ name: test.test_name, unit: test.test_price, qty: quantity }];
   }
 
   $: subtotal = lineItems.reduce((s, i) => s + i.unit * i.qty, 0);
@@ -146,6 +167,55 @@
   const deltaSupplier2 = -0.4;
 
   const formatDelta = (n: number) => `${n >= 0 ? "" : ""}${n}%`;
+
+//  comparison table 
+  let comparisonItems: any[] = [];
+  let comparing = false;
+  let comparisonError: string | null = null;
+
+  function alreadyInComparison(labProvidedTestId: string | null) {
+    if (!labProvidedTestId) return false;
+    return comparisonItems.some(i => String(i.lab_test) === String(labProvidedTestId));
+  }
+
+  async function compareCurrentLab() {
+    if (comparing) return;
+    if (!labParam) {
+      toast.error("No lab selected.");
+      return;
+    }
+    if (!get(isAuthenticated)) {
+      toast.error("Login required.");
+      return;
+    }
+    if (alreadyInComparison(labParam)) {
+      toast.info("Already in comparison. Redirecting…");
+      await new Promise((r) => setTimeout(r, 2000));
+      goto(`/test-comparison?test_id=${id}`);
+      return;
+    }
+    comparing = true;
+    try {
+      const res = await fetch(`${API_URL}/add-comparison/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${get(user)?.access_token}`,
+        },
+        body: JSON.stringify({ lab_provided_test_id: labParam }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed");
+      comparisonItems = data.items;
+      toast.success(data.added ? "Added. Redirecting…" : "Exists. Redirecting…");
+      await new Promise((r) => setTimeout(r, 2000));
+      goto(`/test-comparison?test_id=${id}`);
+    } catch (e: any) {
+      toast.error(e.message || "Error");
+    } finally {
+      comparing = false;
+    }
+  }
 </script>
 
 <Toaster richColors />
@@ -198,9 +268,13 @@
           Download
         </button>
         <button
-          class="inline-flex items-center rounded-xl bg-indigo-600 px-5 py-3 text-white text-sm font-medium hover:bg-indigo-700 transition shadow-sm"
+          class="inline-flex items-center justify-center rounded-xl bg-[#0c017b] px-5 py-3 text-white text-sm font-medium hover:bg-indigo-700 transition shadow-sm w-[220px]"
+          on:click={compareCurrentLab}
+          aria-busy={comparing}
         >
-          Compare Related Requests
+          <span class="flex items-center">
+            Compare Related Requests            
+          </span>
         </button>
       </div>
     </div>
@@ -383,7 +457,7 @@
               {isAdding ? "Adding..." : "Save"}
             </button> -->
             <button
-              class="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-50"
+              class="rounded-lg bg-[#0c017b] px-4 py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-50"
               on:click={goToCheckoutForm}
               disabled={isAdding || isAccepting}
             >

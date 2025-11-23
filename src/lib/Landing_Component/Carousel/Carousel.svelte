@@ -11,7 +11,7 @@
         {
             title: "Seamless Access to Certified Labs for Every Researcher. <br>– Quickly, Reliably, Seamlessly.",
             text: "Get Ready to Accelerate Your Research with access to a wide range of services across multiple fields — all in one place. Whether you’re a startup, researcher, or global enterprise, we connect you with trusted labs to deliver faster, more reliable results.",
-            img: "assets/carousel/carousel_1.jpg",
+            img: "/assets/carousel/national-cancer-institute-s9WLlvDlbx4-unsplash.jpg",
             advice: {
                 tag: "Travel Insurance 101",
                 text: "How to choose your travel insurance policy:<br> A Practical Guide",
@@ -24,7 +24,7 @@
             ],
         },
         {
-            title: "Marketplace built for research and innovation. <br>– From Your Doorstep to the Lab.",
+            title: "Marketplace built for Modern Research, and Innovation<br>– From Your Doorstep to the Lab.",
             text: "Say goodbye to lab-hunting, wasted trips, and delivery hassles. We simplify access, logistics, and reporting—saving you time, reducing costs, and letting you focus on what matters most: advancing discoveries.",
             img: "assets/carousel/carousel_3.jpg",
             advice: {
@@ -64,17 +64,17 @@
             class="inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold text-lg mb-4 md:mb-6"
             style="background:{WAVE}; color:{PRIMARY}"
         >
-            Solutions
+            Marketplace
         </p>
         <h1 style="color:{PRIMARY}">{@html cards[current].title}</h1>
         <div class="mb-[24px] flex flex-row gap-2 md:gap-2 items-center justify-start">
             <a
                 class="main-btn inline-flex justify-center"
-                href="#"
+                href="/testing"
                 style="background-color:{PRIMARY}; min-width: 120px; padding: 10px 22px; font-size: 1.125rem; border-radius: 9px; height: 48px;"
             >Get Started</a>
             <a
-                href="#"
+                href="/solutions"
                 class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-[color:var(--primary)] transition-colors hover:bg-[color:var(--wave)]"
                 style="--primary:{PRIMARY}; --wave:{WAVE}; font-size: 1.05rem; height: 48px; padding: 10px 14px; border-radius: 9px;"
             >
@@ -106,7 +106,6 @@
         display: flex;
         background: #1746a2;
         border-radius: 24px;
-        margin-top: 8px;
         margin-bottom: 32px;
         margin-left: auto;
         margin-right: auto;

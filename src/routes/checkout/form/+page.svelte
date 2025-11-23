@@ -35,6 +35,7 @@
 
     // Section 3: Analytical Requirements
     requestedTechnique: "",
+    labName: "", // display/snapshot
     analysisPurpose: [] as string[], // Qualitative / Quantitative / Purity / Identification / Other
     amountProvided: "",
     amountUnit: "mg", // mg / g / mL
@@ -156,6 +157,7 @@
     sampleForm.msds = data.msds ?? "No";
     sampleForm.msdsFile = null;
     sampleForm.requestedTechnique = data.requested_technique ?? "";
+    sampleForm.labName = data.lab_name ?? "";
     sampleForm.analysisPurpose = data.analysis_purpose ?? [];
     sampleForm.amountProvided = data.amount_provided ?? "";
     sampleForm.amountUnit = data.amount_unit ?? "mg";
@@ -203,10 +205,11 @@ async function submitRequisition() {
     submitting = true;
     try {
       const fd = new FormData();
-
       // Link test details (from query params if present)
       if (testIdParam) fd.append("test", String(testIdParam));
       if (testNameParam) fd.append("test_name", testNameParam);
+      if (labProvidedTestIdParam) fd.append("provided_test", labProvidedTestIdParam); // FK to LabProvidedTest
+      if (sampleForm.labName) fd.append("lab_name", sampleForm.labName); // snapshot
       fd.append("quantity", String(testQtyParam ?? 1));
 
       // Section 1
@@ -430,13 +433,25 @@ async function submitRequisition() {
   // Test info passed from tests page
   let testIdParam = "";
   let testNameParam = "";
+  let labNameParam = "";
+  let labProvidedTestIdParam = ""; // new
   let testQtyParam: number | null = null;
   $: {
     const sp = $page.url.searchParams;
     testIdParam = sp.get("test_id") || "";
     testNameParam = sp.get("test_name") || "";
+    labNameParam = sp.get("lab_name") || "";
+    labProvidedTestIdParam = sp.get("lab_provided_test_id") || "";
     // const q = sp.get("quantity");
     // testQtyParam = q ? Number(q) : null;
+  }
+
+  // Prefills (only when empty)
+  $: if (testNameParam && !sampleForm.requestedTechnique) {
+    sampleForm.requestedTechnique = testNameParam;
+  }
+  $: if (labNameParam && !sampleForm.labName) {
+    sampleForm.labName = labNameParam;
   }
 </script>
 
@@ -722,8 +737,28 @@ async function submitRequisition() {
                 Requested Technique <span class="text-rose-500">*</span>
               </label>
               <input
-                class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                type="text" placeholder="e.g., HPLC, GC-MS, NMR" bind:value={sampleForm.requestedTechnique} required
+                id="RequestedTechnique"
+                class="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 focus:outline-none"
+                type="text"
+                placeholder="e.g., HPLC, GC-MS, NMR"
+                bind:value={sampleForm.requestedTechnique}
+                readonly
+                required
+              />
+            </div>
+
+            <!-- Lab Name (auto-filled) -->
+            <div class="md:col-span-2">
+              <label for="LabName" class="block text-sm font-medium text-gray-700 mb-1">
+                Lab Name
+              </label>
+              <input
+                id="LabName"
+                class="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 focus:outline-none"
+                type="text"
+                bind:value={sampleForm.labName}
+                placeholder="Selected lab"
+                readonly
               />
             </div>
 
@@ -861,7 +896,7 @@ async function submitRequisition() {
             <h2 class="text-lg font-semibold mb-2">Use Previous Form?</h2>
             <p class="mb-4 text-gray-700">You have already submitted a requisition for this test. Do you want to use your previous form details?</p>
             <div class="flex gap-4 justify-end">
-              <button class="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium" on:click={usePreviousRequisition}>Yes, use previous</button>
+              <button class="px-4 py-2 rounded-lg bg-[#0c017b] text-white font-medium" on:click={usePreviousRequisition}>Yes, use previous</button>
               <button class="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 font-medium" on:click={skipPreviousRequisition}>No, start fresh</button>
             </div>
           </div>
@@ -876,7 +911,7 @@ async function submitRequisition() {
         >
           Add Test to Cart
         </button>
-        {#if canProceed && lastOrderId}
+        {#if lastOrderId}
           <button
             class="w-full sm:w-auto rounded-lg bg-green-600 px-4 py-2 text-base sm:text-sm text-white font-medium hover:bg-green-700 transition"
             on:click={() => goto(`/checkout/pickup`)}

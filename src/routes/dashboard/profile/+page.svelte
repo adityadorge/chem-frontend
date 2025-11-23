@@ -187,7 +187,7 @@
         {#if loadingProfile}<small>Loading…</small>{/if}
         {#if profileError}<small class="text-red-700">{profileError}</small>{/if}
         {#if noVerification}
-          <small class="text-gray-600">Profile not completed yet. Please submit verification details (Authentication > Verify).</small>
+          <small class="text-gray-600">Profile not completed yet. Please submit verification details.</small>
         {/if}
       </div>
 
@@ -197,7 +197,7 @@
           <span>{title(verification?.status) || "Pending"}</span>
         </div>
         {#if verification && (verification.status === "pending" || verification.status === "rejected")}
-          <small class="text-gray-500 text-xs text-right max-[36rem]:text-center">Go to Authentication › Verify to complete verification.</small>
+          <small class="text-rose-500 text-sm text-right max-[36rem]:text-center">Please complete the verification process by visiting the verification page.</small>
         {/if}
       </div>
     </div>
@@ -207,12 +207,13 @@
     <div class="flex gap-2 flex-row max-[36rem]:flex-col max-[36rem]:w-full">
       <button
         class={"border-none px-5 py-2.5 rounded-md cursor-pointer font-semibold w-fit hover:bg-indigo-100 hover:text-indigo-500 max-[36rem]:w-full " +
-          (activeCard === "personal" ? "text-white bg-indigo-600" : "bg-transparent text-gray-700")}
+          (activeCard === "personal" ? "text-white bg-[#0c017b]" : "bg-transparent text-gray-700")}
         on:click={() => toggleCard("personal")}>Profile</button>
       <button
         class={"border-none px-5 py-2.5 rounded-md cursor-pointer font-semibold w-fit hover:bg-indigo-100 hover:text-indigo-500 max-[36rem]:w-full " +
-          (activeCard === "address" ? "text-white bg-indigo-600" : "bg-transparent text-gray-700")}
+          (activeCard === "address" ? "text-white bg-[#0c017b]" : "bg-transparent text-gray-700")}
         on:click={() => toggleCard("address")}>Address</button>
+        
     </div>
   </div>
 </div>

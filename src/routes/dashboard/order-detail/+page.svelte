@@ -184,10 +184,10 @@
   }
 </script>
 
-<div class="w-full p-4 font-[system-ui] text-[1.05rem]">
-  <header class="flex justify-between items-start gap-4 py-1 pb-4 mb-3 border-b border-[#edf0f3] flex-col md:flex-row">
+<div class="w-full sm:pt-8">
+  <header class="mb-6 rounded-[14px] bg-[#0c017b] p-4 sm:p-5 md:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start gap-6">
     <div class="order-header__left max-w-[980px]">
-      <h1 class="m-0 text-[1.5rem] font-bold text-[#111827] inline-flex items-center gap-2">
+      <h1 class="m-0 text-[1.5rem] font-bold text-white inline-flex items-center gap-2">
         Order Details
         <button
           class="info inline-flex items-center justify-center w-9 h-9 rounded-lg border border-[#e5e7eb] bg-white text-[#6b7280] hover:bg-[#f9fafb] hover:border-[#d1d5db] hover:text-[#374151] transition"
@@ -202,37 +202,37 @@
           </svg>
         </button>
       </h1>
-      <p class="mt-1 text-[#6b7280] leading-[1.5] text-[0.98rem]">
+      <p class="mt-1 text-white/80 leading-[1.5] text-[0.98rem]">
         In the order details section, you can review and manage all orders with their details. You can view and edit many information such as IDs of all orders, ordered product, order date, price and order status. Access to this area is limited. Only administrators and team leaders can reach. The changes you make will be approved after they are checked.
       </p>
 
       <div class="mt-5 mb-3 flex items-center gap-4">
-        <h2 class="m-0 text-[1.2rem] font-semibold text-[#111827]">Orders</h2>
+        <h2 class="m-0 text-[1.2rem] font-semibold text-white">Orders</h2>
         <button
           type="button"
-          class="bg-white border border-[#e5e7eb] px-3 py-2 rounded-lg text-[0.85rem] cursor-pointer text-[#374151] hover:bg-[#f9fafb] hover:border-[#d1d5db] transition"
+          class="bg-white shadow-md px-3 py-2 rounded-lg text-[0.85rem] cursor-pointer text-[#374151] hover:bg-[#f9fafb] hover:border-[#d1d5db] transition"
         >
           Jan 1 - Jan 30, 2024 ▾
         </button>
       </div>
 
       <div class="grid gap-4 mb-5 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
-        <div class="bg-white border border-[#e5e7eb] rounded-[10px] p-4 flex flex-col gap-1 min-h-[108px]">
+        <div class="bg-white rounded-[10px] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex flex-col gap-1 min-h-[108px]">
           <div class="text-[0.75rem] font-semibold tracking-[0.5px] uppercase text-[#6b7280]">Total Orders</div>
             <div class="text-[1.5rem] font-semibold text-[#111827] leading-[1.1]">21 -</div>
           <div class="up text-[0.7rem] font-medium inline-flex items-center gap-1 tracking-[0.3px] text-[#059669]">▲ 25.2% last week</div>
         </div>
-        <div class="bg-white border border-[#e5e7eb] rounded-[10px] p-4 flex flex-col gap-1 min-h-[108px]">
+        <div class="bg-white rounded-[10px] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex flex-col gap-1 min-h-[108px]">
           <div class="text-[0.75rem] font-semibold tracking-[0.5px] uppercase text-[#6b7280]">Order items over time</div>
           <div class="text-[1.5rem] font-semibold text-[#111827] leading-[1.1]">15 -</div>
           <div class="up text-[0.7rem] font-medium inline-flex items-center gap-1 tracking-[0.3px] text-[#059669]">▲ 18.2% last week</div>
         </div>
-        <div class="bg-white border border-[#e5e7eb] rounded-[10px] p-4 flex flex-col gap-1 min-h-[108px]">
+        <div class="bg-white rounded-[10px] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex flex-col gap-1 min-h-[108px]">
           <div class="text-[0.75rem] font-semibold tracking-[0.5px] uppercase text-[#6b7280]">Returns Orders</div>
           <div class="text-[1.5rem] font-semibold text-[#111827] leading-[1.1]">0 -</div>
           <div class="down text-[0.7rem] font-medium inline-flex items-center gap-1 tracking-[0.3px] text-[#dc2626]">▼ 1.2% last week</div>
         </div>
-        <div class="bg-white border border-[#e5e7eb] rounded-[10px] p-4 flex flex-col gap-1 min-h-[108px]">
+        <div class="bg-white rounded-[10px] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex flex-col gap-1 min-h-[108px]">
           <div class="text-[0.75rem] font-semibold tracking-[0.5px] uppercase text-[#6b7280]">Fulfilled orders over time</div>
           <div class="text-[1.5rem] font-semibold text-[#111827] leading-[1.1]">12 -</div>
           <div class="up text-[0.7rem] font-medium inline-flex items-center gap-1 tracking-[0.3px] text-[#059669]">▲ 12.2% last week</div>

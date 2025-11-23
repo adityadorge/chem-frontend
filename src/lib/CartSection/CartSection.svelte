@@ -24,9 +24,9 @@
     if (browser) {
         onMount(() => {
             width = window.innerWidth;
-            const resize = () => width = window.innerWidth;
-            window.addEventListener('resize', resize);
-            return () => window.removeEventListener('resize', resize);
+            const resize = () => (width = window.innerWidth);
+            window.addEventListener("resize", resize);
+            return () => window.removeEventListener("resize", resize);
         });
     }
 
@@ -87,10 +87,9 @@
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${$user?.access_token}`,
-                        "Content-Type": "application/json",
-                    },
+                    "Content-Type": "application/json",
                 },
-            );
+            });
 
             const data = await response.json();
 
@@ -109,16 +108,19 @@
 
     async function proceedToCheckout() {
         try {
-            const response = await fetch(`${API_URL}/add-cart-to-ordersummary/`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${$user?.access_token}`,
-                    "Content-Type": "application/json",
+            const response = await fetch(
+                `${API_URL}/add-cart-to-ordersummary/`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${$user?.access_token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        cart: $cartItems,
+                    }),
                 },
-                body: JSON.stringify({
-                    cart: $cartItems
-                }),
-            });
+            );
 
             const data = await response.json();
 
@@ -138,11 +140,14 @@
     $: if (isOpen && $isAuthenticated) {
         fetchCart();
     }
-    $: if (! $isAuthenticated) {
+    $: if (!$isAuthenticated) {
         cartItems.set([]);
     }
 
-    $: totalItems = $cartItems.reduce((sum, item) => sum + item.number_of_samples, 0);
+    $: totalItems = $cartItems.reduce(
+        (sum, item) => sum + item.number_of_samples,
+        0,
+    );
     $: subtotal = $cartItems.reduce(
         (sum, item) => sum + item.price * item.number_of_samples,
         0,
@@ -156,7 +161,11 @@
         tabindex="0"
         aria-label="Close cart"
         on:click={closeCart}
-        on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { closeCart(); } }}
+        on:keydown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                closeCart();
+            }
+        }}
         transition:fade
     >
         <div
@@ -165,11 +174,15 @@
                 width: {isMobile ? '100vw' : isTablet ? '90vw' : '500px'};
                 max-width: {isMobile ? '100vw' : isTablet ? '90vw' : '500px'};
                 top: {isMobile || isTablet ? 'auto' : '70px'};
-                border-radius: {isMobile || isTablet ? '18px 18px 0 0' : '20px'};
+                border-radius: {isMobile || isTablet
+                ? '18px 18px 0 0'
+                : '20px'};
                 bottom: {isMobile ? '0' : 'auto'};
                 left: {isMobile ? '0' : 'auto'};
                 right: {isMobile ? '0' : '0'};
-                box-shadow: {isMobile ? '0 -2px 16px rgba(0,0,0,0.18)' : '0 5px 15px rgba(0,0,0,0.15)'};
+                box-shadow: {isMobile
+                ? '0 -2px 16px rgba(0,0,0,0.18)'
+                : '0 5px 15px rgba(0,0,0,0.15)'};
             "
             role="presentation"
             aria-label="Cart container"
@@ -177,12 +190,26 @@
             on:click|stopPropagation
             on:keydown|stopPropagation
         >
-            <div class="cart-panel" style="
+            <div
+                class="cart-panel"
+                style="
                 min-height: {isMobile ? '35vh' : isTablet ? '40vh' : '400px'};
-                max-height: {isMobile ? '85vh' : isTablet ? '80vh' : 'calc(100vh - 60px)'};
-                border-radius: {isMobile || isTablet ? '18px 18px 0 0' : '20px'};
+                max-height: {isMobile
+                    ? '85vh'
+                    : isTablet
+                      ? '80vh'
+                      : 'calc(100vh - 60px)'};
+                border-radius: {isMobile || isTablet
+                    ? '18px 18px 0 0'
+                    : '20px'};
                 padding-bottom: {isMobile ? '80px' : '0'};
-            " transition:fly={{ x: isMobile ? 0 : 400, y: isMobile ? 200 : 0, duration: 300 }}>
+            "
+                transition:fly={{
+                    x: isMobile ? 0 : 400,
+                    y: isMobile ? 200 : 0,
+                    duration: 300,
+                }}
+            >
                 <div class="cart-header {isMobile ? 'mobile-header' : ''}">
                     <h2 style="font-size: {isMobile ? '1.2rem' : '1.4rem'}">
                         Your Cart ({totalItems})
@@ -217,24 +244,59 @@
                     {:else}
                         <div class="cart-items">
                             {#each $cartItems as item (item.id)}
-                                <div class="cart-item {isMobile ? 'mobile-item' : ''}" style="gap: {isMobile ? '10px' : '15px'};">
+                                <div
+                                    class="cart-item {isMobile
+                                        ? 'mobile-item'
+                                        : ''}"
+                                    style="gap: {isMobile ? '10px' : '15px'};"
+                                >
                                     <img
                                         src={item.image}
                                         alt={item.name}
                                         class="item-image"
-                                        style="width: {isMobile ? '48px' : isTablet ? '60px' : '80px'}; height: {isMobile ? '48px' : isTablet ? '60px' : '80px'};"
+                                        style="width: {isMobile
+                                            ? '48px'
+                                            : isTablet
+                                              ? '60px'
+                                              : '80px'}; height: {isMobile
+                                            ? '48px'
+                                            : isTablet
+                                              ? '60px'
+                                              : '80px'};"
                                     />
                                     <div class="item-details">
-                                        <h3 style="font-size: {isMobile ? '1rem' : '18px'}">{item.name}</h3>
-                                        <p style="font-size: {isMobile ? '0.98rem' : '1rem'}">
+                                        <h3
+                                            style="font-size: {isMobile
+                                                ? '1rem'
+                                                : '18px'}"
+                                        >
+                                            {item.name}
+                                        </h3>
+                                        <p
+                                            style="font-size: {isMobile
+                                                ? '0.98rem'
+                                                : '1rem'}"
+                                        >
                                             ${item.price.toFixed(2)} × {item.number_of_samples}
                                         </p>
                                     </div>
-                                    <div class="item-actions" style="gap: {isMobile ? '8px' : '10px'};">
-                                        <span style="font-size: {isMobile ? '1rem' : '1.1rem'}">{item.number_of_samples}</span>
+                                    <div
+                                        class="item-actions"
+                                        style="gap: {isMobile
+                                            ? '8px'
+                                            : '10px'};"
+                                    >
+                                        <span
+                                            style="font-size: {isMobile
+                                                ? '1rem'
+                                                : '1.1rem'}"
+                                            >{item.number_of_samples}</span
+                                        >
                                         <button
                                             class="remove-btn"
-                                            style="font-size: {isMobile ? '2rem' : '2rem'}"
+                                            style="font-size: {isMobile
+                                                ? '2rem'
+                                                : '2rem'}"
                                             on:click={() => removeItem(item.id)}
                                             >×</button
                                         >
@@ -246,7 +308,9 @@
                 </div>
 
                 {#if $cartItems.length > 0}
-                    <div class="cart-summary {isMobile ? 'mobile-summary' : ''}">
+                    <div
+                        class="cart-summary {isMobile ? 'mobile-summary' : ''}"
+                    >
                         <div class="summary-row">
                             <span>Subtotal:</span>
                             <span>${subtotal.toFixed(2)}</span>
@@ -255,7 +319,11 @@
                 {/if}
 
                 <div class="cart-footer {isMobile ? 'mobile-footer' : ''}">
-                    <button class="checkout-btn" style="font-size: {isMobile ? '1.1rem' : '1.1rem'}" on:click={proceedToCheckout}>Proceed to Checkout</button>
+                    <button
+                        class="checkout-btn"
+                        style="font-size: {isMobile ? '1.1rem' : '1.1rem'}"
+                        on:click={proceedToCheckout}>Proceed to Checkout</button
+                    >
                 </div>
             </div>
         </div>
@@ -273,7 +341,8 @@
         display: flex;
         justify-content: flex-end;
     }
-    .backdrop.mobile, .backdrop.tablet {
+    .backdrop.mobile,
+    .backdrop.tablet {
         justify-content: center !important;
         align-items: flex-end !important;
         z-index: 3000 !important;
@@ -284,7 +353,7 @@
         pointer-events: auto;
         display: flex;
         flex-direction: column;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
         background: white;
     }
     .cart-panel {
@@ -377,7 +446,7 @@
     @media (max-width: 480px) {
         .backdrop.mobile {
             align-items: flex-end !important;
-            background: rgba(0,0,0,0.18);
+            background: rgba(0, 0, 0, 0.18);
         }
         .cart-container {
             left: 0 !important;
@@ -387,7 +456,7 @@
             border-radius: 18px 18px 0 0 !important;
             width: 100vw !important;
             max-width: 100vw !important;
-            box-shadow: 0 -2px 16px rgba(0,0,0,0.18) !important;
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.18) !important;
         }
         .cart-panel {
             min-height: 35vh !important;
@@ -462,7 +531,7 @@
             background: #fff;
             border-radius: 0 0 18px 18px;
             padding: 14px 18px 18px 18px !important;
-            box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
             z-index: 20;
         }
         .checkout-btn {

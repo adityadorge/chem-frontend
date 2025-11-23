@@ -212,7 +212,7 @@
         <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
         <button
           type="button"
-          class="text-sm text-[#3E28D9] hover:text-[#2f1cc8] underline-offset-2"
+          class="text-sm text-[#0c017b] hover:text-[#2f1cc8] underline-offset-2"
           on:click={openForgotModal}
           aria-haspopup="dialog"
           aria-controls="forgot-password-modal"
@@ -236,7 +236,7 @@
 
       <!-- Log in button -->
       <button
-        class="mt-6 inline-flex w-full items-center justify-center h-12 rounded-md bg-[#3d1cba] text-white font-semibold hover:bg-[#3621c9] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+        class="mt-6 inline-flex w-full items-center justify-center h-12 rounded-md bg-[#0c017b] text-white font-semibold hover:bg-[#3621c9] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
         on:click|preventDefault={handleLogin}
         disabled={isLoggingIn}
         aria-busy={isLoggingIn}
@@ -251,7 +251,7 @@
 
       <!-- New: Register button -->
       <button
-        class="mt-3 inline-flex w-full items-center justify-center h-12 rounded-md border border-[#3d1cba] text-[#3d1cba] font-semibold hover:bg-[#3d1cba]/5 transition-colors"
+        class="mt-3 inline-flex w-full items-center justify-center h-12 rounded-md border border-[#0c017b] text-[#0c017b] font-semibold hover:bg-[#0c017b]/5 transition-colors"
         on:click|preventDefault={goRegister}
         aria-label="Create an account"
       >
@@ -267,11 +267,6 @@
 
       <!-- Social buttons -->
       <div class="grid grid-cols-1 gap-3">
-        <!-- <button type="button" class="w-full h-11 rounded-md bg-indigo-50 text-gray-900 hover:bg-indigo-100 transition flex items-center justify-center gap-2">
-          <Facebook size={18} class="text-[#1877F2]" />
-          <span class="font-medium">Facebook</span>
-        </button> -->
-
         {#if gsiReady}
           <!-- Google renders here -->
           <div bind:this={gsiEl} id="googleSignInButton" class="w-full flex items-center justify-center h-11 rounded-md"></div>
@@ -282,17 +277,6 @@
             <span class="font-medium">Google</span>
           </button>
         {/if}
-
-        <!-- <button type="button" class="w-full h-11 rounded-md bg-indigo-50 text-gray-900 hover:bg-indigo-100 transition flex items-center justify-center gap-2">
-          <Apple size={18} class="text-black" />
-          <span class="font-medium">Apple</span>
-        </button> -->
-
-        <!-- Xero (no Lucide brand) – keep consistent styling -->
-        <!-- <button type="button" class="w-full h-11 rounded-md bg-indigo-50 text-gray-900 hover:bg-indigo-100 transition flex items-center justify-center gap-2">
-          <span class="h-2 w-2 rounded-full bg-sky-400"></span>
-          <span class="font-medium">Xero</span>
-        </button> -->
       </div>
 
 
@@ -310,7 +294,7 @@
     class="fixed inset-0 z-50 flex items-center justify-center p-4"
     role="dialog"
     aria-modal="true"
-    aria-label="Reset password"
+    aria-label="Reset_password"
     on:click|stopPropagation
   >
     <div class="w-full max-w-md rounded-lg bg-white shadow-xl p-6">
@@ -326,14 +310,14 @@
             type="email"
             bind:value={forgotEmail}
             required
-            class="w-full h-11 rounded-md border border-gray-300 focus:border-[#3E28D9] focus:ring-2 focus:ring-[#3E28D9]/30 outline-none px-3"
+            class="w-full h-11 rounded-md border border-gray-300 focus:border-[#0c017b] focus:ring-2 focus:ring-[#0c017b]/30 outline-none px-3"
             placeholder="you@example.com"
           />
         </div>
         <div class="flex gap-2">
           <button
             type="submit"
-            class="inline-flex items-center justify-center h-11 px-4 rounded-md bg-[#3d1cba] text-white font-semibold hover:bg-[#3621c9] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            class="inline-flex items-center justify-center h-11 px-4 rounded-md bg-[#0c017b] text-white font-semibold hover:bg-[#0c017b] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             disabled={isSendingReset}
           >
             {#if isSendingReset}

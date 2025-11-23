@@ -1,14 +1,11 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { page } from "$app/stores";
-  import { get } from "svelte/store";
   import CardsSection from "$lib/Testing_Component/CardsSection/CardsSection.svelte";
-  import Filter from "$lib/Testing_Component/Filter/Filter.svelte";
   import TestCardsSection from "$lib/Testing_Component/TestCardsSection/TestCardsSection.svelte";
-  import Navbar from "$lib/Navbar/Navbar.svelte";
+  import LabCardsSection from "$lib/Testing_Component/LabCardsSection/LabCardsSection.svelte";
   import { goto } from "$app/navigation";
   import { API_URL } from "$lib/store/api";
-  import { LayoutGrid, List } from 'lucide-svelte';
 
   let searchTerm: string = "";
 
@@ -35,6 +32,14 @@
     test_price: number;
   }
 
+  interface LabProvided {
+    id: number;        // lab id
+    lab_name: string;
+    turnaround_time?: string;
+    email?: string;
+    test_id?: number;
+  }
+
   type BreadcrumbItem = {
     label: string;
     type: "home" | "category" | "subcategory";
@@ -48,6 +53,8 @@
   let selectedCategory: Category | null = null;
   let subcategories: Subcategory[] = [];
   let tests: Test[] = [];
+  let selectedTest: Test | null = null;
+  let labs: LabProvided[] = [];
 
   // Fetch the category data from the Django API
   async function fetchCategories() {
@@ -70,6 +77,16 @@
     );
     const test_data: Test[] = await test_response.json();
     tests = test_data;
+  }
+
+  async function fetchLabs(testId: number) {
+    labs = [];
+    // new endpoint (add in backend): /app1/tests/<id>/labs/
+    const res = await fetch(`${API_URL}/app1/tests/${testId}/labs/`);
+    if (res.ok) {
+      const data = await res.json();
+      labs = data;
+    }
   }
 
   $: categoryId = $page.url.searchParams.get("category");
@@ -189,6 +206,37 @@
     }
   }
 
+  function selectTest(test: Test) {
+    selectedTest = test;
+    // add test breadcrumb if not present
+    const exists = breadcrumbPath.find(b => b.type === 'subcategory' && b.label === test.test_name);
+    if (!exists) {
+      breadcrumbPath = [
+        ...breadcrumbPath,
+        { label: test.test_name, type: 'subcategory', data: test }
+      ];
+    }
+    // update URL param ?test=<id>
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("test", String(test.id));
+      goto(url.pathname + url.search, { replaceState: false });
+    }
+    fetchLabs(test.id);
+  }
+
+  function clearTest() {
+    selectedTest = null;
+    labs = [];
+    // remove test breadcrumb
+    breadcrumbPath = breadcrumbPath.filter(b => !(b.type === 'subcategory' && b.data?.id === selectedTest?.id));
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("test");
+      goto(url.pathname + url.search, { replaceState: true });
+    }
+  }
+
   // Listen for back/forward navigation
   function handlePopState(event: PopStateEvent) {
     // Read the current URL and update state accordingly
@@ -214,6 +262,25 @@
         fetchData(cat.id);
       }
       // If you support subcategories in URL, add logic here
+    }
+    const testParam = url.searchParams.get("test");
+    if (!testParam) {
+      selectedTest = null;
+      labs = [];
+    } else {
+      const t = tests.find(t => t.id === Number(testParam));
+      if (t) {
+        selectedTest = t;
+        fetchLabs(t.id);
+        // ensure breadcrumb path contains test
+        const has = breadcrumbPath.find(b => b.type === 'subcategory' && b.data?.id === t.id);
+        if (!has) {
+          breadcrumbPath = [
+            ...breadcrumbPath,
+            { label: t.test_name, type: 'subcategory', data: t }
+          ];
+        }
+      }
     }
   }
 
@@ -265,11 +332,6 @@
       // Drive your existing flow
       showSubcategories(cat);
     }
-  }
-
-  function onSelectSubcategory(e: Event) {
-    selectedSubcategoryName = (e.target as HTMLSelectElement).value;
-    // If you later fetch tests by subcategory, trigger it here.
   }
 
   function showResults() {
@@ -358,8 +420,23 @@
     },
   ];
 
-  let testsView: "grid" | "list" = "grid"; // view mode for TESTS only
-  const setTestsView = (v: "grid" | "list") => (testsView = v);
+  // Client-side search helpers
+  const toKey = (s?: string) => (s ?? "").toLowerCase().trim();
+  $: query = toKey(searchTerm);
+  const has = (s?: string) => toKey(s).includes(query);
+
+  // Reactive filtered lists per view
+  $: filteredCategories = query
+    ? categories.filter(c => has(c.category_name) || has(c.description) || has(c.info))
+    : categories;
+  $: filteredTests = query
+    ? tests.filter(t => has(t.test_name) || has(t.test_description))
+    : tests;
+  $: filteredLabs = query
+    ? labs.filter(l => has(l.lab_name) || has(l.email) || has(l.turnaround_time))
+    : labs;
+
+  // Removed testsView state and setter
 </script>
 
 <!-- Replace the old breadcrumb + Filter with the new hero header -->
@@ -457,33 +534,7 @@
           </select>
         </div>
 
-        <!-- Subcategory -->
-        <div class="pill">
-          <select
-            on:change={onSelectSubcategory}
-            bind:value={selectedSubcategoryName}
-            aria-label="Topic"
-            disabled={!subcategories.length}
-          >
-            <option value=""
-              >{subcategories.length
-                ? "Topic"
-                : "Select category first"}</option
-            >
-            {#each subcategories as sc}
-              <option value={sc.category_name}>{sc.category_name}</option>
-            {/each}
-          </select>
-        </div>
-
-        <!-- Placeholder -->
-        <div class="pill">
-          <select aria-label="Business type" disabled>
-            <option>Business type</option>
-          </select>
-        </div>
-
-        <!-- Search -->
+                <!-- Search -->
         <div class="pill pill-input">
           <svg
             class="icon"
@@ -657,65 +708,78 @@
 
       <!-- Categories grid ONLY when no category selected -->
       <div class="categories-grid">
-        {#if categories.length}
-          {#each categories as c (c.id)}
-            <CardsSection
-              icon={c.image_url || "/assets/default-icon.svg"}
-              title={c.category_name}
-              description={c.description}
-              info={c.info}
-              category={c}
-              {showSubcategories}
-              kicker="CATEGORY"
-            />
-          {/each}
+        {#if filteredCategories.length}
+          {#each filteredCategories as c (c.id)}
+             <CardsSection
+               icon={c.image_url || "/assets/default-icon.svg"}
+               title={c.category_name}
+               description={c.description}
+               info={c.info}
+               category={c}
+               {showSubcategories}
+               kicker="CATEGORY"
+             />
+           {/each}
         {:else}
-          <p class="empty-note">No categories available.</p>
-        {/if}
-      </div>
-    {/if}
+          {#if categories.length}
+            <p class="empty-note">No categories match "{searchTerm}".</p>
+          {:else}
+            <p class="empty-note">No categories available.</p>
+          {/if}
+         {/if}
+       </div>
+     {/if}
   </div>
 </section>
 
-{#if selectedCategory}
+{#if selectedCategory && !selectedTest}
+  <!-- Tests layer -->
   <main>
     <div class="cards-container">
-      <!-- View toggle (hidden on small screens) -->
-      <div class="tests-toolbar" role="toolbar" aria-label="Test view options">
-        <button
-          type="button"
-          class="vt-btn"
-          class:active={testsView === 'grid'}
-          aria-pressed={testsView === 'grid'}
-          on:click={() => setTestsView('grid')}
-          title="Cards view"
-        >
-        <LayoutGrid size={16} />
-        </button>
-        <button
-          type="button"
-          class="vt-btn"
-          class:active={testsView === 'list'}
-          aria-pressed={testsView === 'list'}
-          on:click={() => setTestsView('list')}
-          title="List view"
-        >
-        <List size={16} />
-        </button>
-      </div>
-
+      <!-- Removed view toggle toolbar -->
       <div class="cards-wrapper">
-        {#if tests?.length}
-          <div class="test-cards" data-view={testsView}>
-            {#each tests as test (test.id)}
-              <TestCardsSection {test} view={testsView} />
+        {#if filteredTests?.length}
+           <div class="test-cards" data-view="grid">
+            {#each filteredTests as test (test.id)}
+              <TestCardsSection {test} view="grid" on:select={(e) => selectTest(e.detail.test)} />
             {/each}
-          </div>
+           </div>
         {:else}
-          <p class="empty-note">
-            No tests found in {selectedCategory.category_name}.
-          </p>
-        {/if}
+          {#if tests?.length}
+            <p class="empty-note">No tests match "{searchTerm}".</p>
+          {:else}
+            <p class="empty-note">No tests found in {selectedCategory.category_name}.</p>
+          {/if}
+         {/if}
+      </div>
+    </div>
+  </main>
+{/if}
+
+{#if selectedCategory && selectedTest}
+  <!-- Labs layer -->
+  <main>
+    <div class="cards-container">
+      <div class="tests-toolbar" role="toolbar" aria-label="Lab view options">
+        <button type="button" class="vt-btn" on:click={clearTest}>Back to tests</button>
+      </div>
+      <h2 style="margin:8px 0 18px;font-weight:800;color:#0c017b;">
+        Labs providing: {selectedTest.test_name}
+      </h2>
+      <div class="cards-wrapper">
+        {#if filteredLabs.length}
+           <div class="test-cards" data-view="grid">
+            {#each filteredLabs as lab (lab.id)}
+               <LabCardsSection lab={lab} testId={selectedTest.id} view="grid" />
+             {/each}
+           </div>
+        {:else}
+          {#if labs.length}
+            <p class="empty-note">No labs match "{searchTerm}".</p>
+          {:else}
+            <p class="empty-note">No labs found for this test.</p>
+          {/if}
+         {/if}
       </div>
     </div>
   </main>
@@ -741,7 +805,7 @@
   .hero-inner {
     max-width: 1120px;
     margin: 0 auto;
-    padding: 56px 20px 140px; /* bottom extra for wave */
+    padding: 56px 20px 56px; /* bottom extra for wave */
     text-align: center;
   }
   .hero-crumbs {
@@ -803,16 +867,7 @@
     min-height: 44px;
     /* subtle alignment to baseline */
     padding-inline: 2px;
-  }
-
-  /* Label kept on one line */
-  .filters-label {
-    color: var(--accent);
-    font-weight: 800;
-    letter-spacing: 1.6px;
-    font-size: 12px;
-    white-space: nowrap; /* keep on one line */
-    margin: 0; /* remove previous margins */
+    justify-content: center; /* center label + controls */
   }
 
   /* Controls row stays on one line; scrolls horizontally if cramped */
@@ -820,11 +875,12 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    flex: 1 1 auto;
-    flex-wrap: nowrap; /* force single line */
-    overflow-x: auto; /* allow horizontal scroll if needed */
+    flex: 0 0 auto;          /* don’t stretch across the row */
+    justify-content: center; /* center the controls group */
+    flex-wrap: nowrap;        /* force single line */
+    overflow-x: auto;         /* allow horizontal scroll if needed */
     overflow-y: hidden;
-    scrollbar-width: thin; /* Firefox */
+    scrollbar-width: thin;    /* Firefox */
   }
   .filters-row::-webkit-scrollbar {
     height: 6px;
@@ -1316,11 +1372,6 @@
     font-size: 13px;
     cursor: pointer;
   }
-  .vt-btn.active {
-    background: #eef2ff;
-    border-color: #c7d2fe;
-    color: #4338ca;
-  }
 
   /* Test cards layout switches by data-view */
   .test-cards[data-view="grid"] {
@@ -1339,11 +1390,6 @@
       grid-template-columns: 1fr;
       gap: 18px;
     }
-  }
-  .test-cards[data-view="list"] {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
   }
 
   /* Grid that displays CardsSection items */
@@ -1374,4 +1420,6 @@
       gap: 18px;
     }
   }
+
+  /* reuse existing .test-cards styles for labs */
 </style>

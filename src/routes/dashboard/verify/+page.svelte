@@ -299,62 +299,83 @@
   $: if ($user?.access_token && !loading && !hasExisting && statusVal === "") {
     // reserved
   }
+
+  // Unified input styles
+  const inputCls =
+    "w-full h-11 sm:h-11 md:h-11 rounded-lg border border-gray-300 bg-white px-3 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition";
+  const selectCls =
+    "w-full h-11 rounded-lg border border-gray-300 bg-white px-3 shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition";
+  const textareaCls =
+    "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition";
 </script>
 
 <Toaster richColors />
 
-<main class="w-full overflow-x-hidden px-2 sm:px-6 md:px-8 lg:px-10 py-4 sm:py-6">
-  <div class="mx-auto w-full max-w-[1320px] min-w-0">
-    <!-- Header -->
-    <header class="mb-4 rounded-2xl bg-white/90 supports-backdrop-blur:bg-white/60 backdrop-blur ring-1 ring-gray-200 shadow-sm">
-      <div class="flex items-center justify-between gap-4 sm:gap-6 p-3 sm:p-4 min-w-0">
-        <div class="flex items-center gap-3">
-          <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-            <ShieldCheck class="h-5 w-5" aria-hidden="true" />
-          </span>
-          <div>
-            <h1 class="text-base sm:text-lg md:text-xl font-semibold text-gray-900">User Verification</h1>
-            <p class="mt-0.5 text-xs sm:text-sm text-gray-600">Simple layout—optimized for quick completion.</p>
-          </div>
-        </div>
+<main class="w-full sm:pt-8">
+  <!-- Added Order Details style header -->
+    <div class="mb-6 rounded-[14px] bg-[#0c017b] p-4 sm:p-5 md:p-6 shadow-sm flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <div>
+        <h1 class="m-0 text-[1.5rem] font-bold text-white inline-flex items-center gap-2">
+          User Verification
+          <button
+            class="info inline-flex items-center justify-center w-9 h-9 rounded-lg border border-[#e5e7eb] bg-white text-[#6b7280] hover:bg-[#f9fafb] hover:border-[#d1d5db] hover:text-[#374151] transition"
+            type="button"
+            aria-label="About this page"
+            title="About this page"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 10v6" />
+              <circle cx="12" cy="7" r="1.2" />
+            </svg>
+          </button>
+        </h1>
+        <p class="mt-1 text-white/80 leading-[1.5] text-[0.98rem]">
+          In the order details section, you can review and manage all orders with their details. You can view and edit many information such as IDs of all orders, ordered product, order date, price and order status. Access to this area is limited. Only administrators and team leaders can reach. The changes you make will be approved after they are checked.
+        </p>
+      </div>
 
+      <div class="flex flex-col items-start gap-2 self-start">
         {#if statusVal}
           <span
-            class="inline-flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] sm:text-xs font-medium
-                   {statusVal === 'approved' ? 'bg-emerald-50 text-emerald-700' : ''}
-                   {statusVal === 'pending' ? 'bg-amber-50 text-amber-700' : ''}
-                   {statusVal === 'rejected' ? 'bg-rose-50 text-rose-700' : ''}">
-            <Check class="h-3.5 w-3.5" />
+            class="inline-flex items-center justify-center gap-2 self-start rounded-lg px-4 py-2
+                  text-sm sm:text-base font-semibold shadow-sm ring-1 min-w-[180px]
+                  {statusVal === 'approved' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : ''}
+                  {statusVal === 'pending' ? 'bg-amber-50 text-amber-700 ring-amber-200' : ''}
+                  {statusVal === 'rejected' ? 'bg-rose-50 text-rose-700 ring-rose-200' : ''}"
+          >
+            {#if statusVal === 'rejected'}
+              <Info class="h-5 w-5" />
+            {:else}
+              <Check class="h-5 w-5" />
+            {/if}
             {statusVal.charAt(0).toUpperCase() + statusVal.slice(1)}
           </span>
         {/if}
-      </div>
-
-      {#if statusVal === 'rejected' && rejectionReason}
-        <div class="px-3 sm:px-4 pb-3">
-          <div class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs sm:text-sm text-rose-800">
+        {#if statusVal === 'rejected' && rejectionReason}
+          <div class="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs sm:text-sm text-rose-800">
             Rejection reason: {rejectionReason}
           </div>
-        </div>
-      {/if}
-    </header>
+        {/if}
+      </div>
+    </div>
 
-    <!-- Form -->
-    <section class="rounded-xl border border-gray-200 bg-white p-3 sm:p-5 md:p-6 overflow-x-hidden">
+    <!-- ...rest of existing form section... -->
+    <section class="rounded-2xl bg-white p-4 sm:p-6 md:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.12)] overflow-x-hidden">
       {#if loading}
         <p class="text-sm text-gray-600">Loading...</p>
       {:else}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 min-w-0">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 min-w-0">
           <!-- Basic Information -->
           <div class="sm:col-span-2 lg:col-span-3">
             <h3 class="text-sm sm:text-base font-semibold text-gray-900">Basic Information</h3>
           </div>
 
           <div>
-            <label for="full_name" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Full Name <span class="text-rose-500">*</span></label>
+            <label for="full_name" class="block text-[13px] font-medium text-gray-800 mb-1.5">Full Name <span class="text-rose-500">*</span></label>
             <input
               id="full_name"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.full_name}
               placeholder="Your full legal name"
@@ -365,10 +386,10 @@
           </div>
 
           <div>
-            <label for="email" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Email <span class="text-rose-500">*</span></label>
+            <label for="email" class="block text-[13px] font-medium text-gray-800 mb-1.5">Email <span class="text-rose-500">*</span></label>
             <input
               id="email"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="email"
               bind:value={form.email}
               placeholder="name@company.com"
@@ -380,10 +401,10 @@
           </div>
 
           <div>
-            <label for="phone" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Phone Number <span class="text-rose-500">*</span></label>
+            <label for="phone" class="block text-[13px] font-medium text-gray-800 mb-1.5">Phone Number <span class="text-rose-500">*</span></label>
             <input
               id="phone"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="tel"
               bind:value={form.phone_number}
               placeholder="+91 98765 43210"
@@ -395,10 +416,10 @@
           </div>
 
           <div>
-            <label for="alt_phone" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Alternate Phone</label>
+            <label for="alt_phone" class="block text-[13px] font-medium text-gray-800 mb-1.5">Alternate Phone</label>
             <input
               id="alt_phone"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="tel"
               bind:value={form.alternate_phone_number}
               placeholder="+91 9xxxx xxxxx"
@@ -408,10 +429,10 @@
           </div>
 
           <div>
-            <label for="dob" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Date of Birth <span class="text-rose-500">*</span></label>
+            <label for="dob" class="block text-[13px] font-medium text-gray-800 mb-1.5">Date of Birth <span class="text-rose-500">*</span></label>
             <input
               id="dob"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="date"
               bind:value={form.date_of_birth}
               max={maxDob}
@@ -423,10 +444,10 @@
           </div>
 
           <div>
-            <label for="gender" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Gender</label>
+            <label for="gender" class="block text-[13px] font-medium text-gray-800 mb-1.5">Gender</label>
             <select
               id="gender"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={selectCls}
               bind:value={form.gender}
             >
               <option value="">Select</option>
@@ -435,15 +456,15 @@
           </div>
 
           <!-- Residential Address -->
-          <div class="sm:col-span-2 lg:col-span-3 mt-1 sm:mt-2">
+          <div class="sm:col-span-2 lg:col-span-3 mt-2">
             <h3 class="text-sm sm:text-base font-semibold text-gray-900">Residential Address</h3>
           </div>
 
           <div>
-            <label for="addr1" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Address Line 1 <span class="text-rose-500">*</span></label>
+            <label for="addr1" class="block text-[13px] font-medium text-gray-800 mb-1.5">Address Line 1 <span class="text-rose-500">*</span></label>
             <input
               id="addr1"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.residential_address_line1}
               placeholder="House/Flat, Street"
@@ -454,10 +475,10 @@
           </div>
 
           <div>
-            <label for="addr2" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Address Line 2</label>
+            <label for="addr2" class="block text-[13px] font-medium text-gray-800 mb-1.5">Address Line 2</label>
             <input
               id="addr2"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.residential_address_line2}
               placeholder="Area, Landmark (optional)"
@@ -466,10 +487,10 @@
           </div>
 
           <div>
-            <label for="city" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">City <span class="text-rose-500">*</span></label>
+            <label for="city" class="block text-[13px] font-medium text-gray-800 mb-1.5">City <span class="text-rose-500">*</span></label>
             <input
               id="city"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.residential_city}
               autocomplete="address-level2"
@@ -478,10 +499,10 @@
           </div>
 
           <div>
-            <label for="state" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">State <span class="text-rose-500">*</span></label>
+            <label for="state" class="block text-[13px] font-medium text-gray-800 mb-1.5">State <span class="text-rose-500">*</span></label>
             <input
               id="state"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.residential_state}
               autocomplete="address-level1"
@@ -490,10 +511,10 @@
           </div>
 
           <div>
-            <label for="postal" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Postal Code <span class="text-rose-500">*</span></label>
+            <label for="postal" class="block text-[13px] font-medium text-gray-800 mb-1.5">Postal Code <span class="text-rose-500">*</span></label>
             <input
               id="postal"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.residential_postal_code}
               autocomplete="postal-code"
@@ -503,10 +524,10 @@
           </div>
 
           <div>
-            <label for="country" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Country</label>
+            <label for="country" class="block text-[13px] font-medium text-gray-800 mb-1.5">Country</label>
             <input
               id="country"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.residential_country}
               autocomplete="country-name"
@@ -514,7 +535,7 @@
           </div>
 
           <!-- Work Address -->
-          <div class="sm:col-span-2 lg:col-span-3 mt-1 sm:mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div class="sm:col-span-2 lg:col-span-3 mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <h3 class="text-sm sm:text-base font-semibold text-gray-900">Work Address</h3>
             <label class="inline-flex items-center gap-2 text-sm text-gray-700">
               <input id="sameAsRes" type="checkbox" bind:checked={sameAsResidential} />
@@ -526,7 +547,7 @@
             <label for="work_address" class="sr-only">Work Address</label>
             <textarea
               id="work_address"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={textareaCls}
               rows="3"
               bind:value={form.work_address}
               placeholder="Full work address"
@@ -535,15 +556,15 @@
           </div>
 
           <!-- Profession -->
-          <div class="sm:col-span-2 lg:col-span-3 mt-1 sm:mt-2">
+          <div class="sm:col-span-2 lg:col-span-3 mt-2">
             <h3 class="text-sm sm:text-base font-semibold text-gray-900">Professional Details</h3>
           </div>
 
           <div>
-            <label for="institution" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Institution</label>
+            <label for="institution" class="block text-[13px] font-medium text-gray-800 mb-1.5">Institution</label>
             <input
               id="institution"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.institution}
               placeholder="Organization / Institute"
@@ -552,10 +573,10 @@
           </div>
 
           <div>
-            <label for="designation" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Designation</label>
+            <label for="designation" class="block text-[13px] font-medium text-gray-800 mb-1.5">Designation</label>
             <input
               id="designation"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.designation}
               placeholder="e.g., Research Associate"
@@ -563,10 +584,10 @@
           </div>
 
           <div>
-            <label for="field" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">Field of Research</label>
+            <label for="field" class="block text-[13px] font-medium text-gray-800 mb-1.5">Field of Research</label>
             <input
               id="field"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={inputCls}
               type="text"
               bind:value={form.field_of_research}
               placeholder="e.g., Analytical Chemistry"
@@ -574,15 +595,15 @@
           </div>
 
           <!-- ID Proof -->
-          <div class="sm:col-span-2 lg:col-span-3 mt-1 sm:mt-2">
+          <div class="sm:col-span-2 lg:col-span-3 mt-2">
             <h3 class="text-sm sm:text-base font-semibold text-gray-900">ID Proof</h3>
           </div>
 
           <div>
-            <label for="id_type" class="block text-sm md:text-xs font-medium text-gray-700 mb-1">ID Document Type <span class="text-rose-500">*</span></label>
+            <label for="id_type" class="block text-[13px] font-medium text-gray-800 mb-1.5">ID Document Type <span class="text-rose-500">*</span></label>
             <select
               id="id_type"
-              class="w-full h-12 sm:h-11 md:h-10 rounded-md border border-gray-300 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class={selectCls}
               bind:value={form.id_document_type}
               required
               aria-required="true"
@@ -593,7 +614,7 @@
           </div>
 
           <div class="sm:col-span-2 lg:col-span-2">
-            <label class="block text-sm md:text-xs font-medium text-gray-700 mb-2">Upload ID document <span class="text-rose-500">*</span></label>
+            <label class="block text-[13px] font-medium text-gray-800 mb-2">Upload ID document <span class="text-rose-500">*</span></label>
 
             {#if currentDocUrl && !form.id_document}
               <div class="mb-3 inline-flex flex-wrap items-center gap-2 rounded-md bg-gray-50 px-3 py-2 ring-1 ring-gray-200 text-sm text-gray-700">
@@ -617,7 +638,7 @@
               <div>
                 <label
                   for="id_doc"
-                  class="flex w-full cursor-pointer items-center gap-3 rounded-md border border-dashed border-gray-300 p-3 hover:border-indigo-300 overflow-hidden"
+                  class="flex w-full cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed border-gray-300 p-3 hover:border-indigo-300 hover:bg-indigo-50/30 transition overflow-hidden"
                   aria-required="true"
                 >
                   <div class="flex items-center gap-3 min-w-0">
@@ -640,20 +661,18 @@
           </div>
 
           <!-- Consent -->
-          <div class="sm:col-span-2 lg:col-span-3 mt-2 rounded-md bg-gray-50 px-3 py-2 ring-1 ring-gray-200">
+          <div class="sm:col-span-2 lg:col-span-3 mt-2 rounded-lg bg-gray-50 px-3 py-2 ring-1 ring-gray-200">
             <label for="consent" class="inline-flex items-start gap-2 text-sm text-gray-700">
               <input id="consent" type="checkbox" bind:checked={form.consent_given} />
-              <span>
-                I have read and agree to the company privacy policy and confirm that the details provided are true and accurate.
-              </span>
+              <span>I have read and agree to the company privacy policy and confirm that the details provided are true and accurate.</span>
             </label>
           </div>
         </div>
 
-        <div class="mt-5 flex items-center justify-end">
+        <div class="mt-6 flex items-center justify-end">
           <button
             type="button"
-            class="w-full sm:w-auto rounded-lg bg-indigo-600 px-4 py-3 sm:py-2 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-60"
+            class="w-full sm:w-auto rounded-lg bg-[#0c017b] px-5 py-3 sm:py-2.5 text-white font-semibold shadow-sm hover:bg-[#0c017b] active:bg-[#0c017b] transition disabled:opacity-60"
             on:click={submit}
             disabled={saving || loading || !form.consent_given}
           >
@@ -662,7 +681,6 @@
         </div>
       {/if}
     </section>
-  </div>
 </main>
 
 <style>

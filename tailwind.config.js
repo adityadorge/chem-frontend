@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        alegreya: ["Alegreya", "serif"],
-      },
+        sans: ["InterVariable", "Inter", "system-ui", "sans-serif"]
+      }
     },
   },
 };

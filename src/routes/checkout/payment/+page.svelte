@@ -62,8 +62,8 @@
     }
 </script>
 
-<div class="container">
-    <div class="flex flex-col lg:flex-row min-h-screen gap-12 p-4 lg:p-8">
+<div class="container mx-auto">
+    <div class="flex flex-col lg:flex-row min-h-screen gap-4 p-4 lg:p-8">
         <!-- Sidebar -->
         <div class="w-full lg:w-[40%] bg-pink-100 p-8 lg:p-12 flex flex-col justify-between rounded-3xl relative min-h-[400px]">
             <div class="pb-20 lg:pb-0">
@@ -183,7 +183,12 @@
                         {#each orderSummaries as order}
                             <div class="border rounded-2xl p-6 bg-blue-50 mb-6 shadow-sm flex flex-col gap-2 relative group order-summary-card">
                                 <div class="flex justify-between items-center mb-2">
-                                    <div class="font-semibold text-lg text-blue-900">{order.test_name}</div>
+                                    <div class="font-semibold text-lg text-blue-900">
+                                        {order.test_name}
+                                        {#if order.lab_name}
+                                            <span class="text-xl font-bold text-gray-900"> — {order.lab_name}</span>
+                                        {/if}
+                                    </div>
                                     <button
                                         class="ml-2 px-3 py-1 bg-red-500 text-white rounded-full text-sm font-semibold hover:bg-red-600 transition"
                                         on:click={() => removeOrderSummaryItem(order.id)}

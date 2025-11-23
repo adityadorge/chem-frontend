@@ -41,13 +41,6 @@
         <span class={`lg:px-6 px-4 py-1 rounded-full text-sm font-semibold mb-4 self-start ${card.tagColor}`}>{card.tag}</span>
         <h2 class="font-bold lg:text-2xl text-xl sm:text-lg xs:text-base mb-3">{card.title}</h2>
         <p class="text-gray-600 lg:text-lg text-base sm:text-sm xs:text-xs mb-8">{card.desc}</p>
-        <div class="flex items-center mt-auto">
-          <img src={card.avatar} alt={card.author} class="lg:w-14 lg:h-14 w-11 h-11 sm:w-9 sm:h-9 xs:w-8 xs:h-8 rounded-full mr-4 border-2 border-white shadow"/>
-          <div>
-            <p class="text-gray-800 lg:text-lg text-base sm:text-sm xs:text-xs font-semibold">{card.author}</p>
-            <p class="text-gray-400 lg:text-base text-sm sm:text-xs xs:text-[10px]">{card.time}</p>
-          </div>
-        </div>
       </div>
     </div>
   {/each}
