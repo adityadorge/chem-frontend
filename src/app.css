@@ -1,18 +1,25 @@
 @import "tailwindcss";
 
+/* design canvas */
+#design-root {
+  width: 440px;              /* your reference design width */
+  transform-origin: top left;
+  -webkit-transform-origin: top left;
+  margin: 0 auto;           /* center on wide screens */
+  /* prevent scrollbars caused by fractional transforms */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+
+/* body defaults so page doesn't jump if JS disabled */
 html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-}
-
-:root {
-  --design-width: 440; /* your Moto G64 width */
-}
-
-body {
-  transform: scale(calc(100vw / var(--design-width)));
-  transform-origin: top left;
-  width: var(--design-width);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
