@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
-@layer base {
-  html {
-    --design-width: 440;
-    font-size: clamp(14px, calc(16px * (100vw / var(--design-width))), 18px);
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
-/* Utility: Hide scrollbars on mobile */
+:root {
+  --design-width: 440; /* your Moto G64 width */
+}
+
 body {
-  -webkit-overflow-scrolling: touch;
-  overflow-x: hidden;
+  transform: scale(calc(100vw / var(--design-width)));
+  transform-origin: top left;
+  width: var(--design-width);
 }
 
