@@ -33,7 +33,7 @@
   ];
 </script>
 
-<div class="flex flex-wrap gap-8 justify-center items-center py-8">
+<div class="flex flex-wrap gap-8 justify-center items-start pb-16 px-4 sm:px-6 lg:px-0">
   {#each cards as card}
     <div class="lg:w-[28rem] w-96 sm:w-80 xs:w-full rounded-2xl shadow-lg bg-white overflow-hidden flex flex-col transition-transform hover:-translate-y-1 hover:shadow-xl max-w-full">
       <img src={card.image} alt={card.title} class="lg:h-72 h-56 sm:h-48 xs:h-40 w-full object-cover"/>

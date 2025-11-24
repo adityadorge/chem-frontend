@@ -6,6 +6,7 @@
   import LabCardsSection from "$lib/Testing_Component/LabCardsSection/LabCardsSection.svelte";
   import { goto } from "$app/navigation";
   import { API_URL } from "$lib/store/api";
+  import { Mail } from "lucide-svelte";
 
   let searchTerm: string = "";
 
@@ -33,7 +34,7 @@
   }
 
   interface LabProvided {
-    id: number;        // lab id
+    id: number; // lab id
     lab_name: string;
     turnaround_time?: string;
     email?: string;
@@ -66,14 +67,14 @@
   // Fetch subcategories for a selected category
   async function fetchData(categoryId: number) {
     const subcategories_response = await fetch(
-      `${API_URL}/app1/categories/${categoryId}/subcategories/`,
+      `${API_URL}/app1/categories/${categoryId}/subcategories/`
     );
     const subcategories_data: Subcategory[] =
       await subcategories_response.json();
     subcategories = subcategories_data;
 
     const test_response = await fetch(
-      `${API_URL}/app1/categories/${categoryId}/tests/`,
+      `${API_URL}/app1/categories/${categoryId}/tests/`
     );
     const test_data: Test[] = await test_response.json();
     tests = test_data;
@@ -150,13 +151,13 @@
     let idx = -1;
     if (item.type === "category") {
       idx = breadcrumbPath.findIndex(
-        (b) => b.type === "category" && b.data?.id === item.data.id,
+        (b) => b.type === "category" && b.data?.id === item.data.id
       );
     } else if (item.type === "subcategory") {
       idx = breadcrumbPath.findIndex(
         (b) =>
           b.type === "subcategory" &&
-          b.data?.category_name === item.data.category_name,
+          b.data?.category_name === item.data.category_name
       );
     }
     if (idx === -1) {
@@ -209,11 +210,13 @@
   function selectTest(test: Test) {
     selectedTest = test;
     // add test breadcrumb if not present
-    const exists = breadcrumbPath.find(b => b.type === 'subcategory' && b.label === test.test_name);
+    const exists = breadcrumbPath.find(
+      (b) => b.type === "subcategory" && b.label === test.test_name
+    );
     if (!exists) {
       breadcrumbPath = [
         ...breadcrumbPath,
-        { label: test.test_name, type: 'subcategory', data: test }
+        { label: test.test_name, type: "subcategory", data: test },
       ];
     }
     // update URL param ?test=<id>
@@ -229,7 +232,9 @@
     selectedTest = null;
     labs = [];
     // remove test breadcrumb
-    breadcrumbPath = breadcrumbPath.filter(b => !(b.type === 'subcategory' && b.data?.id === selectedTest?.id));
+    breadcrumbPath = breadcrumbPath.filter(
+      (b) => !(b.type === "subcategory" && b.data?.id === selectedTest?.id)
+    );
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.delete("test");
@@ -268,16 +273,18 @@
       selectedTest = null;
       labs = [];
     } else {
-      const t = tests.find(t => t.id === Number(testParam));
+      const t = tests.find((t) => t.id === Number(testParam));
       if (t) {
         selectedTest = t;
         fetchLabs(t.id);
         // ensure breadcrumb path contains test
-        const has = breadcrumbPath.find(b => b.type === 'subcategory' && b.data?.id === t.id);
+        const has = breadcrumbPath.find(
+          (b) => b.type === "subcategory" && b.data?.id === t.id
+        );
         if (!has) {
           breadcrumbPath = [
             ...breadcrumbPath,
-            { label: t.test_name, type: 'subcategory', data: t }
+            { label: t.test_name, type: "subcategory", data: t },
           ];
         }
       }
@@ -427,13 +434,17 @@
 
   // Reactive filtered lists per view
   $: filteredCategories = query
-    ? categories.filter(c => has(c.category_name) || has(c.description) || has(c.info))
+    ? categories.filter(
+        (c) => has(c.category_name) || has(c.description) || has(c.info)
+      )
     : categories;
   $: filteredTests = query
-    ? tests.filter(t => has(t.test_name) || has(t.test_description))
+    ? tests.filter((t) => has(t.test_name) || has(t.test_description))
     : tests;
   $: filteredLabs = query
-    ? labs.filter(l => has(l.lab_name) || has(l.email) || has(l.turnaround_time))
+    ? labs.filter(
+        (l) => has(l.lab_name) || has(l.email) || has(l.turnaround_time)
+      )
     : labs;
 
   // Removed testsView state and setter
@@ -441,7 +452,6 @@
 
 <!-- Replace the old breadcrumb + Filter with the new hero header -->
 <section class="testing-hero">
-
   <!-- Centered content -->
   <div class="hero-inner">
     <nav class="hero-crumbs" aria-label="Breadcrumb">
@@ -534,7 +544,7 @@
           </select>
         </div>
 
-                <!-- Search -->
+        <!-- Search -->
         <div class="pill pill-input">
           <svg
             class="icon"
@@ -665,22 +675,12 @@
 
         <div class="subscribe-card" role="region" aria-label="Subscribe">
           <div class="sub-left">
-            <div class="sub-icon">
-              <svg
-                viewBox="0 0 24 24"
-                width="22"
-                height="22"
-                aria-hidden="true"
+            <div class="">
+              <div
+                class="inline-flex items-center justify-center bg-yellow-100 rounded-full p-2"
               >
-                <path d="M4 6h16v12H4z" fill="#FFC32E" /><path
-                  d="M4 6l8 6 8-6"
-                  fill="none"
-                  stroke="#A66E00"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+                <Mail class="text-yellow-500" size={20} strokeWidth={1.5} />
+              </div>
             </div>
             <div class="sub-copy">
               <p class="sub-title">Subscribe to our newsletter</p>
@@ -710,25 +710,23 @@
       <div class="categories-grid">
         {#if filteredCategories.length}
           {#each filteredCategories as c (c.id)}
-             <CardsSection
-               icon={c.image_url || "/assets/default-icon.svg"}
-               title={c.category_name}
-               description={c.description}
-               info={c.info}
-               category={c}
-               {showSubcategories}
-               kicker="CATEGORY"
-             />
-           {/each}
+            <CardsSection
+              icon={c.image_url || "/assets/default-icon.svg"}
+              title={c.category_name}
+              description={c.description}
+              info={c.info}
+              category={c}
+              {showSubcategories}
+              kicker="CATEGORY"
+            />
+          {/each}
+        {:else if categories.length}
+          <p class="empty-note">No categories match "{searchTerm}".</p>
         {:else}
-          {#if categories.length}
-            <p class="empty-note">No categories match "{searchTerm}".</p>
-          {:else}
-            <p class="empty-note">No categories available.</p>
-          {/if}
-         {/if}
-       </div>
-     {/if}
+          <p class="empty-note">No categories available.</p>
+        {/if}
+      </div>
+    {/if}
   </div>
 </section>
 
@@ -739,18 +737,22 @@
       <!-- Removed view toggle toolbar -->
       <div class="cards-wrapper">
         {#if filteredTests?.length}
-           <div class="test-cards" data-view="grid">
+          <div class="test-cards" data-view="grid">
             {#each filteredTests as test (test.id)}
-              <TestCardsSection {test} view="grid" on:select={(e) => selectTest(e.detail.test)} />
+              <TestCardsSection
+                {test}
+                view="grid"
+                on:select={(e) => selectTest(e.detail.test)}
+              />
             {/each}
-           </div>
+          </div>
+        {:else if tests?.length}
+          <p class="empty-note">No tests match "{searchTerm}".</p>
         {:else}
-          {#if tests?.length}
-            <p class="empty-note">No tests match "{searchTerm}".</p>
-          {:else}
-            <p class="empty-note">No tests found in {selectedCategory.category_name}.</p>
-          {/if}
-         {/if}
+          <p class="empty-note">
+            No tests found in {selectedCategory.category_name}.
+          </p>
+        {/if}
       </div>
     </div>
   </main>
@@ -761,25 +763,25 @@
   <main>
     <div class="cards-container">
       <div class="tests-toolbar" role="toolbar" aria-label="Lab view options">
-        <button type="button" class="vt-btn" on:click={clearTest}>Back to tests</button>
+        <button type="button" class="vt-btn" on:click={clearTest}
+          >Back to tests</button
+        >
       </div>
       <h2 style="margin:8px 0 18px;font-weight:800;color:#0c017b;">
         Labs providing: {selectedTest.test_name}
       </h2>
       <div class="cards-wrapper">
         {#if filteredLabs.length}
-           <div class="test-cards" data-view="grid">
+          <div class="test-cards" data-view="grid">
             {#each filteredLabs as lab (lab.id)}
-               <LabCardsSection lab={lab} testId={selectedTest.id} view="grid" />
-             {/each}
-           </div>
+              <LabCardsSection {lab} testId={selectedTest.id} view="grid" />
+            {/each}
+          </div>
+        {:else if labs.length}
+          <p class="empty-note">No labs match "{searchTerm}".</p>
         {:else}
-          {#if labs.length}
-            <p class="empty-note">No labs match "{searchTerm}".</p>
-          {:else}
-            <p class="empty-note">No labs found for this test.</p>
-          {/if}
-         {/if}
+          <p class="empty-note">No labs found for this test.</p>
+        {/if}
       </div>
     </div>
   </main>
@@ -829,7 +831,7 @@
     opacity: 0.6;
   }
 
-    /* Bottom wave of the hero (inherits --hero color) */
+  /* Bottom wave of the hero (inherits --hero color) */
   .hero-wave {
     position: absolute;
     left: 0;
@@ -844,7 +846,7 @@
     display: block;
   }
 
-    /* Light underlay below the wave, hosting the filter bar */
+  /* Light underlay below the wave, hosting the filter bar */
   /* Bigger light-blue section */
   .testing-underlay {
     position: relative;
@@ -875,12 +877,13 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    flex: 0 0 auto;          /* don’t stretch across the row */
+    flex: 0 0 auto; /* don’t stretch across the row */
     justify-content: center; /* center the controls group */
-    flex-wrap: nowrap;        /* force single line */
-    overflow-x: auto;         /* allow horizontal scroll if needed */
+    flex-wrap: nowrap; /* force single line */
+    overflow-x: auto; /* allow horizontal scroll if needed */
     overflow-y: hidden;
-    scrollbar-width: thin;    /* Firefox */
+    scrollbar-width: thin; /* Firefox */
+    padding: 10px;
   }
   .filters-row::-webkit-scrollbar {
     height: 6px;
@@ -1209,15 +1212,6 @@
     align-items: center;
     gap: 12px;
   }
-  .sub-icon {
-    background: #ffcf6b;
-    color: #a86a00;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-  }
   .sub-title {
     margin: 0 0 2px;
     color: #221b7e;
@@ -1359,7 +1353,9 @@
     margin: 8px 0 16px;
   }
   @media (min-width: 700px) {
-    .tests-toolbar { display: flex; }
+    .tests-toolbar {
+      display: flex;
+    }
   }
   .vt-btn {
     appearance: none;
@@ -1389,6 +1385,17 @@
     .test-cards[data-view="grid"] {
       grid-template-columns: 1fr;
       gap: 18px;
+    }
+
+    .subscribe-card {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+    .sub-left {
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
     }
   }
 

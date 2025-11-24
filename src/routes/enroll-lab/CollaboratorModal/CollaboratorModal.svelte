@@ -31,6 +31,18 @@
     submitting = true;
     errorMsg = "";
     successMsg = "";
+    if (!firstName && !lastName) {
+      errorMsg = "First name and last name are required.";
+      return;
+    }
+    if (!email) {
+      errorMsg = "Email is required.";
+      return;
+    }
+    if (!phone) {
+      errorMsg = "Phone number is required.";
+      return;
+    }
     try {
       const res = await fetch(`${API_URL}/collaborator-lead/`, {
         method: "POST",
@@ -48,11 +60,12 @@
           consent,
         }),
       });
+      const data = await res.json();
       if (res.ok) {
         successMsg = "Thank you! We'll be in touch soon.";
-        // Optionally close modal or reset form
+      } else if (res.status === 409) {
+        errorMsg = data.detail || "You have already applied as a collaborator.";
       } else {
-        const data = await res.json();
         errorMsg = data?.detail || "Submission failed.";
       }
     } catch (e) {
@@ -135,20 +148,20 @@
         <form class="space-y-6 pb-8" on:submit|preventDefault={handleSubmit}>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label>First Name</label>
-              <input type="text" bind:value={firstName} class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              <label>First Name <span class="text-red-500">*</span></label>
+              <input type="text" bind:value={firstName} required class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
             </div>
             <div>
               <label>Last Name</label>
               <input type="text" bind:value={lastName} class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
             </div>
             <div>
-              <label>Work Email</label>
-              <input type="email" bind:value={email} class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              <label>Work Email <span class="text-red-500">*</span></label>
+              <input type="email" bind:value={email} required class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
             </div>
             <div>
-              <label>Phone Number</label>
-              <input type="tel" bind:value={phone} class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              <label>Phone Number <span class="text-red-500">*</span></label>
+              <input type="tel" bind:value={phone} required class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
             </div>
             <div class="sm:col-span-2">
               <label>Company Name</label>
@@ -184,7 +197,14 @@
           <div class="flex items-start gap-2">
             <input type="checkbox" bind:checked={consent} class="mt-0.5 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
             <p class="text-[11px] leading-snug text-gray-600">
-              I agree to the Terms of Use and Privacy Policy. This site is protected by reCAPTCHA and the Google Privacy Policy and Terms of Service apply.
+              I agree to the
+              <a
+                href="/legal/overview"
+                target="_blank"
+                class="underline text-indigo-700 hover:text-indigo-900"
+                >Terms of Use and Privacy Policy</a
+              >.
+              This site is protected by reCAPTCHA and the Google Privacy Policy and Terms of Service apply.
             </p>
           </div>
 

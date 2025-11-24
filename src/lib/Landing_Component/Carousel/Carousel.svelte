@@ -170,6 +170,8 @@
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        justify-content: center;
+        align-items: center;
     }
 
     .insight-number {
@@ -184,6 +186,7 @@
         color: #888;
         margin-top: 4px;
         font-weight: 400;
+        text-align: center;
     }
 
     .hero-image-card {
@@ -235,7 +238,9 @@
             max-width: 500px;
         }
         .hero-insights {
-            display: none;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
         }
     }
 

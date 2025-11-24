@@ -94,7 +94,7 @@
           body: "Reaching the right brands is hard—onboarding them is even harder. Phial connects your lab with thousands of ready-to-work customers.",
         },
       ],
-      image: "/assets/enroll-lab/figure1.png",
+      image: "/assets/enroll-lab/Group 197.png",
       imagePosition: "left",
       footer: "More Reach. More Trust. More Growth.",
     },
