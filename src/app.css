@@ -6,7 +6,7 @@ html {
 }
 
 :root {
-  --design-width: 440;
+  --design-width: 380;
   font-size: clamp(14px, calc(16px * (100vw / var(--design-width))), 18px);
 }
 /* Utility: Hide scrollbars on mobile */
