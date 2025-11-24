@@ -1,10 +1,15 @@
 @import "tailwindcss";
 
 html {
-  -webkit-text-size-adjust: 100% !important; /* iOS/Safari and some WebKit browsers */
-  -ms-text-size-adjust: 100%;     /* IE/Edge */
+  -webkit-text-size-adjust: 100% !important;
   text-size-adjust: 100% !important;
 }
+
+:root {
+  --design-width: 440; /* your Moto G64 width */
+  font-size: calc(16px * (100vw / var(--design-width)));
+}
+
 /* Utility: Hide scrollbars on mobile */
 body {
   -webkit-overflow-scrolling: touch;
