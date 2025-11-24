@@ -6,10 +6,9 @@ html {
 }
 
 :root {
-  --design-width: 440; /* your Moto G64 width */
-  font-size: calc(16px * (100vw / var(--design-width)));
+  --design-width: 440;
+  font-size: clamp(14px, calc(16px * (100vw / var(--design-width))), 18px);
 }
-
 /* Utility: Hide scrollbars on mobile */
 body {
   -webkit-overflow-scrolling: touch;
